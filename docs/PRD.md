@@ -1,10 +1,10 @@
 # Product Requirements Document (PRD)
-## TreatsAI — Smart Food, Zero Judgment 🐾
+## TreatsAI - Smart Food, Zero Judgment 🐾
 
 **Version:** 1.0  
 **Date:** June 30, 2026  
 **Author:** Joselyn Grace Gordillo Lopez  
-**Hackathon:** Hack the Kitty — World Cat Domination Day
+**Hackathon:** Hack the Kitty - Cat World Domination Day
 
 ---
 
@@ -12,9 +12,9 @@
 
 Most cat feeders on the market are, at their core, dumb timers. They dispense food on a fixed schedule with no awareness of the animal in front of them. They cannot tell which cat is eating, how much was consumed, whether a meal was skipped, or whether a cat's body is changing over time.
 
-This creates a silent gap in the cat-owner relationship: owners lose visibility into one of the most reliable daily health signals their cat produces — eating behavior.
+This creates a silent gap in the cat-owner relationship: owners lose visibility into one of the most reliable daily health signals their cat produces - eating behavior.
 
-Beyond health, there is a deeper problem: **routine builds bonds**. A structured, predictable mealtime is not just good for a cat's digestion — it is a daily moment of care and connection between a cat and its owner. Current feeders automate the act of feeding but strip away the awareness that makes that routine meaningful.
+Beyond health, there is a deeper problem: **routine builds bonds**. A structured, predictable mealtime is not just good for a cat's digestion - it is a daily moment of care and connection between a cat and its owner. Current feeders automate the act of feeding but strip away the awareness that makes that routine meaningful.
 
 ---
 
@@ -22,27 +22,27 @@ Beyond health, there is a deeper problem: **routine builds bonds**. A structured
 
 TreatsAI is an AI-powered cat feeding system that learns each individual cat, tracks its eating habits over time, and strengthens the daily routine shared between a cat and its owner.
 
-The technology — computer vision, workflow automation, cloud intelligence — operates silently in the background. What the owner experiences is clarity, calm, and connection: knowing their cat ate, knowing how much, knowing if something changed.
+The technology - computer vision, workflow automation, cloud intelligence - operates silently in the background. What the owner experiences is clarity, calm, and connection: knowing their cat ate, knowing how much, knowing if something changed.
 
-> "The goal is not to replace the owner's care. The goal is to make that care more informed, more consistent, and more present — even when the owner is not."
+> "The goal is not to replace the owner's care. The goal is to make that care more informed, more consistent, and more present - even when the owner is not."
 
 ---
 
 ## 3. Target Users
 
-### Primary — The Attentive Single-Cat Owner
+### Primary - The Attentive Single-Cat Owner
 - Has one cat they consider a close companion
 - Travels or works long hours and worries about their cat's wellbeing
 - Wants peace of mind, not complexity
 - Values routine and consistency for their pet
 
-### Secondary — The Multi-Cat Household Manager
+### Secondary - The Multi-Cat Household Manager
 - Has 2–4 cats with different dietary needs
 - Struggles with cats eating each other's food
 - Needs per-cat portion control and individual tracking
 - Currently uses multiple manual strategies to manage feeding
 
-### Tertiary — The Health-Conscious Owner
+### Tertiary - The Health-Conscious Owner
 - Cat is on a vet-prescribed diet (weight loss, kidney support, etc.)
 - Needs precise portion control and measurable progress
 - Would benefit from weight trend data and goal tracking
@@ -58,13 +58,13 @@ The technology — computer vision, workflow automation, cloud intelligence — 
 | **Routine reinforcement** | Structured mealtimes become consistent, shared rituals |
 | **Passive health monitoring** | Weight goals and eating pattern changes are tracked automatically |
 | **Owner-cat relationship** | The system returns meaningful awareness to the owner, deepening the bond |
-| **Zero friction** | Once set up, TreatsAI requires no daily interaction — it simply works |
+| **Zero friction** | Once set up, TreatsAI requires no daily interaction - it simply works |
 
 ---
 
 ## 5. Goals & Non-Goals
 
-### Goals (v1 — Hackathon MVP)
+### Goals (v1 - Hackathon MVP)
 - Recognize an individual cat via computer vision
 - Dispense the correct portion based on a configured schedule
 - Log every feeding event (successful, skipped, rejected)
@@ -102,7 +102,7 @@ The technology — computer vision, workflow automation, cloud intelligence — 
 | **Feeding history completeness** | % of events logged with full data (cat ID, portion, timestamp, confidence score) |
 
 ### Relationship Metric (qualitative)
-The system is successful when an owner, looking at their cat's feeding history, feels **informed rather than anxious** — when the data confirms what good care looks like, rather than replacing the act of caring.
+The system is successful when an owner, looking at their cat's feeding history, feels **informed rather than anxious** - when the data confirms what good care looks like, rather than replacing the act of caring.
 
 ---
 

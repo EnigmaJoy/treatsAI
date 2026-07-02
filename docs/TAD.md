@@ -1,16 +1,16 @@
 # Technical Architecture Document (TAD)
-## TreatsAI — Smart Food, Zero Judgment 🐾
+## TreatsAI - Smart Food, Zero Judgment 🐾
 
 **Version:** 1.0  
 **Date:** June 30, 2026  
 **Author:** Joselyn Grace Gordillo Lopez  
-**Hackathon:** Hack the Kitty — World Cat Domination Day
+**Hackathon:** Hack the Kitty - Cat World Domination Day
 
 ---
 
 ## 1. Purpose
 
-This document describes the technical architecture of TreatsAI — how every component is structured, why each technology was chosen, and how data flows through the system. It is intended to give any developer or judge a complete understanding of the system without needing to read the source code.
+This document describes the technical architecture of TreatsAI - how every component is structured, why each technology was chosen, and how data flows through the system. It is intended to give any developer or judge a complete understanding of the system without needing to read the source code.
 
 ---
 
@@ -18,10 +18,10 @@ This document describes the technical architecture of TreatsAI — how every com
 
 TreatsAI is built as an **edge-first, event-driven web application** composed of four layers:
 
-1. **Frontend** — SvelteKit application running on the edge, serving the owner dashboard
-2. **Workflow Layer** — Temporal orchestrating all time-based and durable workflows
-3. **Cloud Services** — AWS Lambda (compute), DynamoDB (database), Rekognition (computer vision), S3 (storage)
-4. **Real-time Layer** — Server-Sent Events (SSE) pushing live updates to the dashboard
+1. **Frontend** - SvelteKit application running on the edge, serving the owner dashboard
+2. **Workflow Layer** - Temporal orchestrating all time-based and durable workflows
+3. **Cloud Services** - AWS Lambda (compute), DynamoDB (database), Rekognition (computer vision), S3 (storage)
+4. **Real-time Layer** - Server-Sent Events (SSE) pushing live updates to the dashboard
 
 ---
 
@@ -68,42 +68,42 @@ graph TD
 
 ## 4. Technology Stack
 
-### 4.1 Frontend — SvelteKit
+### 4.1 Frontend - SvelteKit
 
-**What it is:** SvelteKit is a full-stack web framework built on top of Svelte. Unlike React or Vue, Svelte compiles components to vanilla JavaScript at build time — there is no virtual DOM at runtime. This produces faster, lighter applications.
+**What it is:** SvelteKit is a full-stack web framework built on top of Svelte. Unlike React or Vue, Svelte compiles components to vanilla JavaScript at build time - there is no virtual DOM at runtime. This produces faster, lighter applications.
 
 **Why we chose it:**
-- **Edge-first by default** — SvelteKit deploys naturally to edge runtimes (AWS Lambda@Edge), meaning the app runs physically close to the user, reducing latency
-- **Reactivity model** — Svelte's reactivity is built into the language syntax, not a library abstraction. This is architecturally different from React's hooks model and represents a deliberate, informed technology choice
-- **File-based routing** — pages and API endpoints are defined by file structure, keeping the codebase organized and predictable
-- **SSE support** — SvelteKit server routes handle SSE streams natively, with no additional libraries required
+- **Edge-first by default** - SvelteKit deploys naturally to edge runtimes (AWS Lambda@Edge), meaning the app runs physically close to the user, reducing latency
+- **Reactivity model** - Svelte's reactivity is built into the language syntax, not a library abstraction. This is architecturally different from React's hooks model and represents a deliberate, informed technology choice
+- **File-based routing** - pages and API endpoints are defined by file structure, keeping the codebase organized and predictable
+- **SSE support** - SvelteKit server routes handle SSE streams natively, with no additional libraries required
 
 **Key conventions used:**
-- `+page.svelte` — page components
-- `+page.server.ts` — server-side data loading per page
-- `+server.ts` — API endpoints and SSE streams
-- `src/lib/` — shared components, utilities, and stores
+- `+page.svelte` - page components
+- `+page.server.ts` - server-side data loading per page
+- `+server.ts` - API endpoints and SSE streams
+- `src/lib/` - shared components, utilities, and stores
 
 ---
 
-### 4.2 Styling — Tailwind CSS v4
+### 4.2 Styling - Tailwind CSS v4
 
 **What it is:** a utility-first CSS framework. Instead of writing custom CSS files, styles are applied directly in HTML/Svelte markup using predefined utility classes (e.g. `class="flex items-center gap-4 rounded-xl"`).
 
 **Why we chose it:**
 - Eliminates the need for a separate CSS architecture decision
 - Produces consistent, responsive layouts with minimal code
-- Tailwind v4 integrates directly with Vite (TreatsAI's build tool) via a plugin — zero config overhead
-- The `@tailwindcss/forms` plugin normalizes form element styling across browsers — directly relevant to TreatsAI's settings and onboarding forms
+- Tailwind v4 integrates directly with Vite (TreatsAI's build tool) via a plugin - zero config overhead
+- The `@tailwindcss/forms` plugin normalizes form element styling across browsers - directly relevant to TreatsAI's settings and onboarding forms
 
 ---
 
-### 4.3 Internationalisation — Paraglide JS
+### 4.3 Internationalisation - Paraglide JS
 
-**What it is:** Paraglide is the official i18n (internationalisation) library for SvelteKit, built by the inlang team. It manages translations at compile time — translated strings are tree-shaken per language, meaning users only download the translations for the language they actually use.
+**What it is:** Paraglide is the official i18n (internationalisation) library for SvelteKit, built by the inlang team. It manages translations at compile time - translated strings are tree-shaken per language, meaning users only download the translations for the language they actually use.
 
 **Why we chose it:**
-- Native SvelteKit integration — zero configuration friction
+- Native SvelteKit integration - zero configuration friction
 - Supports EN, IT, and ES out of the box with our scaffold
 - Compile-time translation loading means no runtime performance cost
 - Language detection hook allows us to implement the browser language → timezone → default English detection hierarchy defined in FR-I18N-04
@@ -112,12 +112,12 @@ graph TD
 
 ---
 
-### 4.4 Workflow Orchestration — Temporal
+### 4.4 Workflow Orchestration - Temporal
 
 **What it is:** Temporal is a durable workflow engine. It allows developers to write long-running, time-based workflows in regular code (TypeScript, in our case) with built-in guarantees: if the server crashes mid-workflow, Temporal replays the workflow from exactly where it stopped. No data is lost, no step is skipped.
 
 **Why we chose it over a simple cron job:**
-A cron job is a scheduled task that fires at a set time. If the server is down when the cron fires, the task is silently lost. For TreatsAI, a missed feeding alert or a skipped portion adjustment is not acceptable — these are health-relevant events. Temporal guarantees they happen, always.
+A cron job is a scheduled task that fires at a set time. If the server is down when the cron fires, the task is silently lost. For TreatsAI, a missed feeding alert or a skipped portion adjustment is not acceptable - these are health-relevant events. Temporal guarantees they happen, always.
 
 **Workflows implemented in TreatsAI:**
 
@@ -136,12 +136,12 @@ A cron job is a scheduled task that fires at a set time. If the server is down w
 
 ---
 
-### 4.5 Computer Vision — AWS Rekognition
+### 4.5 Computer Vision - AWS Rekognition
 
-**What it is:** AWS Rekognition is a managed computer vision service. It provides face detection, face comparison, and face collection APIs — we use the **face collection** feature to store and identify individual cats.
+**What it is:** AWS Rekognition is a managed computer vision service. It provides face detection, face comparison, and face collection APIs - we use the **face collection** feature to store and identify individual cats.
 
 **Why we chose it:**
-- No ML model to train or host — Rekognition handles everything as an API call
+- No ML model to train or host - Rekognition handles everything as an API call
 - The face collection API is designed exactly for our use case: store multiple face embeddings per entity, then search a new image against the collection
 - Runs within AWS Free Tier for our usage volume
 - Returns a confidence score (0–100) per match, which maps directly to our Dispense Threshold logic
@@ -151,31 +151,31 @@ A cron job is a scheduled task that fires at a set time. If the server is down w
 1. **Onboarding:** owner uploads 3–10 photos of their cat → Lambda calls `IndexFaces` to store embeddings in a Rekognition Collection, keyed by the cat's UUID
 2. **Recognition:** at each feeding time → Lambda calls `SearchFacesByImage` with a simulated camera capture → Rekognition returns the best match and confidence score → if score ≥ 90%, dispense is triggered
 
-**Important note for judges:** in the hackathon demo, the "camera capture" is simulated — a pre-uploaded test image is passed to Rekognition instead of a live camera feed. The Rekognition API calls, confidence scoring, and dispense logic are all real and functional.
+**Important note for judges:** in the hackathon demo, the "camera capture" is simulated - a pre-uploaded test image is passed to Rekognition instead of a live camera feed. The Rekognition API calls, confidence scoring, and dispense logic are all real and functional.
 
 ---
 
-### 4.6 Database — AWS DynamoDB
+### 4.6 Database - AWS DynamoDB
 
 **What it is:** DynamoDB is a fully managed NoSQL database by AWS. Unlike SQL databases (which store data in tables with rigid schemas), DynamoDB stores items in flexible JSON-like documents, organized by a **partition key** (primary lookup value) and an optional **sort key** (secondary ordering value).
 
 **Why we chose it:**
 - Always Free tier covers our entire usage volume (25GB storage, 200M requests/month)
-- No server to manage — fully serverless, scales automatically
-- Native integration with AWS Lambda — same ecosystem, minimal latency
+- No server to manage - fully serverless, scales automatically
+- Native integration with AWS Lambda - same ecosystem, minimal latency
 - Ideal for our access patterns: fetch all feeding events for a cat, fetch all alerts for an owner
 
 **Table design:** see the Data Model Document (`docs/DATA_MODEL.md`) for full table definitions and access patterns.
 
 ---
 
-### 4.7 Serverless Compute — AWS Lambda
+### 4.7 Serverless Compute - AWS Lambda
 
-**What it is:** Lambda is AWS's serverless compute service. Instead of running a persistent server, you deploy individual functions that execute on demand and shut down when done. You pay only for actual execution time — with our volume, this falls entirely within the Always Free tier.
+**What it is:** Lambda is AWS's serverless compute service. Instead of running a persistent server, you deploy individual functions that execute on demand and shut down when done. You pay only for actual execution time - with our volume, this falls entirely within the Always Free tier.
 
 **Why we chose it:**
 - Zero server management
-- Natural fit for event-driven architecture — each Lambda function handles one specific action (recognize cat, log event, trigger alert, etc.)
+- Natural fit for event-driven architecture - each Lambda function handles one specific action (recognize cat, log event, trigger alert, etc.)
 - Integrates natively with DynamoDB, Rekognition, S3, and API Gateway
 - Temporal Workers run as Lambda functions in production
 
@@ -191,25 +191,25 @@ A cron job is a scheduled task that fires at a set time. If the server is down w
 
 ---
 
-### 4.8 File Storage — AWS S3
+### 4.8 File Storage - AWS S3
 
-**What it is:** S3 (Simple Storage Service) is AWS's object storage — used for storing files (images, documents) rather than structured data.
+**What it is:** S3 (Simple Storage Service) is AWS's object storage - used for storing files (images, documents) rather than structured data.
 
 **Why we chose it:**
 - Cat profile photos uploaded during onboarding are stored in S3 before being passed to Rekognition
-- Free tier: 5GB storage — more than sufficient for a demo
+- Free tier: 5GB storage - more than sufficient for a demo
 - Pre-signed URLs allow secure, temporary direct access to photos from the frontend without exposing S3 credentials
 
 ---
 
-### 4.9 Real-Time Updates — Server-Sent Events (SSE)
+### 4.9 Real-Time Updates - Server-Sent Events (SSE)
 
-**What it is:** SSE is a web standard that allows a server to push data to a browser over a persistent HTTP connection — without the browser needing to ask ("poll") repeatedly. The connection flows in one direction only: server → browser.
+**What it is:** SSE is a web standard that allows a server to push data to a browser over a persistent HTTP connection - without the browser needing to ask ("poll") repeatedly. The connection flows in one direction only: server → browser.
 
 **Why SSE over WebSockets:**
-- WebSockets are bidirectional (browser ↔ server) — TreatsAI only needs server → browser updates (feeding events, alerts, device status). SSE is simpler, lighter, and natively supported in SvelteKit server routes
-- SSE connections automatically reconnect if dropped — built-in resilience with no extra code
-- No additional infrastructure required — SSE runs over standard HTTP
+- WebSockets are bidirectional (browser ↔ server) - TreatsAI only needs server → browser updates (feeding events, alerts, device status). SSE is simpler, lighter, and natively supported in SvelteKit server routes
+- SSE connections automatically reconnect if dropped - built-in resilience with no extra code
+- No additional infrastructure required - SSE runs over standard HTTP
 
 **SSE events in TreatsAI:**
 
@@ -223,7 +223,7 @@ A cron job is a scheduled task that fires at a set time. If the server is down w
 
 ---
 
-## 5. Data Flow — Feeding Event (End to End)
+## 5. Data Flow - Feeding Event (End to End)
 
 ```mermaid
 sequenceDiagram
@@ -260,7 +260,7 @@ sequenceDiagram
 
 ## 6. Architecture Decision Records (ADRs)
 
-An **ADR** (Architecture Decision Record) documents a significant technical decision — what was chosen, what was considered, and why. This section exists so judges and future developers understand that every choice was deliberate.
+An **ADR** (Architecture Decision Record) documents a significant technical decision - what was chosen, what was considered, and why. This section exists so judges and future developers understand that every choice was deliberate.
 
 ### ADR-001: SvelteKit over React/Next.js
 - **Decision:** Use SvelteKit as the frontend framework
@@ -270,7 +270,7 @@ An **ADR** (Architecture Decision Record) documents a significant technical deci
 ### ADR-002: Temporal over cron jobs / step functions
 - **Decision:** Use Temporal for all time-based workflows
 - **Considered:** AWS EventBridge (cron), AWS Step Functions, simple setTimeout chains
-- **Rationale:** TreatsAI's feeding alerts and weight reminders are health-relevant — silent failures are unacceptable. Temporal's durable execution model guarantees workflows complete even across server restarts. No other option provides this guarantee at the same level of simplicity.
+- **Rationale:** TreatsAI's feeding alerts and weight reminders are health-relevant - silent failures are unacceptable. Temporal's durable execution model guarantees workflows complete even across server restarts. No other option provides this guarantee at the same level of simplicity.
 
 ### ADR-003: SSE over WebSockets
 - **Decision:** Use Server-Sent Events for real-time dashboard updates
@@ -285,17 +285,17 @@ An **ADR** (Architecture Decision Record) documents a significant technical deci
 ### ADR-005: DynamoDB over PostgreSQL/RDS
 - **Decision:** Use DynamoDB as the primary database
 - **Considered:** PostgreSQL on RDS (relational, familiar), DynamoDB (NoSQL, serverless)
-- **Rationale:** TreatsAI's access patterns (fetch events by cat, fetch alerts by owner) are key-value and list operations — a natural fit for DynamoDB. RDS introduces server management overhead and exits the Always Free tier after the trial period. DynamoDB's Always Free tier covers our usage indefinitely.
+- **Rationale:** TreatsAI's access patterns (fetch events by cat, fetch alerts by owner) are key-value and list operations - a natural fit for DynamoDB. RDS introduces server management overhead and exits the Always Free tier after the trial period. DynamoDB's Always Free tier covers our usage indefinitely.
 
 ---
 
 ## 7. Security Architecture
 
-- All API keys and AWS credentials are stored as environment variables — never hardcoded or committed to the repository
-- AWS IAM roles follow the **principle of least privilege** — each Lambda function has only the permissions it needs (e.g. `recognizeCat` has Rekognition read access only, not DynamoDB write access)
-- Authentication is handled via secure session tokens — see FR-AUTH in the FRD
+- All API keys and AWS credentials are stored as environment variables - never hardcoded or committed to the repository
+- AWS IAM roles follow the **principle of least privilege** - each Lambda function has only the permissions it needs (e.g. `recognizeCat` has Rekognition read access only, not DynamoDB write access)
+- Authentication is handled via secure session tokens - see FR-AUTH in the FRD
 - 2FA via Email OTP is supported for all owner accounts
-- S3 cat photos are accessed via pre-signed URLs with short expiration (15 minutes) — never exposed via public bucket URLs
+- S3 cat photos are accessed via pre-signed URLs with short expiration (15 minutes) - never exposed via public bucket URLs
 - An Aikido Security scan report is included in `docs/SECURITY_REPORT.md`
 
 ---

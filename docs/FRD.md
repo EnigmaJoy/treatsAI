@@ -1,16 +1,16 @@
 # Functional Requirements Document (FRD)
-## TreatsAI — Smart Food, Zero Judgment 🐾
+## TreatsAI - Smart Food, Zero Judgment 🐾
 
 **Version:** 1.1  
 **Date:** June 30, 2026  
 **Author:** Joselyn Grace Gordillo Lopez  
-**Hackathon:** Hack the Kitty — World Cat Domination Day
+**Hackathon:** Hack the Kitty - Cat World Domination Day
 
 ---
 
 ## 1. Purpose
 
-This document defines the functional requirements of TreatsAI — what the system **shall** do, at a level of precision sufficient to implement and verify each feature. Every requirement listed here corresponds directly to a testable behavior in the application.
+This document defines the functional requirements of TreatsAI - what the system **shall** do, at a level of precision sufficient to implement and verify each feature. Every requirement listed here corresponds directly to a testable behavior in the application.
 
 ---
 
@@ -62,7 +62,7 @@ Regardless of the chosen option, the system shall automatically invalidate all a
 
 **FR-CAT-02:** The system shall allow an owner to upload a minimum of 3 and a maximum of 10 clear, front-facing photos of the cat's face during onboarding, to train the AWS Rekognition face collection. The UI shall display guidance on acceptable photo quality (good lighting, unobstructed face, single cat per photo).
 
-**FR-CAT-03:** The system shall store cat photo embeddings in AWS Rekognition and associate them with the cat's profile UUID — a universally unique identifier (e.g. `550e8400-e29b-41d4-a716-446655440000`) generated at profile creation time and used as the primary key across all TreatsAI data stores.
+**FR-CAT-03:** The system shall store cat photo embeddings in AWS Rekognition and associate them with the cat's profile UUID - a universally unique identifier (e.g. `550e8400-e29b-41d4-a716-446655440000`) generated at profile creation time and used as the primary key across all TreatsAI data stores.
 
 **FR-CAT-04:** The system shall allow an authenticated user with edit permissions (Primary Owner or Co-Owner with edit role) to edit any cat profile field at any time.
 
@@ -86,7 +86,7 @@ Regardless of the chosen option, the system shall automatically invalidate all a
 
 **FR-SCH-05:** The system shall allow an owner to pause a schedule temporarily without deleting it.
 
-**FR-SCH-06:** The system shall persist schedules across sessions — schedules shall remain active until explicitly paused or deleted by the owner.
+**FR-SCH-06:** The system shall persist schedules across sessions - schedules shall remain active until explicitly paused or deleted by the owner.
 
 ---
 
@@ -186,8 +186,8 @@ Regardless of the chosen option, the system shall automatically invalidate all a
 **FR-ACCESS-01:** The Primary Owner shall be able to invite additional users (Co-Owners) to their household by email address.
 
 **FR-ACCESS-02:** Co-Owners shall be assigned one of two roles by the Primary Owner:
-- **Editor** — can view and modify cat profiles, schedules, and feeding events
-- **Viewer** — can view dashboard and feeding history but cannot modify any settings
+- **Editor** - can view and modify cat profiles, schedules, and feeding events
+- **Viewer** - can view dashboard and feeding history but cannot modify any settings
 
 **FR-ACCESS-03:** The Primary Owner shall be able to revoke a Co-Owner's access at any time, immediately terminating their session.
 
@@ -204,8 +204,8 @@ Regardless of the chosen option, the system shall automatically invalidate all a
 **FR-I18N-03:** All user-facing strings, labels, error messages, and notifications shall be available in all three supported languages.
 
 **FR-I18N-04:** The system shall detect the appropriate language using the following priority order:
-1. Browser language setting — if Italian (`it`) or Spanish (`es`), use it
-2. Browser timezone mapping — if no language match, infer from timezone:
+1. Browser language setting - if Italian (`it`) or Spanish (`es`), use it
+2. Browser timezone mapping - if no language match, infer from timezone:
     - `Europe/Rome`, `Europe/Vatican` → Italian
     - `Europe/Madrid`, `America/Mexico_City`, `America/Buenos_Aires`, `America/Bogota`, and other Latin American timezones → Spanish
 3. Default to English if neither signal matches

@@ -45,7 +45,7 @@ You can preview the production build with `npm run preview`.
 
 > Smart Food, Zero Judgment 🐾
 
-An AI-powered cat food dispenser that recognizes individual cats via computer vision, tracks eating habits, and adjusts portions automatically — built for **World Cat Domination Day**.
+An AI-powered cat food dispenser that recognizes individual cats via computer vision, tracks eating habits, and adjusts portions automatically — built for **Cat World Domination Day**.
 
 ---
 
@@ -78,7 +78,7 @@ An AI-powered cat food dispenser that recognizes individual cats via computer vi
 
 ## Theme Connection
 
-<!-- TODO: explicit connection to World Cat Domination Day — make it intentional, not surface-level -->
+<!-- TODO: explicit connection to Cat World Domination Day — make it intentional, not surface-level -->
 
 ## Tech Stack
 

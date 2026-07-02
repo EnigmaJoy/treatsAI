@@ -1,16 +1,16 @@
 # Data Model Document
-## TreatsAI — Smart Food, Zero Judgment 🐾
+## TreatsAI - Smart Food, Zero Judgment 🐾
 
-**Version:** 1.0  
-**Date:** June 30, 2026  
+**Version:** 1.1  
+**Date:** July 1, 2026  
 **Author:** Joselyn Grace Gordillo Lopez  
-**Hackathon:** Hack the Kitty — World Cat Domination Day
+**Hackathon:** Hack the Kitty - Cat World Domination Day
 
 ---
 
 ## 1. Purpose
 
-This document defines the data model for TreatsAI — every entity the system stores, its attributes, and how the DynamoDB tables are structured to serve the application's access patterns efficiently.
+This document defines the data model for TreatsAI - every entity the system stores, its attributes, and how the DynamoDB tables are structured to serve the application's access patterns efficiently.
 
 ---
 
@@ -18,21 +18,29 @@ This document defines the data model for TreatsAI — every entity the system st
 
 ### 2.1 DynamoDB Design Philosophy
 
-DynamoDB is a NoSQL database. Unlike SQL databases where you design tables first and query freely later, DynamoDB requires designing around **access patterns** — the specific questions the application will ask the database. Tables are structured to answer those questions in a single read operation, without expensive joins.
+DynamoDB is a NoSQL database. Unlike SQL databases where you design tables first and query freely later, DynamoDB requires designing around **access patterns** - the specific questions the application will ask the database. Tables are structured to answer those questions in a single read operation, without expensive joins.
 
 ### 2.2 Primary Keys
 
 Every DynamoDB item is identified by:
-- **Partition Key (PK)** — the primary lookup value. DynamoDB uses this to distribute data across storage nodes.
-- **Sort Key (SK)** — an optional secondary value that allows range queries and ordering within the same partition.
+- **Partition Key (PK)** - the primary lookup value. DynamoDB uses this to distribute data across storage nodes.
+- **Sort Key (SK)** - an optional secondary value that allows range queries and ordering within the same partition.
 
 ### 2.3 UUID as Entity Identifier
 
-Every entity in TreatsAI uses a **UUID v4** as its unique identifier — a 128-bit randomly generated string (e.g. `550e8400-e29b-41d4-a716-446655440000`). UUIDs are generated at creation time and never change. They are used as the primary key across all TreatsAI data stores, including DynamoDB and AWS Rekognition face collections.
+Every entity in TreatsAI uses a **UUID v4** as its unique identifier - a 128-bit randomly generated string (e.g. `550e8400-e29b-41d4-a716-446655440000`). UUIDs are generated at creation time and never change. They are used as the primary key across all TreatsAI data stores, including DynamoDB and AWS Rekognition face collections.
 
 ### 2.4 Single Table Design
 
-TreatsAI uses a **single DynamoDB table** (`TreatsAI`) for all entities. This is a DynamoDB best practice — storing all entities in one table with carefully designed key patterns allows efficient access without managing multiple tables or performing cross-table joins.
+TreatsAI uses a **single DynamoDB table** (`TreatsAI`) for all entities. This is a DynamoDB best practice - storing all entities in one table with carefully designed key patterns allows efficient access without managing multiple tables or performing cross-table joins.
+
+### 2.5 Denormalization Strategy
+
+DynamoDB does not support joins. When an API response or SSE event requires data from multiple entities (e.g. an Alert needing the cat's name alongside its UUID), the required fields are **denormalized** - written into the item at creation time alongside the foreign key. This trades a small amount of storage for significantly faster reads.
+
+Denormalized fields in TreatsAI:
+- `catName` is stored in Alert items alongside `catId`
+- `catName` is included in SSE event payloads at publish time
 
 ---
 
@@ -42,13 +50,14 @@ These are the questions TreatsAI will ask the database, which drove every table 
 
 | # | Access Pattern | Operation |
 |---|---|---|
-| AP-01 | Get all cats for a given owner | Query by owner UUID |
-| AP-02 | Get all feeding events for a given cat | Query by cat UUID |
-| AP-03 | Get all active alerts for a given owner | Query by owner UUID, filter by status |
-| AP-04 | Get feeding events for a cat filtered by date range | Query by cat UUID + timestamp range |
-| AP-05 | Get weight history for a given cat | Query by cat UUID, sorted by date |
-| AP-06 | Get a single cat profile by UUID | Get by cat UUID |
-| AP-07 | Get all schedules for a given cat | Query by cat UUID |
+| AP-01 | Get all cats for a given owner | Query by householdId |
+| AP-02 | Get all feeding events for a given cat | Query by catId |
+| AP-03 | Get all active alerts for a given owner | Query by householdId, filter by status |
+| AP-04 | Get feeding events for a cat filtered by date range | Query by catId + timestamp range |
+| AP-05 | Get weight history for a given cat | Query by catId, sorted by date |
+| AP-06 | Get a single cat profile by UUID | Get by householdId + catId |
+| AP-07 | Get all schedules for a given cat | Query by catId |
+| AP-08 | Get all active sessions for a user | Query by userId |
 
 ---
 
@@ -56,7 +65,7 @@ These are the questions TreatsAI will ask the database, which drove every table 
 
 ### 4.1 User (Owner / Co-Owner)
 
-Represents an authenticated user — either a Primary Owner or a Co-Owner invited to a household.
+Represents an authenticated user - either a Primary Owner or a Co-Owner invited to a household.
 
 | Attribute | Type | Required | Description |
 |---|---|---|---|
@@ -65,8 +74,8 @@ Represents an authenticated user — either a Primary Owner or a Co-Owner invite
 | `passwordHash` | String | ✅ | Bcrypt-hashed password, never stored in plain text |
 | `role` | Enum | ✅ | `primary_owner` or `co_owner` |
 | `householdId` | UUID | ✅ | Links user to a household (created automatically for primary owners) |
-| `coOwnerRole` | Enum | ❌ | `editor` or `viewer` — only present for Co-Owners |
-| `language` | Enum | ✅ | `en`, `it`, or `es` — user's selected UI language |
+| `coOwnerRole` | Enum | ❌ | `editor` or `viewer` - only present for Co-Owners (post-MVP) |
+| `language` | Enum | ✅ | `en`, `it`, or `es` - user's selected UI language |
 | `twoFactorEnabled` | Boolean | ✅ | Whether 2FA via Email OTP is active |
 | `sessionPolicy` | Enum | ✅ | `standard` (7 days) or `remember_me` (until logout) |
 | `createdAt` | ISO 8601 | ✅ | Account creation timestamp (UTC) |
@@ -74,9 +83,26 @@ Represents an authenticated user — either a Primary Owner or a Co-Owner invite
 
 ---
 
-### 4.2 Household
+### 4.2 Session
 
-Represents a shared household — the container that links one Primary Owner and zero or more Co-Owners to a shared set of cat profiles and devices.
+Represents an active authenticated session for a user. Sessions are stored to support the session listing and remote revocation features defined in FR-AUTH-03.
+
+| Attribute | Type | Required | Description |
+|---|---|---|---|
+| `sessionId` | UUID | ✅ | Unique identifier, generated at login |
+| `userId` | UUID | ✅ | Links session to a user |
+| `sessionToken` | String | ✅ | Hashed session token (never stored in plain text) |
+| `createdAt` | ISO 8601 | ✅ | Session creation timestamp (UTC) |
+| `expiresAt` | ISO 8601 | ✅ | Session expiry timestamp (UTC) - null if `remember_me` |
+| `userAgent` | String | ❌ | Browser/device user agent string for display in session list |
+| `revoked` | Boolean | ✅ | Whether the session has been manually revoked (default: false) |
+| `revokedAt` | ISO 8601 | ❌ | Timestamp of revocation (UTC) |
+
+---
+
+### 4.3 Household
+
+Represents a shared household - the container that links one Primary Owner and zero or more Co-Owners to a shared set of cat profiles and devices.
 
 | Attribute | Type | Required | Description |
 |---|---|---|---|
@@ -87,7 +113,7 @@ Represents a shared household — the container that links one Primary Owner and
 
 ---
 
-### 4.3 Cat Profile
+### 4.4 Cat Profile
 
 Represents one individual cat registered in the system.
 
@@ -102,6 +128,7 @@ Represents one individual cat registered in the system.
 | `targetWeightKg` | Number | ❌ | Target weight (required if goal is not `maintenance`) |
 | `weightGoal` | Enum | ✅ | `weight_loss`, `maintenance`, or `weight_gain` |
 | `consumptionBaseline` | Number | ✅ | Expected consumption percentage (0–100), owner-set at onboarding, auto-refined over time |
+| `suggestedPortionGrams` | Number | ❌ | System-calculated recommended portion size in grams, recalculated whenever weight is logged. Returned by the API as `updatedPortionSuggestionGrams` after each weight entry. |
 | `photoS3Keys` | String[] | ✅ | Array of S3 object keys for the cat's training photos |
 | `rekognitionCollectionId` | String | ✅ | AWS Rekognition Collection ID (same as `catId`) |
 | `microchipNumber` | String | ❌ | ISO 11784/11785 15-digit microchip number (post-MVP) |
@@ -111,9 +138,9 @@ Represents one individual cat registered in the system.
 
 ---
 
-### 4.4 Feeding Schedule
+### 4.5 Feeding Schedule
 
-Represents a configured feeding schedule for one cat — one or more daily feeding times with portion sizes.
+Represents a configured feeding schedule for one cat - one or more daily feeding times with portion sizes.
 
 | Attribute | Type | Required | Description |
 |---|---|---|---|
@@ -131,9 +158,9 @@ Represents a configured feeding schedule for one cat — one or more daily feedi
 
 ---
 
-### 4.5 Feeding Event
+### 4.6 Feeding Event
 
-Represents a single recorded feeding attempt — the core health data unit of TreatsAI.
+Represents a single recorded feeding attempt - the core health data unit of TreatsAI.
 
 | Attribute | Type | Required | Description |
 |---|---|---|---|
@@ -141,18 +168,19 @@ Represents a single recorded feeding attempt — the core health data unit of Tr
 | `catId` | UUID | ✅ | Links event to a cat profile |
 | `scheduleId` | UUID | ✅ | Links event to the schedule that triggered it |
 | `householdId` | UUID | ✅ | Links event to a household |
-| `timestamp` | ISO 8601 | ✅ | Event timestamp (UTC) |
+| `timestamp` | ISO 8601 | ✅ | Timestamp of the feeding attempt (UTC) - used as the canonical event time and record creation time |
 | `outcome` | Enum | ✅ | `dispensed`, `skipped`, or `rejected` |
 | `confidenceScore` | Number | ✅ | Rekognition confidence score (0–100) |
 | `portionDispensedGrams` | Number | ❌ | Grams dispensed (only present if outcome is `dispensed`) |
 | `consumptionPercent` | Number | ❌ | Estimated consumption percentage (owner-logged or simulated) |
 | `foodTypeLabel` | String | ❌ | Free-text food type at time of feeding (e.g. "Whiskas Tuna") |
 | `manualOverride` | Boolean | ✅ | Whether the owner manually triggered this dispense |
-| `createdAt` | ISO 8601 | ✅ | Record creation timestamp (UTC) |
+
+> **Note on `timestamp`:** In TreatsAI, `timestamp` serves as both the event time and the record creation time. Since feeding events are written immediately when they occur, no meaningful difference exists between the two. A separate `createdAt` field is therefore omitted to keep the schema clean.
 
 ---
 
-### 4.6 Weight Entry
+### 4.7 Weight Entry
 
 Represents a single manually logged weight measurement for a cat.
 
@@ -168,7 +196,7 @@ Represents a single manually logged weight measurement for a cat.
 
 ---
 
-### 4.7 Alert
+### 4.8 Alert
 
 Represents a system-generated notification requiring owner attention.
 
@@ -177,6 +205,7 @@ Represents a system-generated notification requiring owner attention.
 | `alertId` | UUID | ✅ | Unique identifier |
 | `householdId` | UUID | ✅ | Links alert to a household |
 | `catId` | UUID | ❌ | Links alert to a cat (if cat-specific) |
+| `catName` | String | ❌ | Denormalized cat name - stored at write time alongside `catId` to avoid a secondary read when listing alerts |
 | `type` | Enum | ✅ | `skip_meal`, `baseline_deviation`, `weight_reminder`, `low_food_level` |
 | `status` | Enum | ✅ | `active` or `acknowledged` |
 | `triggeredAt` | ISO 8601 | ✅ | When the alert was generated (UTC) |
@@ -186,7 +215,7 @@ Represents a system-generated notification requiring owner attention.
 
 ---
 
-### 4.8 Device
+### 4.9 Device
 
 Represents the simulated smart feeder unit.
 
@@ -214,6 +243,7 @@ All entities are stored in one table. The Partition Key (`PK`) and Sort Key (`SK
 | Entity | PK | SK |
 |---|---|---|
 | User | `USER#<userId>` | `PROFILE` |
+| Session | `USER#<userId>` | `SESSION#<sessionId>` |
 | Household | `HOUSEHOLD#<householdId>` | `PROFILE` |
 | Household Member | `HOUSEHOLD#<householdId>` | `MEMBER#<userId>` |
 | Cat Profile | `HOUSEHOLD#<householdId>` | `CAT#<catId>` |
@@ -234,6 +264,7 @@ All entities are stored in one table. The Partition Key (`PK`) and Sort Key (`SK
 | AP-05: Get weight history for cat | `CAT#<catId>` | begins_with `WEIGHT#` | Sorted chronologically by loggedAt |
 | AP-06: Get single cat profile | `HOUSEHOLD#<householdId>` | `CAT#<catId>` | Single item Get |
 | AP-07: Get schedules for cat | `CAT#<catId>` | begins_with `SCHEDULE#` | Returns all schedules for the cat |
+| AP-08: Get all sessions for user | `USER#<userId>` | begins_with `SESSION#` | Filter by revoked=false in application layer |
 
 ---
 
@@ -251,6 +282,14 @@ erDiagram
         boolean twoFactorEnabled
     }
 
+    SESSION {
+        uuid sessionId PK
+        uuid userId FK
+        string sessionToken
+        datetime expiresAt
+        boolean revoked
+    }
+
     HOUSEHOLD {
         uuid householdId PK
         uuid primaryOwnerId FK
@@ -265,6 +304,7 @@ erDiagram
         number targetWeightKg
         enum weightGoal
         number consumptionBaseline
+        number suggestedPortionGrams
         string microchipNumber
     }
 
@@ -280,6 +320,7 @@ erDiagram
         uuid eventId PK
         uuid catId FK
         uuid scheduleId FK
+        datetime timestamp
         enum outcome
         number confidenceScore
         number portionDispensedGrams
@@ -298,6 +339,7 @@ erDiagram
         uuid alertId PK
         uuid householdId FK
         uuid catId FK
+        string catName
         enum type
         enum status
         datetime triggeredAt
@@ -311,6 +353,7 @@ erDiagram
         string currentFoodTypeLabel
     }
 
+    USER ||--o{ SESSION : "has"
     HOUSEHOLD ||--o{ USER : "has members"
     HOUSEHOLD ||--o{ CAT_PROFILE : "owns"
     HOUSEHOLD ||--o{ ALERT : "receives"
@@ -319,3 +362,13 @@ erDiagram
     CAT_PROFILE ||--o{ FEEDING_EVENT : "generates"
     CAT_PROFILE ||--o{ WEIGHT_ENTRY : "tracks"
     FEEDING_SCHEDULE ||--o{ FEEDING_EVENT : "triggers"
+```
+
+---
+
+## 7. Changelog
+
+| Version | Date | Changes |
+|---|---|---|
+| 1.0 | 2026-06-30 | Initial Data Model |
+| 1.1 | 2026-07-01 | Added Session entity (AP-08); added `suggestedPortionGrams` to Cat Profile; added `catName` denormalization to Alert; clarified `timestamp` as canonical event time in Feeding Event; added `coOwnerRole` post-MVP note; added Section 2.5 Denormalization Strategy |
