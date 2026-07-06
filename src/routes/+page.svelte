@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import FeedingChart from '$lib/components/FeedingChart.svelte';
+  import DashboardFeedingChart from '$lib/components/DashboardFeedingChart.svelte';
   import AlertBanner from '$lib/components/AlertBanner.svelte';
   import DevicePanel from '$lib/components/DevicePanel.svelte';
   import type { FeedingEvent, Alert, Device } from '$lib/types';
@@ -80,119 +80,213 @@
     await fetch(`/api/v1/alerts/${alertId}/acknowledge`, { method: 'PATCH' });
     alerts = alerts.filter(a => a.alertId !== alertId);
   }
+
+  // ── Derived stats for stat cards ──
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayDispensed = $derived(events.filter(e => e.timestamp.startsWith(todayStr) && e.outcome === 'dispensed').length);
+  const todaySkipped   = $derived(events.filter(e => e.timestamp.startsWith(todayStr) && e.outcome === 'skipped').length);
+  const todayRejected  = $derived(events.filter(e => e.timestamp.startsWith(todayStr) && e.outcome === 'rejected').length);
+  const todayMealTotal = $derived(todayDispensed + todaySkipped + todayRejected);
+  const progressPct    = $derived(todayMealTotal > 0 ? Math.round((todayDispensed / todayMealTotal) * 100) : 0);
+  const ringDash       = $derived(((progressPct / 100) * 97.4).toFixed(1));
+
+  const lastFedEvent = $derived(
+    events
+      .filter(e => e.outcome === 'dispensed')
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0] ?? null
+  );
 </script>
 
-<div class="flex flex-col gap-6">
-  <!-- Page header -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-white">Dashboard</h1>
-      <p class="text-slate-500 text-sm mt-0.5">Real-time overview of your cats</p>
+<!-- ── Topbar ── -->
+<header class="h-[52px] shrink-0 flex items-center justify-between px-6 border-b border-[#2D2D4A] bg-[#0F0F1A]">
+  <h1 class="text-[15px] font-semibold text-[#F8FAFC]">Dashboard</h1>
+
+  <div class="flex items-center gap-3">
+    <!-- Language badge -->
+    <span class="text-[11px] text-[#94A3B8] border border-[#2D2D4A] rounded px-2 py-0.5 bg-[#0F0F1A]">EN</span>
+
+    <!-- Notification bell -->
+    <button class="relative text-[#94A3B8] hover:text-[#F8FAFC] transition-colors p-0.5" aria-label="Notifications">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
+      {#if activeAlerts > 0}
+        <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#F59E0B]"></span>
+      {/if}
+    </button>
+
+    <!-- User avatar -->
+    <div class="w-7 h-7 rounded-full bg-[#7C3AED] flex items-center justify-center text-[11px] font-bold text-white select-none">
+      {totalCats > 0 ? data.cats[0].name.slice(0, 2).toUpperCase() : 'ME'}
     </div>
-    <div class="flex items-center gap-2">
-      <span class="w-2 h-2 rounded-full {sseConnected ? 'bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.4)]' : 'bg-slate-600'}"></span>
-      <span class="text-xs text-slate-500">{sseConnected ? 'Live' : 'Connecting...'}</span>
+
+    <!-- Live indicator -->
+    <div class="flex items-center gap-1.5 pl-1 border-l border-[#2D2D4A]">
+      <span class="w-2 h-2 rounded-full shrink-0 {sseConnected
+        ? 'bg-[#10B981] shadow-[0_0_6px_2px_rgba(16,185,129,0.4)]'
+        : 'bg-[#94A3B8]'}"></span>
+      <span class="text-[11px] text-[#94A3B8]">{sseConnected ? 'Live' : 'Offline'}</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Scrollable content ── -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5 pb-20 md:pb-6">
+
+  <!-- ── Section 1: Stat cards ── -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+    <!-- Card 1: Today's meals (progress ring) -->
+    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col items-center gap-2">
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide self-start">Today's meals</p>
+      <div class="relative">
+        <svg width="64" height="64" viewBox="0 0 36 36" class="-rotate-90" aria-hidden="true">
+          <circle cx="18" cy="18" r="15.5" fill="none" stroke="#2D2D4A" stroke-width="3"/>
+          <circle
+            cx="18" cy="18" r="15.5"
+            fill="none"
+            stroke="#7C3AED"
+            stroke-width="3"
+            stroke-dasharray="{ringDash} 97.4"
+            stroke-linecap="round"
+            class="transition-all duration-500"
+          />
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-[13px] font-bold text-[#F8FAFC]">{todayDispensed}/{todayMealTotal || 0}</span>
+        </div>
+      </div>
+      <p class="text-[11px] text-[#94A3B8]">{progressPct}% done</p>
+    </div>
+
+    <!-- Card 2: Dispensed -->
+    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">Dispensed</p>
+      <p class="text-[32px] font-bold leading-none" style="color: #10B981">{todayDispensed}</p>
+      <p class="text-[11px] text-[#94A3B8] mt-2">On schedule</p>
+    </div>
+
+    <!-- Card 3: Skipped -->
+    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">Skipped</p>
+      <p class="text-[32px] font-bold leading-none" style="color: #F59E0B">{todaySkipped}</p>
+      <p class="text-[11px] text-[#94A3B8] mt-2">{todaySkipped > 0 ? 'Meals missed today' : 'None today'}</p>
+    </div>
+
+    <!-- Card 4: Rejected -->
+    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">Rejected</p>
+      <p class="text-[32px] font-bold leading-none text-[#94A3B8]">{todayRejected}</p>
+      <p class="text-[11px] text-[#94A3B8] mt-2">{todayRejected === 0 ? 'All clear' : 'Needs attention'}</p>
     </div>
   </div>
 
-  <!-- Alert banner -->
+  <!-- ── Section 2: Alert banner ── -->
   {#if alerts.length > 0}
     <AlertBanner {alerts} onDismiss={dismissAlert} />
   {/if}
 
-  <!-- Summary stats row -->
-  <div class="grid grid-cols-3 gap-4">
-    <div class="bg-[#1a1a2e] border border-[#7c3aed]/30 rounded-2xl p-5">
-      <p class="text-slate-500 text-xs uppercase tracking-wider mb-2">Total Cats</p>
-      <p class="text-3xl font-bold text-white">{totalCats}</p>
-      <p class="text-slate-500 text-xs mt-1">In household</p>
-    </div>
-    <div class="bg-[#1a1a2e] border border-[#06b6d4]/30 rounded-2xl p-5">
-      <p class="text-slate-500 text-xs uppercase tracking-wider mb-2">Today's Feedings</p>
-      <p class="text-3xl font-bold text-[#22d3ee]">{todayFeedings}</p>
-      <p class="text-slate-500 text-xs mt-1">Dispensed today</p>
-    </div>
-    <div class="bg-[#1a1a2e] border border-[#f59e0b]/30 rounded-2xl p-5">
-      <p class="text-slate-500 text-xs uppercase tracking-wider mb-2">Active Alerts</p>
-      <p class="text-3xl font-bold text-amber-400">{activeAlerts}</p>
-      <p class="text-slate-500 text-xs mt-1">Require attention</p>
-    </div>
-  </div>
+  <!-- ── Section 3: Middle row (cat status + device panel) ── -->
+  <div class="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-4">
 
-  <!-- Two-column layout: chart + device -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Left: chart (2/3 width) -->
-    <div class="lg:col-span-2 flex flex-col gap-6">
-      <!-- Feeding chart -->
-      <div class="bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-2xl p-5">
-        <h2 class="text-white font-semibold mb-4">Feeding Activity — Last 7 Days</h2>
-        <FeedingChart {events} />
-      </div>
+    <!-- Left: Cat status card -->
+    {#if data.cats.length > 0}
+      {@const cat = data.cats[0]}
+      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col gap-4">
 
-      <!-- Recent feedings list -->
-      <div class="bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-2xl p-5">
-        <h2 class="text-white font-semibold mb-4">Recent Feedings</h2>
-        {#if recentEvents.length === 0}
-          <div class="flex flex-col items-center justify-center py-10 text-slate-600">
-            <span class="text-4xl mb-3">🍽️</span>
-            <p class="text-sm">No feeding events yet</p>
+        <!-- Cat header -->
+        <div class="flex items-center gap-3">
+          <div
+            class="w-[52px] h-[52px] rounded-full flex items-center justify-center text-2xl shrink-0"
+            style="background: linear-gradient(135deg, #7C3AED, #F59E0B)"
+            aria-hidden="true"
+          >🐱</div>
+          <div class="min-w-0">
+            <h2 class="text-[18px] font-bold text-[#F8FAFC] truncate">{cat.name}</h2>
+            <span
+              class="inline-block text-[11px] font-medium text-[#10B981] rounded-full px-2 py-0.5 mt-0.5"
+              style="background: rgba(16,185,129,0.15)"
+            >Feeder online</span>
           </div>
-        {:else}
-          <div class="overflow-x-auto -mx-1">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="border-b border-white/5">
-                  <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Time</th>
-                  <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Cat</th>
-                  <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Outcome</th>
-                  <th class="text-right text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Portion</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-white/5">
-                {#each recentEvents as event (event.eventId)}
-                  {@const cat = data.cats.find((c: { catId: string }) => c.catId === event.catId)}
-                  <tr class="hover:bg-white/[0.02] transition-colors">
-                    <td class="py-2.5 px-1 text-slate-400 font-mono text-xs whitespace-nowrap">
-                      {formatTime(event.timestamp)}
-                    </td>
-                    <td class="py-2.5 px-1 text-slate-300">
-                      {cat?.name ?? '—'}
-                    </td>
-                    <td class="py-2.5 px-1">
-                      <span class="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full capitalize {outcomeBadgeClass(event.outcome)}">
-                        {event.outcome}
-                      </span>
-                    </td>
-                    <td class="py-2.5 px-1 text-right text-slate-400 text-xs">
-                      {event.portionDispensedGrams != null ? `${event.portionDispensedGrams}g` : '—'}
-                    </td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Right: device panel (1/3 width) -->
-    <div class="lg:col-span-1">
-      {#if device}
-        <DevicePanel
-          deviceId={device.deviceId}
-          status={device.status}
-          foodReservoirPercent={device.foodReservoirPercent}
-          currentFoodTypeLabel={device.currentFoodTypeLabel}
-          lastDispenseAt={device.lastDispenseAt}
-          cameraStatus={device.cameraStatus}
-          firmwareVersion={device.firmwareVersion}
-        />
-      {:else}
-        <div class="bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-2xl p-5 flex flex-col items-center justify-center gap-3 h-48 text-slate-600">
-          <span class="text-3xl">📡</span>
-          <p class="text-sm">No device found</p>
         </div>
-      {/if}
-    </div>
+
+        <!-- 2×2 stat grid -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Last fed</p>
+            <p class="text-[13px] font-medium text-[#F8FAFC] truncate">
+              {lastFedEvent ? formatTime(lastFedEvent.timestamp) : '—'}
+            </p>
+          </div>
+          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Next feeding</p>
+            <p class="text-[13px] font-medium text-[#F8FAFC]">—</p>
+          </div>
+          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Weight goal</p>
+            <p class="text-[13px] font-medium text-[#F8FAFC] capitalize">{cat.weightGoal.replace('_', ' ')}</p>
+          </div>
+          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Consumption</p>
+            <p class="text-[13px] font-medium text-[#F8FAFC]">{cat.consumptionBaseline}% baseline</p>
+          </div>
+        </div>
+
+        <!-- Manual Dispense -->
+        <button
+          class="w-full text-white font-semibold rounded-[8px] py-[10px] text-[13px] bg-[#7C3AED] hover:bg-[#8B5CF6] transition-colors mt-auto"
+        >
+          Manual Dispense
+        </button>
+      </div>
+    {:else}
+      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
+        <span class="text-3xl" aria-hidden="true">🐱</span>
+        <p class="text-[13px]">No cats added yet</p>
+        <a href="/cats/new" class="text-[13px] font-medium text-[#7C3AED] hover:text-[#8B5CF6] transition-colors">
+          Add a cat →
+        </a>
+      </div>
+    {/if}
+
+    <!-- Right: Device panel -->
+    {#if device}
+      <DevicePanel
+        deviceId={device.deviceId}
+        status={device.status}
+        foodReservoirPercent={device.foodReservoirPercent}
+        currentFoodTypeLabel={device.currentFoodTypeLabel}
+        lastDispenseAt={device.lastDispenseAt}
+        cameraStatus={device.cameraStatus}
+        firmwareVersion={device.firmwareVersion}
+      />
+    {:else}
+      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
+        <span class="text-3xl" aria-hidden="true">📡</span>
+        <p class="text-[13px]">No device found</p>
+      </div>
+    {/if}
   </div>
+
+  <!-- ── Section 4: 7-day chart ── -->
+  <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5">
+    <!-- Header + custom legend -->
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <h2 class="text-[14px] font-semibold text-[#F8FAFC]">7-day feeding history</h2>
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+          <span class="w-2.5 h-2.5 rounded-sm bg-[#10B981] shrink-0"></span>Dispensed
+        </span>
+        <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+          <span class="w-2.5 h-2.5 rounded-sm bg-[#F59E0B] shrink-0"></span>Skipped
+        </span>
+        <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+          <span class="w-2.5 h-2.5 rounded-sm bg-[#EF4444] shrink-0"></span>Rejected
+        </span>
+      </div>
+    </div>
+    <DashboardFeedingChart {events} />
+  </div>
+
 </div>
