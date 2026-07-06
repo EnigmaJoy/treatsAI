@@ -60,12 +60,12 @@
   }
 </script>
 
-<div class="flex min-h-screen overflow-hidden">
+<div class="flex min-h-screen">
 
   <!-- ═══════════════════════════════════════
        LEFT PANEL — branding & feature list
   ════════════════════════════════════════ -->
-  <div class="hidden lg:flex flex-1 relative flex-col items-center justify-center px-12"
+  <div class="flex-1 hidden lg:flex flex-col items-center justify-center relative overflow-hidden px-12"
     style="background: #0F0F1A;">
     <!-- Gradient overlays -->
     <div class="absolute inset-0 pointer-events-none" style="background:
