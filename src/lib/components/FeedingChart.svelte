@@ -123,12 +123,20 @@
           },
           y: {
             stacked: false,
+            beginAtZero: true,
             ticks: {
               color: '#9ca3af',
-              callback: (val) => `${val}g`,
+              stepSize: 1,
+              callback: (val) => (Number.isInteger(Number(val)) ? val : ''),
             },
             grid: { color: 'rgba(255,255,255,0.05)' },
             border: { color: 'rgba(255,255,255,0.1)' },
+            title: {
+              display: true,
+              text: 'Meals',
+              color: '#9ca3af',
+              font: { size: 11 },
+            },
           },
         },
       },
