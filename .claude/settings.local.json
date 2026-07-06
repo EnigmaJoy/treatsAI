@@ -5,7 +5,10 @@
       "Bash(npm install:*)",
       "Bash(npm run:*)",
       "Bash(find C:\\\\Users\\\\Grace\\\\IdeaProjects\\\\TreatsAI\\\\src:*)",
-      "Bash(npx svelte-check:*)"
+      "Bash(npx svelte-check:*)",
+      "Bash(sed -n '288,296p' src/routes/register/+page.svelte)",
+      "Bash(sed -n '386,394p' src/routes/register/+page.svelte)",
+      "Bash(sed -n '422,430p' src/routes/register/+page.svelte)"
     ]
   }
 }
