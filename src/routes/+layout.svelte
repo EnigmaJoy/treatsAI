@@ -102,8 +102,14 @@
     </aside>
 
     <!-- ── Main content area ── -->
-    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
-      {@render children()}
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <!-- Topbar -->
+      <div class="h-14 shrink-0 border-b border-[#2D2D4A] px-6 flex items-center justify-between">
+      </div>
+      <!-- Page content -->
+      <div class="flex-1 overflow-y-auto px-6 py-6">
+        {@render children()}
+      </div>
     </div>
 
     <!-- ── Mobile bottom tab bar ── -->

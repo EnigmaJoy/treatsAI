@@ -97,40 +97,6 @@
   );
 </script>
 
-<!-- ── Topbar ── -->
-<header class="h-[52px] shrink-0 flex items-center justify-between px-6 border-b border-[#2D2D4A] bg-[#0F0F1A]">
-  <h1 class="text-[15px] font-semibold text-[#F8FAFC]">Dashboard</h1>
-
-  <div class="flex items-center gap-3">
-    <!-- Language badge -->
-    <span class="text-[11px] text-[#94A3B8] border border-[#2D2D4A] rounded px-2 py-0.5 bg-[#0F0F1A]">EN</span>
-
-    <!-- Notification bell -->
-    <button class="relative text-[#94A3B8] hover:text-[#F8FAFC] transition-colors p-0.5" aria-label="Notifications">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-      </svg>
-      {#if activeAlerts > 0}
-        <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#F59E0B]"></span>
-      {/if}
-    </button>
-
-    <!-- User avatar -->
-    <div class="w-7 h-7 rounded-full bg-[#7C3AED] flex items-center justify-center text-[11px] font-bold text-white select-none">
-      {totalCats > 0 ? data.cats[0].name.slice(0, 2).toUpperCase() : 'ME'}
-    </div>
-
-    <!-- Live indicator -->
-    <div class="flex items-center gap-1.5 pl-1 border-l border-[#2D2D4A]">
-      <span class="w-2 h-2 rounded-full shrink-0 {sseConnected
-        ? 'bg-[#10B981] shadow-[0_0_6px_2px_rgba(16,185,129,0.4)]'
-        : 'bg-[#94A3B8]'}"></span>
-      <span class="text-[11px] text-[#94A3B8]">{sseConnected ? 'Live' : 'Offline'}</span>
-    </div>
-  </div>
-</header>
-
 <!-- ── Scrollable content ── -->
 <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5 pb-20 md:pb-6">
 
