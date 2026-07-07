@@ -22,6 +22,11 @@
   const isAuthPage = $derived(
     page.url.pathname === '/login' || page.url.pathname === '/register'
   );
+
+  async function logout() {
+    await fetch('/api/v1/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  }
 </script>
 
 <svelte:head>
@@ -87,9 +92,10 @@
 
       <!-- Logout at bottom -->
       <div class="px-3 py-3 shrink-0 border-t border-[#2D2D4A]">
-        <a
-          href="/api/v1/auth/logout"
-          class="flex items-center gap-2 rounded-[6px] text-[13px] transition-all duration-150 text-[#94A3B8] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.06)]"
+        <button
+          type="button"
+          onclick={logout}
+          class="w-full flex items-center gap-2 rounded-[6px] text-[13px] transition-all duration-150 text-[#94A3B8] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.06)] bg-transparent border-none cursor-pointer"
           style="padding: 10px 20px;"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -98,7 +104,7 @@
             <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
           {m.nav_logout()}
-        </a>
+        </button>
       </div>
     </aside>
 
