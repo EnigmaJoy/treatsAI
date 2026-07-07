@@ -56,6 +56,16 @@
     return { labels, dispensed, skipped, rejected };
   }
 
+  $effect(() => {
+    if (!chart) return;
+    const { labels, dispensed, skipped, rejected } = processData(events);
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = dispensed;
+    chart.data.datasets[1].data = skipped;
+    chart.data.datasets[2].data = rejected;
+    chart.update();
+  });
+
   onMount(() => {
     const { labels, dispensed, skipped, rejected } = processData(events);
 

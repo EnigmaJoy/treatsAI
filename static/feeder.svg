@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 215" aria-hidden="true">
+  <defs>
+    <!-- Cylinder body gradient (dark edges → lighter center = curved surface) -->
+    <linearGradient id="f-body" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#090909"/>
+      <stop offset="18%"  stop-color="#1c1c1e"/>
+      <stop offset="50%"  stop-color="#252528"/>
+      <stop offset="82%"  stop-color="#1c1c1e"/>
+      <stop offset="100%" stop-color="#090909"/>
+    </linearGradient>
+    <!-- Reservoir gradient (slightly lighter than body) -->
+    <linearGradient id="f-res" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#090909"/>
+      <stop offset="20%"  stop-color="#181818"/>
+      <stop offset="50%"  stop-color="#1f1f22"/>
+      <stop offset="80%"  stop-color="#181818"/>
+      <stop offset="100%" stop-color="#090909"/>
+    </linearGradient>
+    <!-- Stainless steel bowl gradient -->
+    <linearGradient id="f-bowl" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#222226"/>
+      <stop offset="45%"  stop-color="#56565e"/>
+      <stop offset="100%" stop-color="#222226"/>
+    </linearGradient>
+    <!-- Radial gradient for cylinder tops (lit from front-left) -->
+    <radialGradient id="f-top" cx="38%" cy="38%" r="62%">
+      <stop offset="0%"   stop-color="#2e2e34"/>
+      <stop offset="100%" stop-color="#0e0e10"/>
+    </radialGradient>
+    <!-- LED glow filter -->
+    <filter id="f-glow" x="-50%" y="-100%" width="200%" height="300%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── BOWL – stainless steel tray at base ── -->
+  <ellipse cx="40" cy="210" rx="36" ry="5.5" fill="#2a2a30"/>
+  <rect x="5" y="204" width="70" height="6" fill="url(#f-bowl)" rx="1"/>
+  <ellipse cx="40" cy="204" rx="35" ry="4.5" fill="#4c4c54"/>
+
+  <!-- ── BASE PAD – black silicone non-slip ── -->
+  <ellipse cx="40" cy="201" rx="40" ry="6" fill="#060606"/>
+  <rect x="0" y="193" width="80" height="8" fill="#0d0d0d" rx="3"/>
+  <ellipse cx="40" cy="193" rx="40" ry="6" fill="#0b0b0b"/>
+
+  <!-- ── MAIN BODY – tall primary cylinder ── -->
+  <rect x="4" y="86" width="72" height="107" fill="url(#f-body)"/>
+  <!-- Body top ellipse (3D depth) -->
+  <ellipse cx="40" cy="86" rx="36" ry="5.5" fill="url(#f-top)"/>
+
+  <!-- Transition step where reservoir meets body (body is slightly wider) -->
+  <rect x="4" y="83" width="72" height="3" fill="#111113"/>
+
+  <!-- ── LED RING – purple glow at 130 mm from body base ── -->
+  <!-- 130/208 × 107 = 66.9 px from body bottom → y = 193 − 67 = 126 -->
+  <ellipse cx="40" cy="126" rx="38" ry="5.5" fill="none"
+           stroke="rgba(124,58,237,0.3)" stroke-width="8" filter="url(#f-glow)"/>
+  <ellipse cx="40" cy="126" rx="38" ry="5.5" fill="none"
+           stroke="#7C3AED" stroke-width="2.2"/>
+  <!-- Surface tint on body between ring lines -->
+  <rect x="3" y="121" width="74" height="10" fill="rgba(124,58,237,0.06)"/>
+
+  <!-- ── CAMERA MODULE – at 45 mm from body base, front-mounted ── -->
+  <!-- 45/208 × 107 = 23.2 px from body bottom → y = 193 − 23 = 170 -->
+  <circle cx="40" cy="165" r="10"  fill="#101012"/>
+  <circle cx="40" cy="165" r="7.2" fill="#0a0a0c"/>
+  <circle cx="40" cy="165" r="4.5" fill="#161620"/>
+  <circle cx="40" cy="165" r="2.4" fill="#20202c"/>
+  <!-- Lens glint -->
+  <circle cx="37.2" cy="162.5" r="1.1" fill="#888" opacity="0.45"/>
+
+  <!-- ── RESERVOIR – narrower top section ── -->
+  <!-- 112/208 × 107 = 57.6 px → from y=86−58=28 to y=86 -->
+  <rect x="9" y="28" width="62" height="58" fill="url(#f-res)"/>
+  <!-- Reservoir top ellipse -->
+  <ellipse cx="40" cy="28" rx="31" ry="4.5" fill="url(#f-top)"/>
+  <!-- Reservoir bottom ellipse (sits inside body step shadow) -->
+  <ellipse cx="40" cy="86" rx="31" ry="4.5" fill="#141414"/>
+
+  <!-- ── LID – flat cylinder ring on top of reservoir ── -->
+  <rect x="9" y="16" width="62" height="12" fill="#121214"/>
+  <ellipse cx="40" cy="16" rx="31" ry="4.5" fill="#1c1c1e"/>
+  <!-- Lid rim highlight -->
+  <ellipse cx="40" cy="16" rx="31" ry="4.5" fill="none" stroke="#2a2a2e" stroke-width="0.8"/>
+
+  <!-- ── DOME CAP – rounded top ── -->
+  <ellipse cx="40" cy="10"  rx="31" ry="9"   fill="#141416"/>
+  <ellipse cx="40" cy="8"   rx="26" ry="5.5" fill="#1e1e22"/>
+  <ellipse cx="40" cy="5.5" rx="17" ry="3"   fill="#242428"/>
+  <!-- Dome glint (top highlight) -->
+  <ellipse cx="36" cy="4"   rx="6"  ry="1.5" fill="#333338" opacity="0.7"/>
+</svg>

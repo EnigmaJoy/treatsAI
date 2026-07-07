@@ -275,9 +275,12 @@
     {:else if activeSection === 'feeder'}
       <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-6 flex flex-col gap-5">
         <!-- Header -->
-        <div>
-          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_feeder_title()}</h2>
-          <p class="text-[13px] text-[#94A3B8]">{m.settings_feeder_subtitle()}</p>
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_feeder_title()}</h2>
+            <p class="text-[13px] text-[#94A3B8]">{m.settings_feeder_subtitle()}</p>
+          </div>
+          <img src="/feeder.svg" alt="TreatsAI Feeder" class="h-[120px] w-auto shrink-0 opacity-90 select-none" draggable="false" />
         </div>
 
         <!-- Online status row -->
