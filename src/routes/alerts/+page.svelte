@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Alert, AlertType } from '$lib/types';
+  import * as m from '$lib/paraglide/messages';
 
   let { data } = $props();
 
@@ -74,7 +75,7 @@
   <div class="flex items-center gap-3">
     <div>
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-white">Alerts</h1>
+        <h1 class="text-2xl font-bold text-white">{m.alerts_title()}</h1>
         {#if alertCount > 0}
           <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40">
             {alertCount}
@@ -118,8 +119,8 @@
       <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
         <span class="text-5xl">✅</span>
         <div>
-          <h2 class="text-white font-semibold text-lg">No active alerts</h2>
-          <p class="text-slate-500 text-sm mt-1">Everything looks good</p>
+          <h2 class="text-white font-semibold text-lg">{m.alerts_none()}</h2>
+          <p class="text-slate-500 text-sm mt-1">{m.alerts_all_good()}</p>
         </div>
       </div>
     {:else}

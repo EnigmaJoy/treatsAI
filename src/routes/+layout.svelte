@@ -2,14 +2,15 @@
   import { page } from '$app/state';
   import './layout.css';
   import favicon from '$lib/assets/favicon.svg';
+  import * as m from '$lib/paraglide/messages';
 
   let { children } = $props();
 
   const navLinks = [
-    { href: '/', label: 'Dashboard' },
-    { href: '/cats', label: 'My Cats' },
-    { href: '/alerts', label: 'Alerts' },
-    { href: '/settings', label: 'Settings' },
+    { href: '/', label: m.nav_dashboard },
+    { href: '/cats', label: m.nav_my_cats },
+    { href: '/alerts', label: m.nav_alerts },
+    { href: '/settings', label: m.nav_settings },
   ];
 
   function isActive(href: string): boolean {
@@ -79,7 +80,7 @@
                 <line x1="17" y1="16" x2="23" y2="16"/>
               {/if}
             </svg>
-            {link.label}
+            {link.label()}
           </a>
         {/each}
       </nav>
@@ -96,7 +97,7 @@
             <polyline points="16 17 21 12 16 7"/>
             <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
-          Logout
+          {m.nav_logout()}
         </a>
       </div>
     </aside>
@@ -143,7 +144,7 @@
               <line x1="17" y1="16" x2="23" y2="16"/>
             {/if}
           </svg>
-          {link.label}
+          {link.label()}
         </a>
       {/each}
     </nav>

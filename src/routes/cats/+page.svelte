@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import CatCard from '$lib/components/CatCard.svelte';
   import type { Cat } from '$lib/types';
+  import * as m from '$lib/paraglide/messages';
 
   let { data } = $props();
   const cats: Cat[] = $derived(data.cats);
@@ -11,7 +12,7 @@
   <!-- Page header -->
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-white">Cats</h1>
+      <h1 class="text-2xl font-bold text-white">{m.cats_title()}</h1>
       <p class="text-slate-500 text-sm mt-0.5">Manage your cats and feeding profiles</p>
     </div>
     <a
@@ -28,7 +29,7 @@
     <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
       <span class="text-6xl">🐱</span>
       <div>
-        <h2 class="text-white font-semibold text-lg">No cats yet</h2>
+        <h2 class="text-white font-semibold text-lg">{m.cats_none()}</h2>
         <p class="text-slate-500 text-sm mt-1">Add your first one to get started</p>
       </div>
       <a

@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import type { Cat, Device } from '$lib/types';
   import { setLocale, getLocale } from '$lib/paraglide/runtime';
+  import * as m from '$lib/paraglide/messages';
 
   let { data } = $props();
 
@@ -149,8 +150,8 @@
   }
 
   const navItems: { id: Section; label: string; active: boolean }[] = [
-    { id: 'appearance',    label: 'Appearance',   active: true },
-    { id: 'feeder',        label: 'Feeder',        active: true },
+    { id: 'appearance',    label: m.settings_appearance(),   active: true },
+    { id: 'feeder',        label: m.settings_feeder(),        active: true },
     { id: 'notifications', label: 'Notifications', active: false },
     { id: 'household',     label: 'Household',     active: false },
     { id: 'security',      label: 'Security',      active: false },
@@ -205,14 +206,14 @@
       <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-6 flex flex-col gap-6">
         <!-- Header -->
         <div>
-          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">Appearance</h2>
+          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_appearance()}</h2>
           <p class="text-[13px] text-[#94A3B8]">Personalise how TreatsAI looks</p>
         </div>
 
         <!-- Theme row -->
         <div class="flex items-center justify-between gap-4">
           <div>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">Theme</p>
+            <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_theme()}</p>
             <p class="text-[12px] text-[#94A3B8] mt-0.5">Switch between dark and light mode</p>
           </div>
           <select
@@ -232,7 +233,7 @@
         <!-- Language row -->
         <div class="flex items-center justify-between gap-4">
           <div>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">Language</p>
+            <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_language()}</p>
             <p class="text-[12px] text-[#94A3B8] mt-0.5">Choose your preferred language</p>
           </div>
           <div class="flex gap-1.5 shrink-0">
@@ -256,7 +257,7 @@
 
         <!-- Colour palette -->
         <div>
-          <p class="text-[13px] font-medium text-[#F8FAFC] mb-0.5">Colour palette</p>
+          <p class="text-[13px] font-medium text-[#F8FAFC] mb-0.5">{m.settings_palette()}</p>
           <p class="text-[12px] text-[#94A3B8] mb-4">Choose a palette that matches your household's personality</p>
 
           <div class="grid grid-cols-3 gap-3">
@@ -295,7 +296,7 @@
       <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-6 flex flex-col gap-5">
         <!-- Header -->
         <div>
-          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">Feeder device</h2>
+          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_feeder()}</h2>
           <p class="text-[13px] text-[#94A3B8]">Manage your smart feeder</p>
         </div>
 

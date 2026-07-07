@@ -4,6 +4,7 @@
   import AlertBanner from '$lib/components/AlertBanner.svelte';
   import DevicePanel from '$lib/components/DevicePanel.svelte';
   import type { FeedingEvent, Alert, Device } from '$lib/types';
+  import * as m from '$lib/paraglide/messages';
 
   let { data } = $props();
   let events = $state<FeedingEvent[]>([]);
@@ -100,12 +101,24 @@
 <!-- ── Scrollable content ── -->
 <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5 pb-20 md:pb-6">
 
+  <!-- ── Page header ── -->
+  <div>
+    <div class="flex items-center gap-2.5">
+      <h1 class="text-[18px] font-bold text-[#F8FAFC]">{m.dashboard_title()}</h1>
+      <span
+        class="text-[11px] font-medium px-2 py-0.5 rounded-full"
+        style="background:{sseConnected ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}; color:{sseConnected ? '#10B981' : '#EF4444'}"
+      >{sseConnected ? m.dashboard_live() : m.dashboard_offline()}</span>
+    </div>
+    <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.dashboard_subtitle()}</p>
+  </div>
+
   <!-- ── Section 1: Stat cards ── -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
     <!-- Card 1: Today's meals (progress ring) -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col items-center gap-2">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide self-start">Today's meals</p>
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide self-start">{m.stats_todays_meals()}</p>
       <div class="relative">
         <svg width="64" height="64" viewBox="0 0 36 36" class="-rotate-90" aria-hidden="true">
           <circle cx="18" cy="18" r="15.5" fill="none" stroke="#2D2D4A" stroke-width="3"/>
@@ -128,21 +141,21 @@
 
     <!-- Card 2: Dispensed -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">Dispensed</p>
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_dispensed()}</p>
       <p class="text-[32px] font-bold leading-none" style="color: #10B981">{todayDispensed}</p>
       <p class="text-[11px] text-[#94A3B8] mt-2">On schedule</p>
     </div>
 
     <!-- Card 3: Skipped -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">Skipped</p>
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_skipped()}</p>
       <p class="text-[32px] font-bold leading-none" style="color: #F59E0B">{todaySkipped}</p>
       <p class="text-[11px] text-[#94A3B8] mt-2">{todaySkipped > 0 ? 'Meals missed today' : 'None today'}</p>
     </div>
 
     <!-- Card 4: Rejected -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">Rejected</p>
+      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_rejected()}</p>
       <p class="text-[32px] font-bold leading-none text-[#94A3B8]">{todayRejected}</p>
       <p class="text-[11px] text-[#94A3B8] mt-2">{todayRejected === 0 ? 'All clear' : 'Needs attention'}</p>
     </div>
@@ -242,13 +255,13 @@
       <h2 class="text-[14px] font-semibold text-[#F8FAFC]">7-day feeding history</h2>
       <div class="flex items-center gap-4">
         <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
-          <span class="w-2.5 h-2.5 rounded-sm bg-[#10B981] shrink-0"></span>Dispensed
+          <span class="w-2.5 h-2.5 rounded-sm bg-[#10B981] shrink-0"></span>{m.stats_dispensed()}
         </span>
         <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
-          <span class="w-2.5 h-2.5 rounded-sm bg-[#F59E0B] shrink-0"></span>Skipped
+          <span class="w-2.5 h-2.5 rounded-sm bg-[#F59E0B] shrink-0"></span>{m.stats_skipped()}
         </span>
         <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
-          <span class="w-2.5 h-2.5 rounded-sm bg-[#EF4444] shrink-0"></span>Rejected
+          <span class="w-2.5 h-2.5 rounded-sm bg-[#EF4444] shrink-0"></span>{m.stats_rejected()}
         </span>
       </div>
     </div>
