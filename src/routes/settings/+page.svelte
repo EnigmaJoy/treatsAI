@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import type { Cat, Device } from '$lib/types';
+  import { setLocale, getLocale } from '$lib/paraglide/runtime';
 
   let { data } = $props();
 
@@ -26,12 +27,27 @@
   let dispensing = $state(false);
   let dispenseToast = $state<string | null>(null);
 
-  // Fetch cats on mount
+  // Fetch cats on mount + restore saved preferences
   onMount(async () => {
     const res = await fetch('/api/v1/cats');
     if (res.ok) {
       cats = (await res.json()).data?.cats ?? [];
       if (cats.length > 0) selectedCatId = cats[0].catId;
+    }
+
+    // Restore saved palette
+    const savedPalette = localStorage.getItem('treatsai-palette') ?? 'midnight-paws';
+    selectedPalette = savedPalette;
+    applyPalette(savedPalette);
+
+    // Sync language button to current Paraglide locale
+    try {
+      const locale = getLocale();
+      if (locale === 'en' || locale === 'it' || locale === 'es') {
+        selectedLanguage = locale;
+      }
+    } catch {
+      // keep default
     }
   });
 
@@ -99,6 +115,38 @@
   let selectedTheme = $state<'dark' | 'light' | 'system'>('dark');
   let selectedLanguage = $state<'en' | 'it' | 'es'>('en');
   let selectedPalette = $state('midnight-paws');
+
+  // ── Palette switching ──
+  function applyPalette(name: string) {
+    const paletteDefs: Record<string, { bg: string; surface: string; border: string; primary: string; accent: string }> = {
+      'midnight-paws': { bg: '#0F0F1A', surface: '#1A1A2E', border: '#2D2D4A', primary: '#7C3AED', accent: '#F59E0B' },
+      'ocean-whisker': { bg: '#0A1628', surface: '#0F2040', border: '#1A3A5C', primary: '#0EA5E9', accent: '#06B6D4' },
+      'forest-purr':   { bg: '#0A1A0F', surface: '#0F2A18', border: '#1A3A24', primary: '#059669', accent: '#84CC16' },
+      'sakura-meow':   { bg: '#1A0A14', surface: '#2A1020', border: '#3A1A2E', primary: '#EC4899', accent: '#F43F5E' },
+      'golden-tabby':  { bg: '#1A1200', surface: '#2A1E00', border: '#3A2E00', primary: '#D97706', accent: '#FBBF24' },
+      'arctic-fox':    { bg: '#0F172A', surface: '#1E2A3A', border: '#2A3A4A', primary: '#64748B', accent: '#38BDF8' },
+    };
+    const p = paletteDefs[name];
+    if (!p) return;
+    const root = document.documentElement;
+    root.style.setProperty('--color-bg',      p.bg);
+    root.style.setProperty('--color-surface',  p.surface);
+    root.style.setProperty('--color-border',   p.border);
+    root.style.setProperty('--color-primary',  p.primary);
+    root.style.setProperty('--color-accent',   p.accent);
+    localStorage.setItem('treatsai-palette', name);
+  }
+
+  // ── Language switching ──
+  function switchLanguage(lang: 'en' | 'it' | 'es') {
+    selectedLanguage = lang;
+    setLocale(lang, { reload: false });
+    localStorage.setItem('treatsai-language', lang);
+    // Force a real browser navigation so the PARAGLIDE_LOCALE cookie
+    // is sent to the server and paraglideMiddleware can re-detect the locale.
+    // SvelteKit's goto() is client-side only and never triggers a fresh HTTP request.
+    window.location.href = window.location.href;
+  }
 
   const navItems: { id: Section; label: string; active: boolean }[] = [
     { id: 'appearance',    label: 'Appearance',   active: true },
@@ -191,7 +239,7 @@
             {#each (['en', 'it', 'es'] as const) as lang}
               <button
                 type="button"
-                onclick={() => (selectedLanguage = lang)}
+                onclick={() => switchLanguage(lang)}
                 class="px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-all duration-150"
                 style="{selectedLanguage === lang
                   ? 'border-color:#7C3AED;background:rgba(124,58,237,0.1);color:#7C3AED;'
@@ -216,7 +264,7 @@
               {@const selected = selectedPalette === palette.id}
               <button
                 type="button"
-                onclick={() => (selectedPalette = palette.id)}
+                onclick={() => { selectedPalette = palette.id; applyPalette(palette.id); }}
                 class="relative text-left rounded-xl p-3 border-2 transition-all duration-150 hover:border-[#7C3AED]"
                 style="border-color:{selected ? '#7C3AED' : '#2D2D4A'}; background:{selected ? 'rgba(124,58,237,0.06)' : 'transparent'};"
               >

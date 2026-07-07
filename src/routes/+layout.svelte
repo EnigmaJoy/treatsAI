@@ -32,10 +32,10 @@
     {@render children()}
   </div>
 {:else}
-  <div class="flex h-screen bg-[#0F0F1A] text-[#F8FAFC] overflow-hidden">
+  <div class="flex h-screen text-[#F8FAFC] overflow-hidden" style="background:var(--color-bg)">
 
     <!-- ── Sidebar (desktop) ── -->
-    <aside class="hidden md:flex flex-col w-[220px] shrink-0 bg-[#1A1A2E] border-r border-[#2D2D4A]">
+    <aside class="hidden md:flex flex-col w-[220px] shrink-0 border-r border-[#2D2D4A]" style="background:var(--color-surface)">
 
       <!-- Logo -->
       <div class="px-5 h-[52px] flex items-center shrink-0 border-b border-[#2D2D4A]">
@@ -113,7 +113,7 @@
     </div>
 
     <!-- ── Mobile bottom tab bar ── -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1A1A2E] border-t border-[#2D2D4A] flex">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[#2D2D4A] flex" style="background:var(--color-surface)">
       {#each navLinks as link (link.href)}
         {@const active = isActive(link.href)}
         <a
