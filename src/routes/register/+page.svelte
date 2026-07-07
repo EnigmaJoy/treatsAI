@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import type { Language, WeightGoal } from '$lib/types';
 
@@ -62,6 +63,11 @@
     feedingSlots = feedingSlots.map(s => s.id === id ? { ...s, portionGrams: val } : s);
   }
 
+  // Clear any existing session so a stale cookie doesn't interfere with registration
+  onMount(async () => {
+    await fetch('/api/v1/auth/logout', { method: 'POST' });
+  });
+
   // ── Step navigation ──
   function goToNext() {
     error = '';
@@ -81,20 +87,41 @@
 
   function goToPrev() { error = ''; currentStep--; }
 
-  // ── Finish: existing register logic + cat + schedule ──
+  // ── Finish: single register call with full onboarding payload, then login ──
   async function handleFinish() {
     loading = true; error = '';
     try {
-      // 1. Register (existing logic preserved)
+      // 1. Register with cat and schedule included - creates everything atomically
       const res = await fetch('/api/v1/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, language })
+        body: JSON.stringify({
+          email,
+          password,
+          language,
+          cat: {
+            name: catName.trim(),
+            breed: catBreed.trim() || undefined,
+            dateOfBirth: catDob || undefined,
+            currentWeightKg: parseFloat(catCurrentWeight),
+            targetWeightKg: catTargetWeight ? parseFloat(catTargetWeight) : undefined,
+            weightGoal: catWeightGoal,
+            consumptionBaseline: catConsumptionBaseline,
+            microchipNumber: catMicrochip.trim() || undefined,
+            weightReminderInterval: catReminderInterval
+          },
+          schedule: {
+            feedingTimes: feedingSlots.map(s => ({ time: s.time, portionGrams: s.portionGrams })),
+            foodType: foodTypeLabel.trim() || undefined
+          }
+        })
       });
       const data = await res.json();
       if (!data.success) { error = data.error?.message ?? 'Registration failed'; return; }
 
-      // 2. Auto-login (existing logic preserved)
+      const catId: string | undefined = data.data.catId;
+
+      // 2. Auto-login to establish session cookie
       const loginRes = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,38 +130,8 @@
       const loginData = await loginRes.json();
       if (!loginData.success) { goto('/login'); return; }
 
-      // 3. Create cat profile
-      const catRes = await fetch('/api/v1/cats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: catName.trim(),
-          breed: catBreed.trim() || undefined,
-          dateOfBirth: catDob || undefined,
-          currentWeightKg: parseFloat(catCurrentWeight),
-          targetWeightKg: catTargetWeight ? parseFloat(catTargetWeight) : undefined,
-          weightGoal: catWeightGoal,
-          consumptionBaseline: catConsumptionBaseline,
-          microchipNumber: catMicrochip.trim() || undefined,
-          weightReminderInterval: catReminderInterval,
-        })
-      });
-      const catData = await catRes.json();
-      if (!catData.success) { error = catData.error?.message ?? 'Failed to create cat profile'; return; }
-
-      const catId = catData.data.cat.catId;
-
-      // 4. Create feeding schedule
-      await fetch(`/api/v1/cats/${catId}/schedules`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          feedingTimes: feedingSlots.map(s => ({ time: s.time, portionGrams: s.portionGrams })),
-        })
-      });
-
-      // 5. Upload photos if any
-      if (uploadedPhotos.length > 0) {
+      // 3. Upload photos if any (requires session from step 2)
+      if (uploadedPhotos.length > 0 && catId) {
         const formData = new FormData();
         for (const file of uploadedPhotos) {
           formData.append('photos', file);

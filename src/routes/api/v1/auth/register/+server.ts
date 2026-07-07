@@ -1,9 +1,26 @@
 import { json } from '@sveltejs/kit';
 import bcrypt from 'bcryptjs';
-import { mockUsers, mockHouseholds } from '$lib/server/aws/mock';
-import type { User, Household, Language } from '$lib/types';
+import { mockUsers, mockHouseholds, mockCats, mockSchedules } from '$lib/server/aws/mock';
+import type { User, Household, Cat, Schedule, Language, WeightGoal } from '$lib/types';
 
 const VALID_LANGUAGES: Language[] = ['en', 'it', 'es'];
+
+interface CatInput {
+    name: string;
+    breed?: string;
+    dateOfBirth?: string;
+    currentWeightKg: number;
+    targetWeightKg?: number;
+    weightGoal: WeightGoal;
+    consumptionBaseline: number;
+    weightReminderInterval: number;
+    microchipNumber?: string;
+}
+
+interface ScheduleInput {
+    feedingTimes: Array<{ time: string; portionGrams: number }>;
+    foodType?: string;
+}
 
 export async function POST({ request }: { request: Request }) {
     try {
@@ -17,7 +34,8 @@ export async function POST({ request }: { request: Request }) {
             );
         }
 
-        const { email, password, language } = body as Record<string, unknown>;
+        // Destructure known fields - extra fields are ignored
+        const { email, password, language, cat, schedule } = body as Record<string, unknown>;
 
         // Validate email
         if (!email || typeof email !== 'string' || email.trim() === '') {
@@ -53,7 +71,7 @@ export async function POST({ request }: { request: Request }) {
         }
 
         // Normalize email and check it's not already taken
-        const normalizedEmail = email.trim().toLowerCase();
+        const normalizedEmail = (email as string).trim().toLowerCase();
         const existingUser = await mockUsers.findByEmail(normalizedEmail);
         if (existingUser) {
             return json(
@@ -63,7 +81,7 @@ export async function POST({ request }: { request: Request }) {
         }
 
         // Hash password
-        const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await bcrypt.hash(password as string, 10);
 
         const now = new Date().toISOString();
         const userId = crypto.randomUUID();
@@ -92,6 +110,47 @@ export async function POST({ request }: { request: Request }) {
         };
         await mockUsers.create(userRecord);
 
+        // Create Cat if included in the onboarding payload
+        let catId: string | undefined;
+        if (cat && typeof cat === 'object') {
+            const catInput = cat as CatInput;
+            catId = crypto.randomUUID();
+            const catRecord: Cat = {
+                catId,
+                householdId,
+                name: catInput.name,
+                breed: catInput.breed,
+                dateOfBirth: catInput.dateOfBirth,
+                currentWeightKg: catInput.currentWeightKg,
+                targetWeightKg: catInput.targetWeightKg,
+                weightGoal: catInput.weightGoal,
+                consumptionBaseline: catInput.consumptionBaseline,
+                photoS3Keys: [],
+                rekognitionCollectionId: `household-${householdId}`,
+                microchipNumber: catInput.microchipNumber,
+                weightReminderInterval: catInput.weightReminderInterval as 3 | 7 | 14,
+                createdAt: now,
+                updatedAt: now
+            };
+            await mockCats.create(catRecord);
+
+            // Create Schedule if included alongside the cat
+            if (schedule && typeof schedule === 'object') {
+                const scheduleInput = schedule as ScheduleInput;
+                const scheduleRecord: Schedule = {
+                    scheduleId: crypto.randomUUID(),
+                    catId,
+                    householdId,
+                    feedingTimes: scheduleInput.feedingTimes,
+                    status: 'active',
+                    temporalWorkflowId: `mock-workflow-${crypto.randomUUID()}`,
+                    createdAt: now,
+                    updatedAt: now
+                };
+                await mockSchedules.create(scheduleRecord);
+            }
+        }
+
         return json(
             {
                 success: true,
@@ -100,6 +159,7 @@ export async function POST({ request }: { request: Request }) {
                     email: normalizedEmail,
                     householdId,
                     language,
+                    catId,
                     createdAt: now
                 }
             },
