@@ -4,6 +4,7 @@
   import type { Cat, Device } from '$lib/types';
   import { setLocale, getLocale } from '$lib/paraglide/runtime';
   import * as m from '$lib/paraglide/messages';
+  import { applyPalette, getSavedPalette } from '$lib/palette';
 
   let { data } = $props();
 
@@ -36,8 +37,8 @@
       if (cats.length > 0) selectedCatId = cats[0].catId;
     }
 
-    // Restore saved palette
-    const savedPalette = localStorage.getItem('treatsai-palette') ?? 'midnight-paws';
+    // Restore saved palette and sync the selection highlight
+    const savedPalette = getSavedPalette();
     selectedPalette = savedPalette;
     applyPalette(savedPalette);
 
@@ -116,27 +117,6 @@
   let selectedTheme = $state<'dark' | 'light' | 'system'>('dark');
   let selectedLanguage = $state<'en' | 'it' | 'es'>('en');
   let selectedPalette = $state('midnight-paws');
-
-  // ── Palette switching ──
-  function applyPalette(name: string) {
-    const paletteDefs: Record<string, { bg: string; surface: string; border: string; primary: string; accent: string }> = {
-      'midnight-paws': { bg: '#0F0F1A', surface: '#1A1A2E', border: '#2D2D4A', primary: '#7C3AED', accent: '#F59E0B' },
-      'ocean-whisker': { bg: '#0A1628', surface: '#0F2040', border: '#1A3A5C', primary: '#0EA5E9', accent: '#06B6D4' },
-      'forest-purr':   { bg: '#0A1A0F', surface: '#0F2A18', border: '#1A3A24', primary: '#059669', accent: '#84CC16' },
-      'sakura-meow':   { bg: '#1A0A14', surface: '#2A1020', border: '#3A1A2E', primary: '#EC4899', accent: '#F43F5E' },
-      'golden-tabby':  { bg: '#1A1200', surface: '#2A1E00', border: '#3A2E00', primary: '#D97706', accent: '#FBBF24' },
-      'arctic-fox':    { bg: '#0F172A', surface: '#1E2A3A', border: '#2A3A4A', primary: '#64748B', accent: '#38BDF8' },
-    };
-    const p = paletteDefs[name];
-    if (!p) return;
-    const root = document.documentElement;
-    root.style.setProperty('--color-bg',      p.bg);
-    root.style.setProperty('--color-surface',  p.surface);
-    root.style.setProperty('--color-border',   p.border);
-    root.style.setProperty('--color-primary',  p.primary);
-    root.style.setProperty('--color-accent',   p.accent);
-    localStorage.setItem('treatsai-palette', name);
-  }
 
   // ── Language switching ──
   function switchLanguage(lang: 'en' | 'it' | 'es') {
@@ -296,8 +276,8 @@
       <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-6 flex flex-col gap-5">
         <!-- Header -->
         <div>
-          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_feeder()}</h2>
-          <p class="text-[13px] text-[#94A3B8]">Manage your smart feeder</p>
+          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_feeder_title()}</h2>
+          <p class="text-[13px] text-[#94A3B8]">{m.settings_feeder_subtitle()}</p>
         </div>
 
         <!-- Online status row -->
@@ -309,7 +289,7 @@
           </span>
           <div>
             <p class="text-[13px] font-medium text-[#F8FAFC]">
-              {device?.status === 'online' ? 'Feeder online' : 'Feeder offline'}
+              {device?.status === 'online' ? m.settings_feeder_online() : 'Feeder offline'}
             </p>
             <p class="text-[11px] text-[#94A3B8]">
               Firmware v{device?.firmwareVersion ?? '—'}
@@ -320,7 +300,7 @@
         <!-- Food reservoir bar -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <label for="reservoir-level" class="text-[13px] font-medium text-[#F8FAFC]">Food reservoir</label>
+            <label for="reservoir-level" class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_food_reservoir()}</label>
             <span class="text-[13px] font-bold" style="color:#7C3AED;">{foodReservoirPercent}%</span>
           </div>
           <div class="h-2 rounded-full overflow-hidden" style="background:#0F0F1A;">
@@ -333,7 +313,7 @@
 
         <!-- Food type input -->
         <div>
-          <label for="food-type-label" class="text-[12px] text-[#94A3B8] mb-1.5 block">Food type</label>
+          <label for="food-type-label" class="text-[12px] text-[#94A3B8] mb-1.5 block">{m.settings_food_type()}</label>
           <input
             id="food-type-label"
             type="text"
@@ -351,7 +331,7 @@
             disabled={feederSaving}
             class="bg-[#7C3AED] hover:bg-[#8B5CF6] disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-semibold transition-colors"
           >
-            {feederSaving ? 'Saving…' : 'Save changes'}
+            {feederSaving ? 'Saving…' : m.settings_save_changes()}
           </button>
           <button
             type="button"
@@ -359,7 +339,7 @@
             disabled={feederSaving}
             class="bg-transparent border border-[#2D2D4A] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#94A3B8] rounded-lg px-5 py-2 text-sm transition-colors disabled:opacity-60"
           >
-            Simulate refill (100%)
+            {m.settings_simulate_refill()}
           </button>
           {#if feederToast}
             <span class="text-[12px] text-[#10B981]">{feederToast}</span>
@@ -384,11 +364,11 @@
 
     <!-- ══ DANGER ZONE ══ -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-6">
-      <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-4">Danger zone</h2>
+      <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-4">{m.settings_danger_zone()}</h2>
       <div class="flex items-center justify-between gap-4">
         <div>
-          <p class="text-[13px] font-medium text-[#F8FAFC]">Delete account</p>
-          <p class="text-[12px] text-[#94A3B8] mt-0.5">Permanently delete your account and all data. This cannot be undone.</p>
+          <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_delete_account()}</p>
+          <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.settings_delete_account_desc()}</p>
         </div>
         <button
           type="button"
@@ -396,7 +376,7 @@
           class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-[#EF4444] transition-colors hover:bg-[rgba(239,68,68,0.1)]"
           style="border:1px solid rgba(239,68,68,0.4);"
         >
-          Delete account
+          {m.settings_delete_account()}
         </button>
       </div>
     </div>

@@ -22,6 +22,9 @@
     device = data.device;
   });
 
+  let firstCatPhotoUrl = $state<string | null>(data.firstCatPhotoUrl ?? null);
+  let dispensing = $state(false);
+
   const totalCats = $derived(data.cats.length);
   const todayFeedings = $derived(events.filter(e => e.timestamp.startsWith(new Date().toISOString().split('T')[0]) && e.outcome === 'dispensed').length);
   const activeAlerts = $derived(alerts.length);
@@ -44,13 +47,34 @@
     return 'bg-red-500/20 text-red-400 border border-red-500/40';
   }
 
+  async function loadDashboardData() {
+    if (data.cats.length > 0) {
+      const r = await fetch(`/api/v1/cats/${data.cats[0].catId}/events?limit=50`);
+      const j = await r.json();
+      events = j.data?.events ?? [];
+    }
+  }
+
+  async function manualDispense(catId: string) {
+    dispensing = true;
+    try {
+      const res = await fetch('/api/v1/device/dispense', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ catId, portionGrams: 80 })
+      });
+      const resData = await res.json();
+      if (resData.success) {
+        await loadDashboardData();
+      }
+    } finally {
+      dispensing = false;
+    }
+  }
+
   onMount(() => {
     // Load events for first cat if exists
-    if (data.cats.length > 0) {
-      fetch(`/api/v1/cats/${data.cats[0].catId}/events?limit=50`)
-        .then(r => r.json())
-        .then(j => { events = j.data?.events ?? []; });
-    }
+    loadDashboardData();
 
     // SSE connection
     eventSource = new EventSource('/api/v1/sse');
@@ -176,11 +200,20 @@
 
         <!-- Cat header -->
         <div class="flex items-center gap-3">
-          <div
-            class="w-[52px] h-[52px] rounded-full flex items-center justify-center text-2xl shrink-0"
-            style="background: linear-gradient(135deg, #7C3AED, #F59E0B)"
-            aria-hidden="true"
-          >🐱</div>
+          {#if firstCatPhotoUrl}
+            <img
+              src={firstCatPhotoUrl}
+              alt={cat.name}
+              style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #7C3AED;flex-shrink:0"
+              onerror={() => { firstCatPhotoUrl = null; }}
+            />
+          {:else}
+            <div
+              class="w-[52px] h-[52px] rounded-full flex items-center justify-center text-2xl shrink-0"
+              style="background: linear-gradient(135deg, #7C3AED, #F59E0B)"
+              aria-hidden="true"
+            >🐱</div>
+          {/if}
           <div class="min-w-0">
             <h2 class="text-[18px] font-bold text-[#F8FAFC] truncate">{cat.name}</h2>
             <span
@@ -214,9 +247,12 @@
 
         <!-- Manual Dispense -->
         <button
-          class="w-full text-white font-semibold rounded-[8px] py-[10px] text-[13px] bg-[#7C3AED] hover:bg-[#8B5CF6] transition-colors mt-auto"
+          type="button"
+          disabled={dispensing}
+          onclick={() => manualDispense(cat.catId)}
+          class="w-full text-white font-semibold rounded-[8px] py-[10px] text-[13px] bg-[#7C3AED] hover:bg-[#8B5CF6] disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-auto"
         >
-          Manual Dispense
+          {dispensing ? 'Dispensing…' : 'Manual Dispense'}
         </button>
       </div>
     {:else}

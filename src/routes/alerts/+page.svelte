@@ -4,34 +4,36 @@
 
   let { data } = $props();
 
+  let loading = $state(true);
   let activeAlerts = $state<Alert[]>([]);
   let acknowledgedAlerts = $state<Alert[]>([]);
+  let activeTab = $state<'active' | 'history'>('active');
 
   $effect(() => {
     activeAlerts = data.active;
     acknowledgedAlerts = data.acknowledged;
+    loading = false;
   });
-  let activeTab = $state<'active' | 'history'>('active');
 
   const alertCount = $derived(activeAlerts.length);
 
-  function alertIcon(type: AlertType): string {
+  function typeBadgeStyle(type: AlertType): { bg: string; text: string; border: string } {
     switch (type) {
-      case 'skip_meal': return '⚠️';
-      case 'baseline_deviation': return '📊';
-      case 'weight_reminder': return '⚖️';
-      case 'low_food_level': return '🪣';
-      default: return '🔔';
+      case 'skip_meal':           return { bg: 'rgba(245,158,11,0.15)',  text: '#F59E0B', border: 'rgba(245,158,11,0.35)' };
+      case 'baseline_deviation':  return { bg: 'rgba(249,115,22,0.15)',  text: '#FB923C', border: 'rgba(249,115,22,0.35)' };
+      case 'weight_reminder':     return { bg: 'rgba(139,92,246,0.15)',  text: '#A78BFA', border: 'rgba(139,92,246,0.35)' };
+      case 'low_food_level':      return { bg: 'rgba(239,68,68,0.15)',   text: '#F87171', border: 'rgba(239,68,68,0.35)'  };
+      default:                    return { bg: 'rgba(148,163,184,0.15)', text: '#94A3B8', border: 'rgba(148,163,184,0.35)' };
     }
   }
 
   function alertTypeLabel(type: AlertType): string {
     switch (type) {
-      case 'skip_meal': return 'Skipped Meal';
+      case 'skip_meal':          return 'Skipped Meal';
       case 'baseline_deviation': return 'Baseline Deviation';
-      case 'weight_reminder': return 'Weight Reminder';
-      case 'low_food_level': return 'Low Food Level';
-      default: return type;
+      case 'weight_reminder':    return 'Weight Reminder';
+      case 'low_food_level':     return 'Low Food Level';
+      default:                   return type;
     }
   }
 
@@ -39,20 +41,11 @@
     const diffMs = Date.now() - new Date(iso).getTime();
     const diffMins = Math.floor(diffMs / 60000);
     if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    if (diffMins < 60) return `${diffMins}m ago`;
     const diffHrs = Math.floor(diffMins / 60);
-    if (diffHrs < 24) return `${diffHrs} hour${diffHrs === 1 ? '' : 's'} ago`;
+    if (diffHrs < 24) return `${diffHrs}h ago`;
     const diffDays = Math.floor(diffHrs / 24);
-    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
-  }
-
-  function formatDateTime(iso: string): string {
-    return new Date(iso).toLocaleString([], {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return `${diffDays}d ago`;
   }
 
   async function acknowledge(alertId: string) {
@@ -70,32 +63,32 @@
   }
 </script>
 
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-5">
+
   <!-- Page header -->
-  <div class="flex items-center gap-3">
-    <div>
-      <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-white">{m.alerts_title()}</h1>
-        {#if alertCount > 0}
-          <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40">
-            {alertCount}
-          </span>
-        {/if}
-      </div>
-      <p class="text-slate-500 text-sm mt-0.5">Notifications and system alerts</p>
+  <div>
+    <div class="flex items-center gap-2.5">
+      <h1 class="text-[18px] font-bold text-[#F8FAFC]">{m.alerts_title()}</h1>
+      {#if alertCount > 0}
+        <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">
+          {alertCount}
+        </span>
+      {/if}
     </div>
+    <p class="text-[12px] text-[#94A3B8] mt-0.5">Notifications and system alerts</p>
   </div>
 
   <!-- Tabs -->
-  <div class="flex gap-1 bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-xl p-1 w-fit">
+  <div class="flex gap-1 p-1 rounded-[10px] w-fit" style="background:var(--color-surface); border:1px solid #2D2D4A">
     <button
-      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150
+      type="button"
+      class="px-4 py-1.5 rounded-[7px] text-[13px] font-medium transition-all duration-150
         {activeTab === 'active'
-          ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40'
-          : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+          ? 'bg-[rgba(124,58,237,0.18)] text-[#A78BFA] border border-[rgba(124,58,237,0.4)]'
+          : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[rgba(255,255,255,0.04)] border border-transparent'}"
       onclick={() => (activeTab = 'active')}
     >
-      Active
+      {m.alert_tab_active()}
       {#if alertCount > 0}
         <span class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold bg-amber-500/30 text-amber-400">
           {alertCount}
@@ -103,105 +96,125 @@
       {/if}
     </button>
     <button
-      class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150
+      type="button"
+      class="px-4 py-1.5 rounded-[7px] text-[13px] font-medium transition-all duration-150
         {activeTab === 'history'
-          ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40'
-          : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+          ? 'bg-[rgba(124,58,237,0.18)] text-[#A78BFA] border border-[rgba(124,58,237,0.4)]'
+          : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[rgba(255,255,255,0.04)] border border-transparent'}"
       onclick={() => (activeTab = 'history')}
     >
-      History
+      {m.alert_tab_history()}
     </button>
   </div>
 
-  <!-- Active tab -->
-  {#if activeTab === 'active'}
-    {#if activeAlerts.length === 0}
-      <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
-        <span class="text-5xl">✅</span>
-        <div>
-          <h2 class="text-white font-semibold text-lg">{m.alerts_none()}</h2>
-          <p class="text-slate-500 text-sm mt-1">{m.alerts_all_good()}</p>
-        </div>
-      </div>
+  <!-- Table card -->
+  <div class="rounded-[12px] border border-[#2D2D4A] overflow-hidden" style="background:var(--color-surface)">
+
+    {#if loading}
+      <!-- Skeleton -->
+      <table class="w-full text-[13px]">
+        <thead>
+          <tr class="border-b border-[#2D2D4A]">
+            {#each [m.alert_col_type(), m.alert_col_cat(), m.alert_col_triggered(), m.alert_col_status(), m.alert_col_action()] as col}
+              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{col}</th>
+            {/each}
+          </tr>
+        </thead>
+        <tbody>
+          {#each [1,2,3] as _}
+            <tr class="border-b border-[#2D2D4A] last:border-0">
+              <td class="px-4 py-3"><div class="h-5 w-28 rounded bg-[#2D2D4A] animate-pulse"></div></td>
+              <td class="px-4 py-3"><div class="h-4 w-16 rounded bg-[#2D2D4A] animate-pulse"></div></td>
+              <td class="px-4 py-3"><div class="h-4 w-12 rounded bg-[#2D2D4A] animate-pulse"></div></td>
+              <td class="px-4 py-3"><div class="h-5 w-20 rounded bg-[#2D2D4A] animate-pulse"></div></td>
+              <td class="px-4 py-3"><div class="h-7 w-16 rounded bg-[#2D2D4A] animate-pulse"></div></td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+
     {:else}
-      <div class="flex flex-col gap-3">
-        {#each activeAlerts as alert (alert.alertId)}
-          <div class="bg-[#1a1a2e] border border-amber-500/20 rounded-2xl p-4 flex items-center gap-4">
-            <!-- Icon -->
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl shrink-0">
-              {alertIcon(alert.type)}
-            </div>
 
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-white font-medium">{alertTypeLabel(alert.type)}</span>
-                {#if alert.catName}
-                  <span class="text-xs px-2 py-0.5 rounded-full bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/30">
-                    {alert.catName}
-                  </span>
-                {/if}
-              </div>
-              <p class="text-slate-500 text-xs mt-0.5">{timeSince(alert.triggeredAt)}</p>
-            </div>
+      {@const rows = activeTab === 'active' ? activeAlerts : acknowledgedAlerts}
 
-            <!-- Acknowledge button -->
-            <button
-              class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#7c3aed]/20 hover:bg-[#7c3aed]/40 text-[#a78bfa] border border-[#7c3aed]/40 transition-colors duration-150"
-              onclick={() => acknowledge(alert.alertId)}
-            >
-              Acknowledge
-            </button>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  {/if}
-
-  <!-- History tab -->
-  {#if activeTab === 'history'}
-    {#if acknowledgedAlerts.length === 0}
-      <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
-        <span class="text-5xl">✅</span>
-        <div>
-          <h2 class="text-white font-semibold text-lg">No alert history</h2>
-          <p class="text-slate-500 text-sm mt-1">Acknowledged alerts will appear here</p>
+      {#if rows.length === 0}
+        <!-- Empty state -->
+        <div class="flex flex-col items-center justify-center py-20 px-6 text-center gap-2">
+          <p class="text-[15px] font-semibold text-[#F8FAFC]">{m.alert_empty_title()}</p>
+          <p class="text-[13px] text-[#94A3B8] max-w-xs">{m.alert_empty_desc()}</p>
         </div>
-      </div>
-    {:else}
-      <div class="flex flex-col gap-3">
-        {#each acknowledgedAlerts as alert (alert.alertId)}
-          <div class="bg-[#1a1a2e] border border-white/5 rounded-2xl p-4 flex items-center gap-4 opacity-60">
-            <!-- Icon -->
-            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-xl shrink-0">
-              {alertIcon(alert.type)}
-            </div>
 
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-slate-300 font-medium">{alertTypeLabel(alert.type)}</span>
-                {#if alert.catName}
-                  <span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/10">
-                    {alert.catName}
+      {:else}
+        <table class="w-full text-[13px]">
+          <thead>
+            <tr class="border-b border-[#2D2D4A]">
+              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_type()}</th>
+              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_cat()}</th>
+              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_triggered()}</th>
+              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_status()}</th>
+              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_action()}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each rows as alert (alert.alertId)}
+              {@const badge = typeBadgeStyle(alert.type)}
+              <tr class="border-b border-[#2D2D4A] last:border-0 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+
+                <!-- Type badge -->
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full"
+                    style="background:{badge.bg}; color:{badge.text}; border:1px solid {badge.border}"
+                  >
+                    {alertTypeLabel(alert.type)}
                   </span>
-                {/if}
-              </div>
-              <p class="text-slate-600 text-xs mt-0.5">
-                Triggered {timeSince(alert.triggeredAt)}
-                {#if alert.acknowledgedAt}
-                  · Acknowledged {formatDateTime(alert.acknowledgedAt)}
-                {/if}
-              </p>
-            </div>
+                </td>
 
-            <!-- Acknowledged badge -->
-            <span class="shrink-0 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-              Acknowledged
-            </span>
-          </div>
-        {/each}
-      </div>
+                <!-- Cat -->
+                <td class="px-4 py-3 text-[#F8FAFC]">
+                  {alert.catName ?? '—'}
+                </td>
+
+                <!-- Triggered -->
+                <td class="px-4 py-3 text-[#94A3B8]">
+                  {timeSince(alert.triggeredAt)}
+                </td>
+
+                <!-- Status -->
+                <td class="px-4 py-3">
+                  {#if alert.status === 'acknowledged'}
+                    <span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      {m.alert_acknowledged()}
+                    </span>
+                  {:else}
+                    <span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                      {m.alert_active()}
+                    </span>
+                  {/if}
+                </td>
+
+                <!-- Action -->
+                <td class="px-4 py-3">
+                  {#if alert.status !== 'acknowledged'}
+                    <button
+                      type="button"
+                      class="text-[12px] font-medium px-3 py-1.5 rounded-[6px] border border-[#2D2D4A] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[rgba(124,58,237,0.4)] hover:bg-[rgba(124,58,237,0.08)] transition-all duration-150"
+                      onclick={() => acknowledge(alert.alertId)}
+                    >
+                      {m.alert_dismiss()}
+                    </button>
+                  {:else}
+                    <span class="text-[#2D2D4A] text-[12px]">—</span>
+                  {/if}
+                </td>
+
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+
     {/if}
-  {/if}
+  </div>
+
 </div>

@@ -1,17 +1,20 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
   import { page } from '$app/state';
   import './layout.css';
   import favicon from '$lib/assets/favicon.svg';
   import * as m from '$lib/paraglide/messages';
+  import { applyPalette, getSavedPalette } from '$lib/palette';
 
   let { children } = $props();
 
-  const navLinks = [
-    { href: '/', label: m.nav_dashboard },
-    { href: '/cats', label: m.nav_my_cats },
-    { href: '/alerts', label: m.nav_alerts },
-    { href: '/settings', label: m.nav_settings },
-  ];
+  const navLinks = $derived([
+    { href: '/', label: m.nav_dashboard() },
+    { href: '/cats', label: m.nav_my_cats() },
+    { href: '/alerts', label: m.nav_alerts() },
+    { href: '/settings', label: m.nav_settings() },
+  ]);
 
   function isActive(href: string): boolean {
     const pathname = page.url.pathname;
@@ -22,6 +25,11 @@
   const isAuthPage = $derived(
     page.url.pathname === '/login' || page.url.pathname === '/register'
   );
+
+  onMount(() => {
+    if (!browser) return;
+    applyPalette(getSavedPalette());
+  });
 
   async function logout() {
     await fetch('/api/v1/auth/logout', { method: 'POST' });
@@ -85,7 +93,7 @@
                 <line x1="17" y1="16" x2="23" y2="16"/>
               {/if}
             </svg>
-            {link.label()}
+            {link.label}
           </a>
         {/each}
       </nav>
@@ -150,7 +158,7 @@
               <line x1="17" y1="16" x2="23" y2="16"/>
             {/if}
           </svg>
-          {link.label()}
+          {link.label}
         </a>
       {/each}
     </nav>
