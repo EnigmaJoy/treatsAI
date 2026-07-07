@@ -7,6 +7,7 @@
   let { data } = $props();
 
   const cat = $derived<Cat | null>(data.cat);
+  const photoUrl = $derived<string | null>(data.photoUrl ?? null);
   const weight = $derived<{ entries?: WeightEntry[] } | null>(data.weight);
   const events = $derived<FeedingEvent[]>(data.events);
 
@@ -104,7 +105,15 @@
       </a>
       <div class="flex items-start justify-between gap-4">
         <div class="flex items-center gap-4">
-          <div class="text-5xl">🐱</div>
+          {#if photoUrl}
+            <img
+              src={photoUrl}
+              alt={cat.name}
+              style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #7C3AED;"
+            />
+          {:else}
+            <div class="text-5xl">🐱</div>
+          {/if}
           <div>
             <h1 class="text-2xl font-bold text-white">{cat.name}</h1>
             <p class="text-slate-400 text-sm mt-0.5">
