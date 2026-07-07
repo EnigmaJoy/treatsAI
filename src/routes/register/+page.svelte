@@ -73,6 +73,8 @@
       if (!catName.trim())        { error = 'Cat name is required'; return; }
       const w = parseFloat(catCurrentWeight);
       if (!w || w < 0.5 || w > 20) { error = 'Please enter a valid weight (0.5 – 20 kg)'; return; }
+    } else if (currentStep === 3) {
+      if (uploadedPhotos.length < 3) { error = 'Please upload at least 3 photos'; return; }
     }
     currentStep++;
   }
@@ -131,6 +133,18 @@
         })
       });
 
+      // 5. Upload photos if any
+      if (uploadedPhotos.length > 0) {
+        const formData = new FormData();
+        for (const file of uploadedPhotos) {
+          formData.append('photos', file);
+        }
+        await fetch(`/api/v1/cats/${catId}/photos`, {
+          method: 'POST',
+          body: formData
+        });
+      }
+
       goto('/');
     } catch {
       error = 'Network error. Please try again.';
@@ -141,12 +155,29 @@
 
   function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter') {
-      if (currentStep < 3) goToNext();
+      if (currentStep < 4) goToNext();
       else handleFinish();
     }
   }
 
-  const stepLabels = ['Account', 'Your cat', 'Schedule'];
+  // ── Step 3: Photos ──
+  let uploadedPhotos = $state<File[]>([]);
+  let photoFileInput: HTMLInputElement;
+
+  const visiblePhotoSlots = $derived(Math.min(10, Math.max(uploadedPhotos.length + 2, 5)));
+  const photoGridSlots    = $derived(Array.from({ length: visiblePhotoSlots }, (_, i) => i));
+
+  function handleFileSelect(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (!input.files) return;
+    const newFiles = Array.from(input.files).filter(f =>
+      (f.type === 'image/jpeg' || f.type === 'image/png') && f.size <= 15 * 1024 * 1024
+    );
+    uploadedPhotos = [...uploadedPhotos, ...newFiles].slice(0, 10);
+    input.value = '';
+  }
+
+  const stepLabels = ['Account', 'Your cat', 'Photos', 'Schedule'];
 </script>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -161,7 +192,7 @@
 
   <!-- ── Progress bar ── -->
   <div class="mb-8 flex items-center">
-    {#each [1, 2, 3] as stepNum, i}
+    {#each [1, 2, 3, 4] as stepNum, i}
       <!-- Step circle + label -->
       <div class="flex flex-col items-center">
         <div
@@ -181,7 +212,7 @@
         </span>
       </div>
       <!-- Connector line -->
-      {#if i < 2}
+      {#if i < 3}
         <div class="w-[60px] h-0.5 mb-5 transition-colors duration-200"
           style="background:{currentStep > stepNum ? '#7C3AED' : '#2D2D4A'}"></div>
       {/if}
@@ -475,6 +506,99 @@
 
     <!-- ════════════════════ STEP 3 ════════════════════ -->
     {#if currentStep === 3}
+      <h2 style="font-size:20px;font-weight:700;color:#F8FAFC;" class="mb-1">Train face recognition</h2>
+      <p style="font-size:13px;color:#94A3B8;" class="mb-5">
+        Upload 3 to 10 clear photos of your cat's face. These train the AI to recognize your cat at the feeder.
+      </p>
+
+      <!-- Tip box -->
+      <div class="rounded-xl p-3 mb-4" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);">
+        <div class="flex items-center gap-2 mb-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+          </svg>
+          <p class="text-[13px] font-semibold" style="color:#7C3AED;">Photo tips for best results</p>
+        </div>
+        <p class="text-[12px] text-[#94A3B8] leading-relaxed">
+          Good lighting, front-facing, one cat per photo. JPEG or PNG only (max 15MB each). iPhone users: convert HEIC to JPEG before uploading.
+        </p>
+      </div>
+
+      <!-- Upload area -->
+      <button
+        type="button"
+        onclick={() => photoFileInput.click()}
+        class="w-full border-2 border-dashed border-[#2D2D4A] hover:border-[#7C3AED] rounded-xl p-8 text-center cursor-pointer mb-4 transition-colors bg-transparent"
+      >
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2D2D4A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3" aria-hidden="true">
+          <polyline points="16 16 12 12 8 16"/>
+          <line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
+        <p class="text-[13px] font-semibold text-[#F8FAFC] mb-1">Drop photos here or click to browse</p>
+        <p class="text-sm text-[#94A3B8]">JPEG, PNG only · max 15MB per photo</p>
+      </button>
+      <input
+        bind:this={photoFileInput}
+        type="file"
+        accept="image/jpeg,image/png"
+        multiple
+        class="hidden"
+        onchange={handleFileSelect}
+      />
+
+      <!-- Photo grid -->
+      <div class="grid grid-cols-5 gap-2 mb-3">
+        {#each photoGridSlots as idx (idx)}
+          {#if idx < uploadedPhotos.length}
+            <div class="aspect-square rounded-lg bg-[#0F0F1A] border border-[#7C3AED] flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </div>
+          {:else}
+            <div class="aspect-square rounded-lg bg-[#0F0F1A] border border-[#2D2D4A] flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </div>
+          {/if}
+        {/each}
+      </div>
+
+      <!-- Photo count -->
+      <p class="text-[12px] mb-4" style="color:{uploadedPhotos.length >= 3 ? '#7C3AED' : '#F59E0B'}">
+        {uploadedPhotos.length} of 10 photos uploaded · minimum 3 required
+      </p>
+
+      <!-- Rekognition training status -->
+      <div class="rounded-xl p-3 bg-[#0F0F1A]">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[12px] text-[#94A3B8]">Rekognition training</span>
+          {#if uploadedPhotos.length >= 3}
+            <span class="text-[12px] font-medium" style="color:#10B981;">Ready</span>
+          {:else}
+            <span class="text-[12px] font-medium" style="color:#F59E0B;">
+              Needs {3 - uploadedPhotos.length} more {3 - uploadedPhotos.length === 1 ? 'photo' : 'photos'}
+            </span>
+          {/if}
+        </div>
+        <div class="w-full rounded-full h-1.5 mb-2" style="background:#2D2D4A;">
+          <div
+            class="h-1.5 rounded-full transition-all duration-300"
+            style="width:{uploadedPhotos.length >= 3 ? 100 : Math.round(uploadedPhotos.length / 3 * 100)}%;background:{uploadedPhotos.length >= 3 ? '#10B981' : '#F59E0B'};"
+          ></div>
+        </div>
+        <p class="text-[11px] text-[#94A3B8]">
+          {uploadedPhotos.length} face embedding{uploadedPhotos.length !== 1 ? 's' : ''} indexed in AWS Rekognition
+        </p>
+      </div>
+    {/if}
+
+    <!-- ════════════════════ STEP 4 ════════════════════ -->
+    {#if currentStep === 4}
       <h2 style="font-size:20px;font-weight:700;color:#F8FAFC;" class="mb-1">
         Set up {catName || 'your cat'}'s feeding schedule
       </h2>
@@ -614,13 +738,24 @@
       {/if}
 
       <!-- Step counter -->
-      <span class="text-[12px] text-[#94A3B8]">Step {currentStep} of 3</span>
+      <span class="text-[12px] text-[#94A3B8]">Step {currentStep} of 4</span>
 
       <!-- Next or Finish -->
-      {#if currentStep < 3}
+      {#if currentStep === 1}
         <button type="button" onclick={goToNext}
           class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
-          {currentStep === 1 ? 'Next – Your cat' : 'Next – Schedule'} <span aria-hidden="true">→</span>
+          Next – Your cat <span aria-hidden="true">→</span>
+        </button>
+      {:else if currentStep === 2}
+        <button type="button" onclick={goToNext}
+          class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
+          Next – Photos <span aria-hidden="true">→</span>
+        </button>
+      {:else if currentStep === 3}
+        <button type="button" onclick={goToNext}
+          disabled={uploadedPhotos.length < 3}
+          class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          Next – Schedule <span aria-hidden="true">→</span>
         </button>
       {:else}
         <button type="button" onclick={handleFinish} disabled={loading}
