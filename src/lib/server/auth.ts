@@ -1,9 +1,9 @@
-import { mockSessions } from '$lib/server/aws/mock';
+import { getSessionByToken, deleteSessionByToken } from '$lib/server/db/sessions';
 
 export async function getAuthenticatedUser(
     request: Request
 ): Promise<{ userId: string; householdId: string; sessionToken: string } | null> {
-    // 1. Try Authorization header first: "Bearer <token>"
+    // Try Authorization header first: "Bearer <token>"
     const authHeader = request.headers.get('Authorization');
     const token = authHeader?.startsWith('Bearer ')
         ? authHeader.slice(7)
@@ -11,12 +11,12 @@ export async function getAuthenticatedUser(
 
     if (!token) return null;
 
-    const session = await mockSessions.findByToken(token);
+    // Look up session in DynamoDB so auth survives dev server restarts
+    const session = await getSessionByToken(token);
     if (!session) return null;
 
-    // Check expiry
     if (new Date(session.expiresAt) < new Date()) {
-        await mockSessions.deleteByToken(token);
+        await deleteSessionByToken(token);
         return null;
     }
 

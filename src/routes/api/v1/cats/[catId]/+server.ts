@@ -64,6 +64,26 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
 
         const updates: Partial<typeof cat> = {};
 
+        if ('breed' in body) {
+            if (body.breed !== undefined && body.breed !== null && typeof body.breed !== 'string') {
+                return json(
+                    { success: false, error: { code: 'VALIDATION_ERROR', message: 'breed must be a string' } },
+                    { status: 422 }
+                );
+            }
+            updates.breed = (body.breed as string | undefined) ?? undefined;
+        }
+
+        if ('dateOfBirth' in body) {
+            if (body.dateOfBirth !== undefined && body.dateOfBirth !== null && typeof body.dateOfBirth !== 'string') {
+                return json(
+                    { success: false, error: { code: 'VALIDATION_ERROR', message: 'dateOfBirth must be a string' } },
+                    { status: 422 }
+                );
+            }
+            updates.dateOfBirth = (body.dateOfBirth as string | undefined) ?? undefined;
+        }
+
         if ('name' in body) {
             if (typeof body.name !== 'string' || body.name.trim() === '') {
                 return json(

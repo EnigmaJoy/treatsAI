@@ -136,10 +136,15 @@
         for (const file of uploadedPhotos) {
           formData.append('photos', file);
         }
-        await fetch(`/api/v1/cats/${catId}/photos`, {
+        const photoUploadRes = await fetch(`/api/v1/cats/${catId}/photos`, {
           method: 'POST',
           body: formData
         });
+        if (!photoUploadRes.ok) {
+          const photoErr = await photoUploadRes.json().catch(() => null);
+          error = photoErr?.error?.message ?? 'Photo upload failed. Your account was created - please add photos from the cat profile.';
+          return;
+        }
       }
 
       goto('/');

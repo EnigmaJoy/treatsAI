@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import bcrypt from 'bcryptjs';
-import { mockUsers, mockSessions } from '$lib/server/aws/mock';
+import { mockUsers } from '$lib/server/aws/mock';
+import { putSession } from '$lib/server/db/sessions';
 
 export async function POST({ request }: { request: Request }) {
     try {
@@ -68,8 +69,8 @@ export async function POST({ request }: { request: Request }) {
             now.getTime() + (shouldRemember ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000)
         ).toISOString();
 
-        // Create session
-        await mockSessions.create({
+        // Write session to DynamoDB so it survives dev server restarts
+        await putSession({
             sessionId: crypto.randomUUID(),
             userId: user.userId,
             householdId: user.householdId,

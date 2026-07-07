@@ -36,6 +36,9 @@ interface Session {
 
 const mockFaceCollection: Record<string, string[]> = {};
 
+// Stores uploaded file bytes keyed by S3 key so the mock serving route can return them
+const mockS3FileStore = new Map<string, { contentType: string; data: Uint8Array }>();
+
 const mockFeedingEventsStore: FeedingEvent[] = [];
 const mockUsersStore: User[] = [];
 const mockHouseholdsStore: Household[] = [];
@@ -161,14 +164,21 @@ export const mockDB = {
 // ---------------------------------------------------------------------------
 
 export const mockS3 = {
-    // Simulate uploading a photo - returns a fake S3 key
-    uploadPhoto: async (catId: string, fileName: string) => {
-        return `cats/${catId}/${fileName}`;
+    // Store the file bytes and return an S3 key
+    uploadPhoto: async (catId: string, fileName: string, data: Uint8Array, contentType: string) => {
+        const s3Key = `cats/${catId}/${fileName}`;
+        mockS3FileStore.set(s3Key, { contentType, data });
+        return s3Key;
     },
 
-    // Simulate generating a pre-signed URL for a photo
+    // Return a local serving path instead of a fake external hostname
     getPresignedUrl: async (s3Key: string) => {
-        return `https://mock-s3.treatsai.local/${s3Key}`;
+        return `/api/mock-s3/${encodeURIComponent(s3Key)}`;
+    },
+
+    // Read stored file content for the serving route
+    getFile: (s3Key: string): { contentType: string; data: Uint8Array } | null => {
+        return mockS3FileStore.get(s3Key) ?? null;
     }
 };
 

@@ -5,11 +5,14 @@ import { getTextDirection } from '$lib/paraglide/runtime';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { getAuthenticatedUser } from '$lib/server/auth';
 
-// Routes that require a valid session
-const PROTECTED_ROUTES = ['/', '/cats', '/alerts', '/settings'];
+// Only these UI routes require an authenticated session.
+// API routes (/api/*) are excluded: each route handler calls getAuthenticatedUser itself
+// and returns a structured 401 JSON response rather than an HTML redirect.
+// Static assets (/_app/*, /favicon.*) and auth pages (/login, /register) are also excluded.
+const PROTECTED_UI_ROUTES = ['/', '/cats', '/alerts', '/settings'];
 
-function isProtectedRoute(pathname: string): boolean {
-    return PROTECTED_ROUTES.some((route) => {
+function isProtectedUiRoute(pathname: string): boolean {
+    return PROTECTED_UI_ROUTES.some((route) => {
         if (route === '/') return pathname === '/';
         return pathname === route || pathname.startsWith(route + '/');
     });
@@ -18,17 +21,20 @@ function isProtectedRoute(pathname: string): boolean {
 const handleAuth: Handle = async ({ event, resolve }) => {
     const { pathname } = event.url;
 
-    // Redirect direct GET navigation to the logout URL back to the dashboard.
-    // Logout is POST-only; arriving here via the address bar is always a mistake.
-    if (pathname === '/api/v1/auth/logout' && event.request.method === 'GET') {
-        throw redirect(302, '/');
+    // Pass through everything that is not a protected UI page without touching auth.
+    // This covers: /api/*, /_app/*, /login, /register, static files, etc.
+    if (!isProtectedUiRoute(pathname)) {
+        // Redirect direct GET navigation to the logout URL to the dashboard.
+        // Logout is POST-only; typing it in the address bar is always a mistake.
+        if (pathname === '/api/v1/auth/logout' && event.request.method === 'GET') {
+            throw redirect(302, '/');
+        }
+        return resolve(event);
     }
 
-    if (isProtectedRoute(pathname)) {
-        const user = await getAuthenticatedUser(event.request);
-        if (!user) {
-            throw redirect(302, '/login');
-        }
+    const user = await getAuthenticatedUser(event.request);
+    if (!user) {
+        throw redirect(302, '/login');
     }
 
     return resolve(event);

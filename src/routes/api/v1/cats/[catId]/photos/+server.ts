@@ -70,7 +70,13 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
         const s3Keys: string[] = [];
         for (const photo of photos) {
-            const s3Key = await mockS3.uploadPhoto(params.catId, photo.name);
+            const buffer = await photo.arrayBuffer();
+            const s3Key = await mockS3.uploadPhoto(
+                params.catId,
+                photo.name,
+                new Uint8Array(buffer),
+                photo.type
+            );
             s3Keys.push(s3Key);
         }
 
