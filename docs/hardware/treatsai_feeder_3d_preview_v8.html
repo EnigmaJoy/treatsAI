@@ -1,0 +1,136 @@
+<h2 class="sr-only">Anteprima 3D del feeder TreatsAI, ruotabile con il mouse, con selettore colore</h2>
+<div style="display:flex;gap:8px;margin-bottom:10px;">
+  <button id="btn-white" style="padding:6px 14px;">Arctic white</button>
+  <button id="btn-black" style="padding:6px 14px;">Midnight black</button>
+</div>
+<div id="viewer-root" style="width:100%;height:420px;position:relative;background:var(--surface-1);border-radius:12px;overflow:hidden;">
+  <div id="canvas-host" style="width:100%;height:100%;"></div>
+</div>
+<p style="font-size:13px;color:var(--text-muted);margin-top:8px;">Trascina per ruotare, scroll per zoom.</p>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function() {
+  var host = document.getElementById('canvas-host');
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(45, host.clientWidth / host.clientHeight, 1, 5000);
+  camera.position.set(0, 220, 500);
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(host.clientWidth, host.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  host.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x888888, 1.1));
+  var dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  dir.position.set(200, 500, 300);
+  scene.add(dir);
+  var fill = new THREE.DirectionalLight(0xffffff, 0.4);
+  fill.position.set(-200, 100, -200);
+  scene.add(fill);
+
+  var controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 150, 0);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 150;
+  controls.maxDistance = 900;
+  controls.update();
+
+  var group = new THREE.Group();
+  var bodyParts = [];
+
+  function bodyMaterial(color) {
+    return new THREE.MeshStandardMaterial({ color: color, roughness: 0.35, metalness: 0.05 });
+  }
+
+  var bodyBottom = 6;
+  var bodyHeight = 208;
+
+  var basePad = new THREE.Mesh(
+    new THREE.CylinderGeometry(104, 104, 6, 48),
+    new THREE.MeshStandardMaterial({ color: 0x0f0f0f, roughness: 0.9 })
+  );
+  basePad.position.y = 3;
+  group.add(basePad);
+
+  var bodyLower = new THREE.Mesh(new THREE.CylinderGeometry(110, 110, bodyHeight, 48), bodyMaterial(0xf0f0ee));
+  bodyLower.position.y = bodyBottom + bodyHeight / 2;
+  group.add(bodyLower); bodyParts.push(bodyLower);
+
+  var bodyTop = bodyBottom + bodyHeight;
+
+  var reservoir = new THREE.Mesh(new THREE.CylinderGeometry(96, 100, 112, 48), bodyMaterial(0xf0f0ee));
+  reservoir.position.y = bodyTop + 56;
+  group.add(reservoir); bodyParts.push(reservoir);
+
+  var lid = new THREE.Mesh(new THREE.CylinderGeometry(98, 98, 18, 48), bodyMaterial(0xf5f5f3));
+  lid.position.y = bodyTop + 112 + 9;
+  group.add(lid); bodyParts.push(lid);
+
+  var lidTop = new THREE.Mesh(new THREE.SphereGeometry(98, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2), bodyMaterial(0xf5f5f3));
+  lidTop.scale.y = 0.18;
+  lidTop.position.y = bodyTop + 112 + 18;
+  group.add(lidTop); bodyParts.push(lidTop);
+
+  var ledRing = new THREE.Mesh(
+    new THREE.TorusGeometry(110, 4, 16, 64),
+    new THREE.MeshStandardMaterial({ color: 0x8b5cf6, emissive: 0x8b5cf6, emissiveIntensity: 1.1 })
+  );
+  ledRing.rotation.x = Math.PI / 2;
+  ledRing.position.y = bodyBottom + 130;
+  group.add(ledRing);
+
+  var camLens = new THREE.Mesh(
+    new THREE.CylinderGeometry(20, 20, 10, 32),
+    new THREE.MeshStandardMaterial({ color: 0x18181a, roughness: 0.15, metalness: 0.4 })
+  );
+  camLens.rotation.x = Math.PI / 2;
+  camLens.position.set(0, bodyBottom + 60, 105);
+  group.add(camLens);
+  var camGlint = new THREE.Mesh(
+    new THREE.SphereGeometry(6, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0x555, roughness: 0.1, metalness: 0.6 })
+  );
+  camGlint.position.set(-4, bodyBottom + 64, 111);
+  group.add(camGlint);
+
+  // Ciotola: vassoio separato che sporge davanti, non intorno al corpo
+  var bowlProfile = [
+    new THREE.Vector2(0, 0),
+    new THREE.Vector2(60, 0),
+    new THREE.Vector2(90, 16),
+    new THREE.Vector2(78, 18),
+    new THREE.Vector2(24, 7),
+    new THREE.Vector2(0, 5)
+  ];
+  var bowl = new THREE.Mesh(
+    new THREE.LatheGeometry(bowlProfile, 48),
+    new THREE.MeshStandardMaterial({ color: 0x5a5a5e, roughness: 0.5, metalness: 0.15, side: THREE.DoubleSide })
+  );
+  bowl.position.set(0, 0, 135);
+  group.add(bowl);
+
+  scene.add(group);
+
+  function setColor(hex) {
+    bodyParts.forEach(function(m) { m.material.color.setHex(hex); });
+  }
+  document.getElementById('btn-white').addEventListener('click', function() { setColor(0xf0f0ee); });
+  document.getElementById('btn-black').addEventListener('click', function() { setColor(0x1c1c1e); });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', function() {
+    camera.aspect = host.clientWidth / host.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(host.clientWidth, host.clientHeight);
+  });
+})();
+</script>
