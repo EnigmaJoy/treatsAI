@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import { getSchedule, updateSchedule, deleteSchedule } from '$lib/server/db/schedules';
-import { getTemporalClient } from '$lib/server/temporal/client';
+import { getTemporalClient } from '$lib/server/temporal/temporal/client';
 import type { FeedingTime, ScheduleStatus } from '$lib/types';
 
 const VALID_STATUSES: ScheduleStatus[] = ['active', 'paused'];

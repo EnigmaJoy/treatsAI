@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import { getCat } from '$lib/server/db/cats';
 import { saveSchedule, listSchedules } from '$lib/server/db/schedules';
-import { getTemporalClient, TASK_QUEUE } from '$lib/server/temporal/client';
+import { getTemporalClient, TASK_QUEUE } from '$lib/server/temporal/temporal/client';
 import type { FeedingTime } from '$lib/types';
 
 // ---------------------------------------------------------------------------
