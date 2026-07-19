@@ -126,10 +126,10 @@
   );
 </script>
 
-<!-- ── Scrollable content ── -->
+<!-- Scrollable content -->
 <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5 pb-20 md:pb-6">
 
-  <!-- ── Page header ── -->
+  <!-- Page header -->
   <div>
     <div class="flex items-center gap-2.5">
       <h1 class="text-[18px] font-bold text-[#F8FAFC]">{m.dashboard_title()}</h1>
