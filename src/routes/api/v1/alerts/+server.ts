@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { mockAlerts } from '$lib/server/aws/mock';
+import { listAlerts } from '$lib/server/db/alerts';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import type { AlertStatus } from '$lib/types';
 
@@ -22,7 +22,7 @@ export async function GET({ request, url }: { request: Request; url: URL }) {
             ? (statusParam as AlertStatus)
             : undefined;
 
-        const allAlerts = await mockAlerts.findAllByHouseholdId(auth.householdId, statusFilter);
+        const allAlerts = await listAlerts(auth.householdId, statusFilter);
         const alerts = allAlerts.slice(0, limit).map((a) => ({
             alertId: a.alertId,
             catId: a.catId,
@@ -34,7 +34,8 @@ export async function GET({ request, url }: { request: Request; url: URL }) {
         }));
 
         return json({ success: true, data: { alerts } }, { status: 200 });
-    } catch {
+    } catch (err) {
+        console.error('[GET /api/v1/alerts] unhandled error:', err);
         return json(
             { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } },
             { status: 500 }

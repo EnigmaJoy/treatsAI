@@ -1,7 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats, mockDB, mockSchedules } from '$lib/server/aws/mock';
+import { getCat } from '$lib/server/db/cats';
+import { getSchedule } from '$lib/server/db/schedules';
+import { saveFeedingEvent } from '$lib/server/db/feeding-events';
 import { broadcastSSE } from '$lib/server/sse';
 
 // ---------------------------------------------------------------------------
@@ -18,7 +20,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -44,7 +46,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
         }
 
         const scheduleId = body.scheduleId;
-        const schedule = await mockSchedules.findByScheduleId(scheduleId);
+        const schedule = await getSchedule(scheduleId);
         if (!schedule || schedule.catId !== params.catId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Schedule not found' } },
@@ -75,7 +77,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
             manualOverride: true
         };
 
-        await mockDB.putFeedingEvent(event);
+        await saveFeedingEvent(event);
 
         broadcastSSE('feeding_event', {
             eventId,

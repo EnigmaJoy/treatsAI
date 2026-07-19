@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import { browser } from '$app/environment';
   import DashboardFeedingChart from '$lib/components/DashboardFeedingChart.svelte';
+  import PawLoader from '$lib/components/PawLoader.svelte';
   import AlertBanner from '$lib/components/AlertBanner.svelte';
   import DevicePanel from '$lib/components/DevicePanel.svelte';
   import type { FeedingEvent, Alert, Device } from '$lib/types';
@@ -8,6 +10,7 @@
 
   let { data } = $props();
   let events = $state<FeedingEvent[]>([]);
+  let loadingEvents = $state(data.cats.length > 0);
   // Seed mutable state from load data; SSE updates these reactively
   let alerts = $state<Alert[]>([]);
   let device = $state<Device | null>(null);
@@ -53,6 +56,7 @@
       const j = await r.json();
       events = j.data?.events ?? [];
     }
+    loadingEvents = false;
   }
 
   async function manualDispense(catId: string) {
@@ -160,28 +164,28 @@
           <span class="text-[13px] font-bold text-[#F8FAFC]">{todayDispensed}/{todayMealTotal || 0}</span>
         </div>
       </div>
-      <p class="text-[11px] text-[#94A3B8]">{progressPct}% done</p>
+      <p class="text-[11px] text-[#94A3B8]">{progressPct}% {m.dashboard_done()}</p>
     </div>
 
     <!-- Card 2: Dispensed -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
       <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_dispensed()}</p>
       <p class="text-[32px] font-bold leading-none" style="color: #10B981">{todayDispensed}</p>
-      <p class="text-[11px] text-[#94A3B8] mt-2">On schedule</p>
+      <p class="text-[11px] text-[#94A3B8] mt-2">{m.dashboard_on_schedule()}</p>
     </div>
 
     <!-- Card 3: Skipped -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
       <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_skipped()}</p>
       <p class="text-[32px] font-bold leading-none" style="color: #F59E0B">{todaySkipped}</p>
-      <p class="text-[11px] text-[#94A3B8] mt-2">{todaySkipped > 0 ? 'Meals missed today' : 'None today'}</p>
+      <p class="text-[11px] text-[#94A3B8] mt-2">{todaySkipped > 0 ? m.dashboard_meals_missed() : m.dashboard_none_today()}</p>
     </div>
 
     <!-- Card 4: Rejected -->
     <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
       <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_rejected()}</p>
       <p class="text-[32px] font-bold leading-none text-[#94A3B8]">{todayRejected}</p>
-      <p class="text-[11px] text-[#94A3B8] mt-2">{todayRejected === 0 ? 'All clear' : 'Needs attention'}</p>
+      <p class="text-[11px] text-[#94A3B8] mt-2">{todayRejected === 0 ? m.dashboard_all_clear() : m.dashboard_needs_attention()}</p>
     </div>
   </div>
 
@@ -219,29 +223,29 @@
             <span
               class="inline-block text-[11px] font-medium text-[#10B981] rounded-full px-2 py-0.5 mt-0.5"
               style="background: rgba(16,185,129,0.15)"
-            >Feeder online</span>
+            >{m.settings_feeder_online()}</span>
           </div>
         </div>
 
         <!-- 2×2 stat grid -->
         <div class="grid grid-cols-2 gap-2">
           <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Last fed</p>
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_last_fed()}</p>
             <p class="text-[13px] font-medium text-[#F8FAFC] truncate">
               {lastFedEvent ? formatTime(lastFedEvent.timestamp) : '—'}
             </p>
           </div>
           <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Next feeding</p>
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_next_feeding()}</p>
             <p class="text-[13px] font-medium text-[#F8FAFC]">—</p>
           </div>
           <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Weight goal</p>
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_weight_goal()}</p>
             <p class="text-[13px] font-medium text-[#F8FAFC] capitalize">{cat.weightGoal.replace('_', ' ')}</p>
           </div>
           <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">Consumption</p>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">{cat.consumptionBaseline}% baseline</p>
+            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_consumption()}</p>
+            <p class="text-[13px] font-medium text-[#F8FAFC]">{cat.consumptionBaseline}% {m.dashboard_baseline()}</p>
           </div>
         </div>
 
@@ -252,15 +256,15 @@
           onclick={() => manualDispense(cat.catId)}
           class="w-full text-white font-semibold rounded-[8px] py-[10px] text-[13px] bg-[#7C3AED] hover:bg-[#8B5CF6] disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-auto"
         >
-          {dispensing ? 'Dispensing…' : 'Manual Dispense'}
+          {dispensing ? m.dashboard_dispensing() : m.dashboard_manual_dispense()}
         </button>
       </div>
     {:else}
       <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
         <span class="text-3xl" aria-hidden="true">🐱</span>
-        <p class="text-[13px]">No cats added yet</p>
+        <p class="text-[13px]">{m.dashboard_no_cats()}</p>
         <a href="/cats/new" class="text-[13px] font-medium text-[#7C3AED] hover:text-[#8B5CF6] transition-colors">
-          Add a cat →
+          {m.dashboard_add_cat()} →
         </a>
       </div>
     {/if}
@@ -279,7 +283,7 @@
     {:else}
       <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
         <span class="text-3xl" aria-hidden="true">📡</span>
-        <p class="text-[13px]">No device found</p>
+        <p class="text-[13px]">{m.dashboard_no_device()}</p>
       </div>
     {/if}
   </div>
@@ -288,7 +292,7 @@
   <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5">
     <!-- Header + custom legend -->
     <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-      <h2 class="text-[14px] font-semibold text-[#F8FAFC]">7-day feeding history</h2>
+      <h2 class="text-[14px] font-semibold text-[#F8FAFC]">{m.dashboard_7day_history()}</h2>
       <div class="flex items-center gap-4">
         <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
           <span class="w-2.5 h-2.5 rounded-sm bg-[#10B981] shrink-0"></span>{m.stats_dispensed()}
@@ -301,7 +305,11 @@
         </span>
       </div>
     </div>
-    <DashboardFeedingChart {events} />
+    {#if loadingEvents}
+      <PawLoader size={24} />
+    {:else if browser}
+      <DashboardFeedingChart {events} />
+    {/if}
   </div>
 
 </div>

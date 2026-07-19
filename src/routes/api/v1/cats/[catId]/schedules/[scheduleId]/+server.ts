@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockSchedules } from '$lib/server/aws/mock';
+import { getSchedule, updateSchedule, deleteSchedule } from '$lib/server/db/schedules';
 import { getTemporalClient } from '$lib/server/temporal/client';
 import type { FeedingTime, ScheduleStatus } from '$lib/types';
 
@@ -46,7 +46,7 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const schedule = await mockSchedules.findByScheduleId(params.scheduleId);
+        const schedule = await getSchedule(params.scheduleId);
         if (!schedule || schedule.householdId !== auth.householdId || schedule.catId !== params.catId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Schedule not found' } },
@@ -88,7 +88,7 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
         }
 
         const now = new Date().toISOString();
-        const updated = await mockSchedules.update(params.scheduleId, { ...updates, updatedAt: now });
+        const updated = await updateSchedule(params.scheduleId, { ...updates, updatedAt: now });
 
         if (!updated) {
             return json(
@@ -130,7 +130,7 @@ export const DELETE: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const schedule = await mockSchedules.findByScheduleId(params.scheduleId);
+        const schedule = await getSchedule(params.scheduleId);
         if (!schedule || schedule.householdId !== auth.householdId || schedule.catId !== params.catId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Schedule not found' } },
@@ -147,7 +147,7 @@ export const DELETE: RequestHandler = async ({ request, params }) => {
             console.warn('Could not cancel Temporal workflow');
         }
 
-        await mockSchedules.delete(params.scheduleId);
+        await deleteSchedule(params.scheduleId);
 
         return json(
             { success: true, data: { message: 'Schedule deleted and workflow cancelled successfully' } },

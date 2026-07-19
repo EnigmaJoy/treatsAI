@@ -132,10 +132,10 @@
   const navItems: { id: Section; label: string; active: boolean }[] = [
     { id: 'appearance',    label: m.settings_appearance(),   active: true },
     { id: 'feeder',        label: m.settings_feeder(),        active: true },
-    { id: 'notifications', label: 'Notifications', active: false },
-    { id: 'household',     label: 'Household',     active: false },
-    { id: 'security',      label: 'Security',      active: false },
-    { id: 'account',       label: 'Account',       active: false },
+    { id: 'notifications', label: m.settings_notifications(), active: false },
+    { id: 'household',     label: m.settings_household(),     active: false },
+    { id: 'security',      label: m.settings_security(),      active: false },
+    { id: 'account',       label: m.settings_account(),       active: false },
   ];
 
   const palettes = [
@@ -171,7 +171,7 @@
         >
           {item.label}
           {#if !item.active && activeSection !== item.id}
-            <span class="ml-auto text-[9px] text-[#94A3B8] bg-[#2D2D4A] rounded px-1 py-0.5 shrink-0">Soon</span>
+            <span class="ml-auto text-[9px] text-[#94A3B8] bg-[#2D2D4A] rounded px-1 py-0.5 shrink-0">{m.settings_soon()}</span>
           {/if}
         </button>
       {/each}
@@ -187,23 +187,23 @@
         <!-- Header -->
         <div>
           <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_appearance()}</h2>
-          <p class="text-[13px] text-[#94A3B8]">Personalise how TreatsAI looks</p>
+          <p class="text-[13px] text-[#94A3B8]">{m.settings_appearance_desc()}</p>
         </div>
 
         <!-- Theme row -->
         <div class="flex items-center justify-between gap-4">
           <div>
             <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_theme()}</p>
-            <p class="text-[12px] text-[#94A3B8] mt-0.5">Switch between dark and light mode</p>
+            <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.settings_theme_desc()}</p>
           </div>
           <select
             bind:value={selectedTheme}
             class="bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer shrink-0"
             style="min-width:130px;"
           >
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-            <option value="system">System</option>
+            <option value="dark">{m.settings_theme_dark()}</option>
+            <option value="light">{m.settings_theme_light()}</option>
+            <option value="system">{m.settings_theme_system()}</option>
           </select>
         </div>
 
@@ -214,7 +214,7 @@
         <div class="flex items-center justify-between gap-4">
           <div>
             <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_language()}</p>
-            <p class="text-[12px] text-[#94A3B8] mt-0.5">Choose your preferred language</p>
+            <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.settings_language_desc()}</p>
           </div>
           <div class="flex gap-1.5 shrink-0">
             {#each (['en', 'it', 'es'] as const) as lang}
@@ -238,7 +238,7 @@
         <!-- Colour palette -->
         <div>
           <p class="text-[13px] font-medium text-[#F8FAFC] mb-0.5">{m.settings_palette()}</p>
-          <p class="text-[12px] text-[#94A3B8] mb-4">Choose a palette that matches your household's personality</p>
+          <p class="text-[12px] text-[#94A3B8] mb-4">{m.settings_palette_desc()}</p>
 
           <div class="grid grid-cols-3 gap-3">
             {#each palettes as palette}
@@ -292,10 +292,10 @@
           </span>
           <div>
             <p class="text-[13px] font-medium text-[#F8FAFC]">
-              {device?.status === 'online' ? m.settings_feeder_online() : 'Feeder offline'}
+              {device?.status === 'online' ? m.settings_feeder_online() : m.settings_feeder_offline()}
             </p>
             <p class="text-[11px] text-[#94A3B8]">
-              Firmware v{device?.firmwareVersion ?? '—'}
+              {m.settings_firmware_v()}{device?.firmwareVersion ?? '—'}
             </p>
           </div>
         </div>
@@ -334,7 +334,7 @@
             disabled={feederSaving}
             class="bg-[#7C3AED] hover:bg-[#8B5CF6] disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-semibold transition-colors"
           >
-            {feederSaving ? 'Saving…' : m.settings_save_changes()}
+            {feederSaving ? m.common_saving() : m.settings_save_changes()}
           </button>
           <button
             type="button"
@@ -360,8 +360,8 @@
             <line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
         </div>
-        <p class="text-[14px] font-semibold text-[#F8FAFC]">Coming soon</p>
-        <p class="text-[12px] text-[#94A3B8]">This section is under construction for the hackathon.</p>
+        <p class="text-[14px] font-semibold text-[#F8FAFC]">{m.settings_coming_soon()}</p>
+        <p class="text-[12px] text-[#94A3B8]">{m.settings_coming_soon_desc()}</p>
       </div>
     {/if}
 

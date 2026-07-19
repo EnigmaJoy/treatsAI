@@ -1,6 +1,9 @@
 import { json } from '@sveltejs/kit';
 import bcrypt from 'bcryptjs';
-import { mockUsers, mockHouseholds, mockCats, mockSchedules } from '$lib/server/aws/mock';
+import { saveUser, getUserByEmail } from '$lib/server/db/users';
+import { saveHousehold } from '$lib/server/db/households';
+import { saveCat } from '$lib/server/db/cats';
+import { saveSchedule } from '$lib/server/db/schedules';
 import type { User, Household, Cat, Schedule, Language, WeightGoal } from '$lib/types';
 
 const VALID_LANGUAGES: Language[] = ['en', 'it', 'es'];
@@ -34,10 +37,8 @@ export async function POST({ request }: { request: Request }) {
             );
         }
 
-        // Destructure known fields - extra fields are ignored
         const { email, password, language, cat, schedule } = body as Record<string, unknown>;
 
-        // Validate email
         if (!email || typeof email !== 'string' || email.trim() === '') {
             return json(
                 { success: false, error: { code: 'VALIDATION_ERROR', message: 'Email is required' } },
@@ -45,57 +46,42 @@ export async function POST({ request }: { request: Request }) {
             );
         }
 
-        // Validate password
         if (!password || typeof password !== 'string' || password.length < 8) {
             return json(
-                {
-                    success: false,
-                    error: { code: 'VALIDATION_ERROR', message: 'Password must be at least 8 characters' }
-                },
+                { success: false, error: { code: 'VALIDATION_ERROR', message: 'Password must be at least 8 characters' } },
                 { status: 422 }
             );
         }
 
-        // Validate language
         if (!language || !VALID_LANGUAGES.includes(language as Language)) {
             return json(
-                {
-                    success: false,
-                    error: {
-                        code: 'VALIDATION_ERROR',
-                        message: "Language must be one of: 'en', 'it', 'es'"
-                    }
-                },
+                { success: false, error: { code: 'VALIDATION_ERROR', message: "Language must be one of: 'en', 'it', 'es'" } },
                 { status: 422 }
             );
         }
 
-        // Normalize email and check it's not already taken
         const normalizedEmail = (email as string).trim().toLowerCase();
-        const existingUser = await mockUsers.findByEmail(normalizedEmail);
+        const existingUser = await getUserByEmail(normalizedEmail);
         if (existingUser) {
             return json(
-                { success: false, error: { code: 'VALIDATION_ERROR', message: 'Email is already registered' } },
-                { status: 422 }
+                { success: false, error: { code: 'CONFLICT', message: 'Email is already registered' } },
+                { status: 409 }
             );
         }
 
-        // Hash password
         const passwordHash = await bcrypt.hash(password as string, 10);
 
         const now = new Date().toISOString();
         const userId = crypto.randomUUID();
         const householdId = crypto.randomUUID();
 
-        // Create Household
         const household: Household = {
             householdId,
             primaryOwnerId: userId,
             createdAt: now
         };
-        await mockHouseholds.create(household);
+        await saveHousehold(household);
 
-        // Create User (store with passwordHash)
         const userRecord: User & { passwordHash: string } = {
             userId,
             email: normalizedEmail,
@@ -108,9 +94,8 @@ export async function POST({ request }: { request: Request }) {
             updatedAt: now,
             passwordHash
         };
-        await mockUsers.create(userRecord);
+        await saveUser(userRecord);
 
-        // Create Cat if included in the onboarding payload
         let catId: string | undefined;
         if (cat && typeof cat === 'object') {
             const catInput = cat as CatInput;
@@ -132,9 +117,8 @@ export async function POST({ request }: { request: Request }) {
                 createdAt: now,
                 updatedAt: now
             };
-            await mockCats.create(catRecord);
+            await saveCat(catRecord);
 
-            // Create Schedule if included alongside the cat
             if (schedule && typeof schedule === 'object') {
                 const scheduleInput = schedule as ScheduleInput;
                 const scheduleRecord: Schedule = {
@@ -143,11 +127,11 @@ export async function POST({ request }: { request: Request }) {
                     householdId,
                     feedingTimes: scheduleInput.feedingTimes,
                     status: 'active',
-                    temporalWorkflowId: `mock-workflow-${crypto.randomUUID()}`,
+                    temporalWorkflowId: `workflow-${crypto.randomUUID()}`,
                     createdAt: now,
                     updatedAt: now
                 };
-                await mockSchedules.create(scheduleRecord);
+                await saveSchedule(scheduleRecord);
             }
         }
 
@@ -165,7 +149,8 @@ export async function POST({ request }: { request: Request }) {
             },
             { status: 201 }
         );
-    } catch {
+    } catch (err) {
+        console.error('[register] unhandled error:', err);
         return json(
             { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } },
             { status: 500 }

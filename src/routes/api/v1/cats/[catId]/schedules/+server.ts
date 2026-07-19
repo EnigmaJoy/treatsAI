@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats, mockSchedules } from '$lib/server/aws/mock';
+import { getCat } from '$lib/server/db/cats';
+import { saveSchedule, listSchedules } from '$lib/server/db/schedules';
 import { getTemporalClient, TASK_QUEUE } from '$lib/server/temporal/client';
 import type { FeedingTime } from '$lib/types';
 
@@ -44,7 +45,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -96,7 +97,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
             updatedAt: now
         };
 
-        await mockSchedules.create(schedule);
+        await saveSchedule(schedule);
 
         // Start Temporal workflow — degrade gracefully if server not running
         try {
@@ -133,7 +134,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -141,7 +142,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const schedules = await mockSchedules.findAllByCatId(params.catId);
+        const schedules = await listSchedules(params.catId);
 
         return json(
             {

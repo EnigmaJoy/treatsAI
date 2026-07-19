@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats, mockDB } from '$lib/server/aws/mock';
+import { getCat } from '$lib/server/db/cats';
+import { listFeedingEvents } from '$lib/server/db/feeding-events';
 import type { FeedingOutcome } from '$lib/types';
 
 const VALID_OUTCOMES: FeedingOutcome[] = ['dispensed', 'skipped', 'rejected'];
@@ -20,7 +21,7 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -51,7 +52,7 @@ export const GET: RequestHandler = async ({ request, params, url }) => {
         }
         const limit = Math.min(parsed, 200); // cap at 200
 
-        const events = await mockDB.getFeedingEventsFiltered(params.catId, {
+        const events = await listFeedingEvents(params.catId, {
             from,
             to,
             outcome: outcomeParam,

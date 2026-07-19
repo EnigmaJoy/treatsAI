@@ -30,3 +30,5 @@ export const docClient = DynamoDBDocumentClient.from(dynamoClient, {
 
 export const TABLE_NAME = env.DYNAMODB_TABLE_NAME ?? 'TreatsAI';
 export const IS_MOCK = isMock;
+
+console.log('[db] mode:', IS_MOCK ? 'MOCK' : 'REAL DynamoDB', '| region:', env.AWS_REGION ?? 'eu-west-1', '| table:', TABLE_NAME);

@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { getTextDirection } from '$lib/paraglide/runtime';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { getAuthenticatedUser } from '$lib/server/auth';
@@ -32,7 +32,12 @@ const handleAuth: Handle = async ({ event, resolve }) => {
         return resolve(event);
     }
 
-    const user = await getAuthenticatedUser(event.request);
+    let user = null;
+    try {
+        user = await getAuthenticatedUser(event.request);
+    } catch (err) {
+        console.error('[handleAuth] getAuthenticatedUser threw:', err);
+    }
     if (!user) {
         throw redirect(302, '/login');
     }
@@ -52,3 +57,10 @@ const handleParaglide: Handle = ({ event, resolve }) =>
     });
 
 export const handle: Handle = sequence(handleAuth, handleParaglide);
+
+export const handleError: HandleServerError = ({ error, event }) => {
+    console.error('[handleError] unhandled error on', event.url.pathname, error);
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    return { message, stack };
+};

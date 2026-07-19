@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { mockAlerts } from '$lib/server/aws/mock';
+import { getAlert, updateAlert } from '$lib/server/db/alerts';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import { broadcastSSE } from '$lib/server/sse';
 
@@ -19,7 +19,7 @@ export async function PATCH({
             );
         }
 
-        const alert = await mockAlerts.findByAlertId(params.alertId);
+        const alert = await getAlert(params.alertId);
         if (!alert || alert.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Alert not found' } },
@@ -28,7 +28,7 @@ export async function PATCH({
         }
 
         const acknowledgedAt = new Date().toISOString();
-        const updated = await mockAlerts.update(params.alertId, {
+        const updated = await updateAlert(params.alertId, {
             status: 'acknowledged',
             acknowledgedAt,
             acknowledgedBy: auth.userId

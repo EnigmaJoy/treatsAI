@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import bcrypt from 'bcryptjs';
-import { mockUsers } from '$lib/server/aws/mock';
+import { getUserByEmail } from '$lib/server/db/users';
 import { putSession } from '$lib/server/db/sessions';
 
 export async function POST({ request }: { request: Request }) {
@@ -18,7 +18,6 @@ export async function POST({ request }: { request: Request }) {
 
         const { email, password, rememberMe } = body as Record<string, unknown>;
 
-        // Validate inputs
         if (!email || typeof email !== 'string' || email.trim() === '') {
             return json(
                 { success: false, error: { code: 'VALIDATION_ERROR', message: 'Email is required' } },
@@ -33,8 +32,7 @@ export async function POST({ request }: { request: Request }) {
             );
         }
 
-        // Find user by email (normalize to lowercase)
-        const user = await mockUsers.findByEmail(email.trim().toLowerCase());
+        const user = await getUserByEmail(email.trim().toLowerCase());
         if (!user) {
             return json(
                 { success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid email or password' } },
@@ -42,16 +40,14 @@ export async function POST({ request }: { request: Request }) {
             );
         }
 
-        // Verify password — user was stored with passwordHash field
-        const userWithHash = user as typeof user & { passwordHash: string };
-        if (!userWithHash.passwordHash) {
+        if (!user.passwordHash) {
             return json(
                 { success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid email or password' } },
                 { status: 401 }
             );
         }
 
-        const passwordMatch = await bcrypt.compare(password, userWithHash.passwordHash);
+        const passwordMatch = await bcrypt.compare(password, user.passwordHash);
         if (!passwordMatch) {
             return json(
                 { success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid email or password' } },
@@ -59,17 +55,14 @@ export async function POST({ request }: { request: Request }) {
             );
         }
 
-        // Generate session token
         const sessionToken = crypto.randomUUID();
         const now = new Date();
         const shouldRemember = rememberMe === true;
 
-        // expiresAt: 7 days if rememberMe, else 24 hours
         const expiresAt = new Date(
             now.getTime() + (shouldRemember ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000)
         ).toISOString();
 
-        // Write session to DynamoDB so it survives dev server restarts
         await putSession({
             sessionId: crypto.randomUUID(),
             userId: user.userId,
@@ -80,9 +73,7 @@ export async function POST({ request }: { request: Request }) {
             userAgent: request.headers.get('user-agent') ?? undefined
         });
 
-        // maxAge in seconds
         const maxAge = shouldRemember ? 7 * 24 * 60 * 60 : 24 * 60 * 60;
-
         const secure = dev ? '' : '; Secure';
         const cookieHeader = `session_token=${encodeURIComponent(sessionToken)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAge}${secure}`;
 
@@ -96,14 +87,10 @@ export async function POST({ request }: { request: Request }) {
                     userId: user.userId
                 }
             },
-            {
-                status: 200,
-                headers: {
-                    'Set-Cookie': cookieHeader
-                }
-            }
+            { status: 200, headers: { 'Set-Cookie': cookieHeader } }
         );
-    } catch {
+    } catch (err) {
+        console.error('[login] unhandled error:', err);
         return json(
             { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } },
             { status: 500 }

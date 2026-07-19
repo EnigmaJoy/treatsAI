@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats, mockWeightEntries } from '$lib/server/aws/mock';
+import { getCat, updateCat } from '$lib/server/db/cats';
+import { saveWeightEntry, listWeightEntries } from '$lib/server/db/weight';
 
 // ---------------------------------------------------------------------------
 // POST /api/v1/cats/[catId]/weight
@@ -17,7 +18,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -61,12 +62,12 @@ export const POST: RequestHandler = async ({ request, params }) => {
             notes
         };
 
-        await mockWeightEntries.create(entry);
+        await saveWeightEntry(entry);
 
         const updatedSuggestion = Math.max(20, Math.round(body.weightKg * 30));
         const now = new Date().toISOString();
 
-        await mockCats.update(params.catId, {
+        await updateCat(params.catId, {
             currentWeightKg: body.weightKg,
             suggestedPortionGrams: updatedSuggestion,
             updatedAt: now
@@ -109,7 +110,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -117,7 +118,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const entries = await mockWeightEntries.findAllByCatId(params.catId);
+        const entries = await listWeightEntries(params.catId);
 
         return json(
             {

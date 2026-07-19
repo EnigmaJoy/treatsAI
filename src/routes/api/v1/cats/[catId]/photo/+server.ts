@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats, mockS3 } from '$lib/server/aws/mock';
+import { getCat } from '$lib/server/db/cats';
+import { mockS3 } from '$lib/server/aws/mock';
 
 export const GET: RequestHandler = async ({ request, params }) => {
     try {
@@ -13,7 +14,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },

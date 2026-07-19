@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats, mockS3, mockRekognition } from '$lib/server/aws/mock';
+import { getCat, updateCat } from '$lib/server/db/cats';
+import { mockS3, mockRekognition } from '$lib/server/aws/mock';
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 const MIN_PHOTOS = 3;
@@ -18,7 +19,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -83,7 +84,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
         const { faceIds } = await mockRekognition.indexFaces(params.catId, photos.length);
 
         const now = new Date().toISOString();
-        const updated = await mockCats.update(params.catId, {
+        const updated = await updateCat(params.catId, {
             photoS3Keys: [...cat.photoS3Keys, ...s3Keys],
             updatedAt: now
         });
