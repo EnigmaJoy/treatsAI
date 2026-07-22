@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { mockSessions } from '$lib/server/aws/mock';
+import { listSessionsByUserId, deleteSessionBySessionId } from '$lib/server/db/sessions';
 import { getAuthenticatedUser } from '$lib/server/auth';
 
 export async function DELETE({
@@ -15,10 +15,7 @@ export async function DELETE({
 
         if (!auth) {
             return json(
-                {
-                    success: false,
-                    error: { code: 'UNAUTHORIZED', message: 'Invalid or missing session token' }
-                },
+                { success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid or missing session token' } },
                 { status: 401 }
             );
         }
@@ -32,8 +29,7 @@ export async function DELETE({
             );
         }
 
-        // Find the session to check ownership and whether it's the current one
-        const allSessions = await mockSessions.findAllByUserId(auth.userId);
+        const allSessions = await listSessionsByUserId(auth.userId);
         const targetSession = allSessions.find((s) => s.sessionId === sessionId);
 
         if (!targetSession) {
@@ -45,12 +41,9 @@ export async function DELETE({
 
         const isDeletingCurrentSession = targetSession.token === auth.sessionToken;
 
-        // Delete the session
-        await mockSessions.deleteBySessionId(sessionId);
+        await deleteSessionBySessionId(sessionId, auth.userId);
 
         const headers: Record<string, string> = {};
-
-        // If the deleted session was the current one, clear the cookie
         if (isDeletingCurrentSession) {
             const secure = dev ? '' : '; Secure';
             headers['Set-Cookie'] =

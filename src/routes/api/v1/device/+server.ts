@@ -1,11 +1,11 @@
 import { json } from '@sveltejs/kit';
-import { mockDevices } from '$lib/server/aws/mock';
+import { getDevice, upsertDevice } from '$lib/server/db/devices';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import { broadcastSSE } from '$lib/server/sse';
 import type { Device } from '$lib/types';
 
 async function getOrCreateDevice(householdId: string): Promise<Device> {
-    const existing = await mockDevices.get(householdId);
+    const existing = await getDevice(householdId);
     if (existing) return existing;
 
     const now = new Date().toISOString();
@@ -21,7 +21,7 @@ async function getOrCreateDevice(householdId: string): Promise<Device> {
         createdAt: now,
         updatedAt: now
     };
-    await mockDevices.upsert(device);
+    await upsertDevice(device);
     return device;
 }
 
@@ -35,7 +35,22 @@ export async function GET({ request }: { request: Request }) {
             );
         }
 
-        const device = await getOrCreateDevice(auth.householdId);
+        const device = await getDevice(auth.householdId);
+
+        if (!device) {
+            return json({
+                success: true,
+                data: {
+                    deviceId: null,
+                    status: 'offline',
+                    foodReservoirPercent: 0,
+                    currentFoodTypeLabel: null,
+                    lastDispenseAt: null,
+                    cameraStatus: 'idle',
+                    firmwareVersion: '1.0.0'
+                }
+            });
+        }
 
         return json(
             {
@@ -52,7 +67,8 @@ export async function GET({ request }: { request: Request }) {
             },
             { status: 200 }
         );
-    } catch {
+    } catch (err) {
+        console.error('[GET /api/v1/device] unhandled error:', err);
         return json(
             { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } },
             { status: 500 }
@@ -85,7 +101,7 @@ export async function PATCH({ request }: { request: Request }) {
 
         const device = await getOrCreateDevice(auth.householdId);
         const now = new Date().toISOString();
-        const updated = await mockDevices.upsert({ ...device, ...updates, updatedAt: now });
+        const updated = await upsertDevice({ ...device, ...updates, updatedAt: now });
 
         broadcastSSE('device_status', {
             deviceId: updated.deviceId,

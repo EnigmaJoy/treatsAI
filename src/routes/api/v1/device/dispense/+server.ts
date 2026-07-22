@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
-import { mockDB, mockCats, mockDevices } from '$lib/server/aws/mock';
+import { getCat } from '$lib/server/db/cats';
+import { saveFeedingEvent } from '$lib/server/db/feeding-events';
+import { getDevice, upsertDevice } from '$lib/server/db/devices';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import { broadcastSSE } from '$lib/server/sse';
 import type { FeedingEvent } from '$lib/types';
@@ -24,7 +26,7 @@ export async function POST({ request }: { request: Request }) {
             );
         }
 
-        const cat = await mockCats.findByCatId(catId);
+        const cat = await getCat(catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -48,12 +50,12 @@ export async function POST({ request }: { request: Request }) {
             manualOverride: true
         };
 
-        await mockDB.putFeedingEvent(event);
+        await saveFeedingEvent(event);
 
         // Update device's lastDispenseAt
-        const device = await mockDevices.get(auth.householdId);
+        const device = await getDevice(auth.householdId);
         if (device) {
-            await mockDevices.upsert({ ...device, lastDispenseAt: now, updatedAt: now });
+            await upsertDevice({ ...device, lastDispenseAt: now, updatedAt: now });
         }
 
         broadcastSSE('feeding_event', {

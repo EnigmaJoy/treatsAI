@@ -1,10 +1,16 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import FeedingChart from '$lib/components/FeedingChart.svelte';
   import WeightProgressBar from '$lib/components/WeightProgressBar.svelte';
   import PortionBadge from '$lib/components/PortionBadge.svelte';
+  import PawLoader from '$lib/components/PawLoader.svelte';
   import type { Cat, FeedingEvent, WeightEntry } from '$lib/types';
+  import * as m from '$lib/paraglide/messages';
 
   let { data } = $props();
+  let loading = $state(true);
+
+  onMount(() => { loading = false; });
 
   const cat = $derived<Cat | null>(data.cat);
   let photoUrl = $state<string | null>(data.photoUrl ?? null);
@@ -89,11 +95,12 @@
   }
 </script>
 
-{#if !cat}
+{#if loading}
+  <PawLoader />
+{:else if !cat}
   <div class="flex flex-col items-center justify-center py-24 gap-4 text-center">
-    <span class="text-5xl">🐾</span>
-    <p class="text-slate-400">Cat not found.</p>
-    <a href="/cats" class="text-[#a78bfa] hover:underline text-sm">← Back to cats</a>
+    <p class="text-slate-400">{m.cat_not_found()}</p>
+    <a href="/cats" class="text-[#a78bfa] hover:underline text-sm">← {m.cat_back_to_cats()}</a>
   </div>
 {:else}
   <div class="flex flex-col gap-6">
@@ -101,7 +108,7 @@
     <div>
       <a href="/cats" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-sm transition-colors mb-4">
         <span aria-hidden="true">←</span>
-        All cats
+        {m.cat_all_cats()}
       </a>
       <div class="flex items-start justify-between gap-4">
         <div class="flex items-center gap-4">
@@ -120,10 +127,10 @@
             <p class="text-slate-400 text-sm mt-0.5">
               {#if cat.breed}{cat.breed}{/if}
               {#if cat.breed && cat.dateOfBirth} · {/if}
-              {#if cat.dateOfBirth}{calcAge(cat.dateOfBirth)} old{/if}
+              {#if cat.dateOfBirth}{calcAge(cat.dateOfBirth)} {m.cat_age_suffix()}{/if}
             </p>
             {#if cat.microchipNumber}
-              <p class="text-slate-600 text-xs mt-1 font-mono">Chip: {cat.microchipNumber}</p>
+              <p class="text-slate-600 text-xs mt-1 font-mono">{m.cat_chip()} {cat.microchipNumber}</p>
             {/if}
           </div>
         </div>
@@ -131,7 +138,7 @@
           href="/cats/{cat.catId}/edit"
           class="shrink-0 text-sm text-slate-400 border border-white/10 hover:border-[#7c3aed]/50 hover:text-[#a78bfa] px-3 py-1.5 rounded-lg transition-colors"
         >
-          Edit
+          {m.common_edit()}
         </a>
       </div>
     </div>
@@ -143,12 +150,12 @@
         <!-- Weight card -->
         <div class="bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-2xl p-5">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-white font-semibold">Weight</h2>
+            <h2 class="text-white font-semibold">{m.cat_weight()}</h2>
             <button
               class="text-xs bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40 hover:bg-[#7c3aed]/30 px-3 py-1 rounded-lg transition-colors"
               onclick={() => (showWeightForm = !showWeightForm)}
             >
-              {showWeightForm ? 'Cancel' : 'Log Weight'}
+              {showWeightForm ? m.common_cancel() : m.cat_log_weight()}
             </button>
           </div>
 
@@ -162,7 +169,7 @@
           {#if showWeightForm}
             <div class="mt-4 flex flex-col gap-3 border-t border-white/5 pt-4">
               <div>
-                <label class="block text-xs text-slate-500 mb-1" for="weight-input">Weight (kg)</label>
+                <label class="block text-xs text-slate-500 mb-1" for="weight-input">{m.cat_weight_kg()}</label>
                 <input
                   id="weight-input"
                   type="number"
@@ -174,7 +181,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-slate-500 mb-1" for="weight-notes">Notes (optional)</label>
+                <label class="block text-xs text-slate-500 mb-1" for="weight-notes">{m.cat_notes_optional()}</label>
                 <input
                   id="weight-notes"
                   type="text"
@@ -187,14 +194,14 @@
                 <p class="text-red-400 text-xs">{weightError}</p>
               {/if}
               {#if weightSuccess}
-                <p class="text-emerald-400 text-xs">Weight logged!</p>
+                <p class="text-emerald-400 text-xs">{m.cat_weight_logged()}</p>
               {/if}
               <button
                 class="bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg transition-colors"
                 onclick={logWeight}
                 disabled={weightLoading}
               >
-                {weightLoading ? 'Saving...' : 'Save Weight'}
+                {weightLoading ? m.common_saving() : m.cat_save_weight()}
               </button>
             </div>
           {/if}
@@ -203,7 +210,7 @@
         <!-- Weight history -->
         {#if weightHistory.length > 0}
           <div class="bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-2xl p-5">
-            <h2 class="text-white font-semibold mb-3">Weight History</h2>
+            <h2 class="text-white font-semibold mb-3">{m.cat_weight_history()}</h2>
             <div class="flex flex-col gap-2">
               {#each weightHistory as entry (entry.weightEntryId)}
                 <div class="flex items-center justify-between text-sm">
@@ -220,27 +227,27 @@
       <div class="lg:col-span-2 flex flex-col gap-6">
         <!-- Feeding chart -->
         <div class="bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-2xl p-5">
-          <h2 class="text-white font-semibold mb-4">Feeding Activity — Last 7 Days</h2>
+          <h2 class="text-white font-semibold mb-4">{m.cat_feeding_activity()}</h2>
           <FeedingChart {events} />
         </div>
 
         <!-- Recent events -->
         <div class="bg-[#1a1a2e] border border-[#7c3aed]/20 rounded-2xl p-5">
-          <h2 class="text-white font-semibold mb-4">Recent Events</h2>
+          <h2 class="text-white font-semibold mb-4">{m.cat_recent_events()}</h2>
           {#if recentEvents.length === 0}
             <div class="flex flex-col items-center justify-center py-8 text-slate-600 gap-2">
               <span class="text-3xl">🍽️</span>
-              <p class="text-sm">No feeding events yet</p>
+              <p class="text-sm">{m.cat_no_events()}</p>
             </div>
           {:else}
             <div class="overflow-x-auto -mx-1">
               <table class="w-full text-sm">
                 <thead>
                   <tr class="border-b border-white/5">
-                    <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Time</th>
-                    <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Outcome</th>
-                    <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Portion</th>
-                    <th class="text-right text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">Consumed</th>
+                    <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">{m.cat_col_time()}</th>
+                    <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">{m.cat_col_outcome()}</th>
+                    <th class="text-left text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">{m.cat_col_portion()}</th>
+                    <th class="text-right text-slate-500 text-xs uppercase tracking-wider pb-2 px-1">{m.cat_col_consumed()}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">

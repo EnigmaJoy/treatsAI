@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { mockSessions } from '$lib/server/aws/mock';
+import { listSessionsByUserId } from '$lib/server/db/sessions';
 import { getAuthenticatedUser } from '$lib/server/auth';
 
 export async function GET({ request }: { request: Request }) {
@@ -8,16 +8,12 @@ export async function GET({ request }: { request: Request }) {
 
         if (!auth) {
             return json(
-                {
-                    success: false,
-                    error: { code: 'UNAUTHORIZED', message: 'Invalid or missing session token' }
-                },
+                { success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid or missing session token' } },
                 { status: 401 }
             );
         }
 
-        // Get all sessions for the user
-        const sessions = await mockSessions.findAllByUserId(auth.userId);
+        const sessions = await listSessionsByUserId(auth.userId);
 
         const sessionList = sessions.map((s) => ({
             sessionId: s.sessionId,
@@ -27,10 +23,7 @@ export async function GET({ request }: { request: Request }) {
             current: s.token === auth.sessionToken
         }));
 
-        return json(
-            { success: true, data: { sessions: sessionList } },
-            { status: 200 }
-        );
+        return json({ success: true, data: { sessions: sessionList } }, { status: 200 });
     } catch {
         return json(
             { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } },

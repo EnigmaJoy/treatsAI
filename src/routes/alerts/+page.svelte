@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Alert, AlertType } from '$lib/types';
+  import PawLoader from '$lib/components/PawLoader.svelte';
   import * as m from '$lib/paraglide/messages';
 
   let { data } = $props();
@@ -29,10 +30,10 @@
 
   function alertTypeLabel(type: AlertType): string {
     switch (type) {
-      case 'skip_meal':          return 'Skipped Meal';
-      case 'baseline_deviation': return 'Baseline Deviation';
-      case 'weight_reminder':    return 'Weight Reminder';
-      case 'low_food_level':     return 'Low Food Level';
+      case 'skip_meal':          return m.alert_type_skip_meal();
+      case 'baseline_deviation': return m.alert_type_baseline_deviation();
+      case 'weight_reminder':    return m.alert_type_weight_reminder();
+      case 'low_food_level':     return m.alert_type_low_food();
       default:                   return type;
     }
   }
@@ -40,12 +41,12 @@
   function timeSince(iso: string): string {
     const diffMs = Date.now() - new Date(iso).getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffMins < 1) return m.time_just_now();
+    if (diffMins < 60) return m.time_ago_min({ n: diffMins });
     const diffHrs = Math.floor(diffMins / 60);
-    if (diffHrs < 24) return `${diffHrs}h ago`;
+    if (diffHrs < 24) return m.time_ago_hour({ n: diffHrs });
     const diffDays = Math.floor(diffHrs / 24);
-    return `${diffDays}d ago`;
+    return m.time_ago_day({ n: diffDays });
   }
 
   async function acknowledge(alertId: string) {
@@ -75,7 +76,7 @@
         </span>
       {/if}
     </div>
-    <p class="text-[12px] text-[#94A3B8] mt-0.5">Notifications and system alerts</p>
+    <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.alerts_subtitle()}</p>
   </div>
 
   <!-- Tabs -->
@@ -111,27 +112,9 @@
   <div class="rounded-[12px] border border-[#2D2D4A] overflow-hidden" style="background:var(--color-surface)">
 
     {#if loading}
-      <!-- Skeleton -->
-      <table class="w-full text-[13px]">
-        <thead>
-          <tr class="border-b border-[#2D2D4A]">
-            {#each [m.alert_col_type(), m.alert_col_cat(), m.alert_col_triggered(), m.alert_col_status(), m.alert_col_action()] as col}
-              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{col}</th>
-            {/each}
-          </tr>
-        </thead>
-        <tbody>
-          {#each [1,2,3] as _}
-            <tr class="border-b border-[#2D2D4A] last:border-0">
-              <td class="px-4 py-3"><div class="h-5 w-28 rounded bg-[#2D2D4A] animate-pulse"></div></td>
-              <td class="px-4 py-3"><div class="h-4 w-16 rounded bg-[#2D2D4A] animate-pulse"></div></td>
-              <td class="px-4 py-3"><div class="h-4 w-12 rounded bg-[#2D2D4A] animate-pulse"></div></td>
-              <td class="px-4 py-3"><div class="h-5 w-20 rounded bg-[#2D2D4A] animate-pulse"></div></td>
-              <td class="px-4 py-3"><div class="h-7 w-16 rounded bg-[#2D2D4A] animate-pulse"></div></td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+      <div class="flex justify-center py-12">
+        <PawLoader />
+      </div>
 
     {:else}
 

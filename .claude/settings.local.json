@@ -9,7 +9,8 @@
       "Bash(sed -n '288,296p' src/routes/register/+page.svelte)",
       "Bash(sed -n '386,394p' src/routes/register/+page.svelte)",
       "Bash(sed -n '422,430p' src/routes/register/+page.svelte)",
-      "Bash(npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide)"
+      "Bash(npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide)",
+      "Bash(grep -v \"^m\\\\.$\")"
     ]
   }
 }

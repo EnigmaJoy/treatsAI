@@ -10,8 +10,6 @@
   } from 'chart.js';
   import type { FeedingOutcome } from '$lib/types';
 
-  Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
-
   interface FeedingEventInput {
     timestamp: string;
     outcome: FeedingOutcome;
@@ -67,6 +65,7 @@
   });
 
   onMount(() => {
+    Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
     const { labels, dispensed, skipped, rejected } = processData(events);
 
     chart = new Chart(canvas, {

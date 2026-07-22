@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats } from '$lib/server/aws/mock';
-import type { WeightGoal } from '$lib/types';
+import { saveCat, listCats } from '$lib/server/db/cats';
+import type { Cat, WeightGoal } from '$lib/types';
 
 const VALID_WEIGHT_GOALS: WeightGoal[] = ['weight_loss', 'maintenance', 'weight_gain'];
 const VALID_REMINDER_INTERVALS = [3, 7, 14];
@@ -119,7 +119,7 @@ export const POST: RequestHandler = async ({ request }) => {
             updatedAt: now
         };
 
-        const created = await mockCats.create(cat);
+        const created = await saveCat(cat as Cat);
 
         return json({
             success: true,
@@ -156,7 +156,7 @@ export const GET: RequestHandler = async ({ request }) => {
             );
         }
 
-        const cats = await mockCats.findAllByHouseholdId(auth.householdId);
+        const cats = await listCats(auth.householdId);
 
         const mapped = cats.map((c) => ({
             catId: c.catId,
@@ -169,7 +169,8 @@ export const GET: RequestHandler = async ({ request }) => {
         }));
 
         return json({ success: true, data: { cats: mapped } }, { status: 200 });
-    } catch {
+    } catch (err) {
+        console.error('[GET /api/v1/cats] unhandled error:', err);
         return json(
             { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } },
             { status: 500 }

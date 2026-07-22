@@ -21,7 +21,8 @@ export async function load({ fetch }) {
     }
 
     return { cats, alerts, device, firstCatPhotoUrl };
-  } catch {
+  } catch (err) {
+    console.error('[dashboard load] error:', err);
     return { cats: [], alerts: [], device: null, firstCatPhotoUrl: null };
   }
 }

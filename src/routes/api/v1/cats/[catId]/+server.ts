@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
-import { mockCats } from '$lib/server/aws/mock';
+import { getCat, updateCat, deleteCat } from '$lib/server/db/cats';
 import type { WeightGoal } from '$lib/types';
 
 const VALID_WEIGHT_GOALS: WeightGoal[] = ['weight_loss', 'maintenance', 'weight_gain'];
@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -44,7 +44,7 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -158,7 +158,7 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
 
         const now = new Date().toISOString();
 
-        const updated = await mockCats.update(params.catId, { ...updates, updatedAt: now });
+        const updated = await updateCat(params.catId, { ...updates, updatedAt: now });
         if (!updated) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -185,7 +185,7 @@ export const DELETE: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        const cat = await mockCats.findByCatId(params.catId);
+        const cat = await getCat(params.catId);
         if (!cat || cat.householdId !== auth.householdId) {
             return json(
                 { success: false, error: { code: 'NOT_FOUND', message: 'Cat not found' } },
@@ -193,7 +193,7 @@ export const DELETE: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        await mockCats.delete(params.catId);
+        await deleteCat(params.catId);
 
         return json(
             { success: true, data: { message: 'Cat profile and all associated data deleted successfully' } },

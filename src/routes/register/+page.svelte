@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
   import type { Language, WeightGoal } from '$lib/types';
+  import * as m from '$lib/paraglide/messages';
 
   // ── Existing account state (preserved exactly) ──
   let email          = $state('');
@@ -10,6 +11,22 @@
   let language       = $state<Language>('en');
   let error          = $state('');
   let loading        = $state(false);
+
+  // ── Step 1 field errors ──
+  let emailError           = $state('');
+  let passwordError        = $state('');
+  let confirmPasswordError = $state('');
+
+  // ── Step 2 field errors ──
+  let catNameError         = $state('');
+  let catWeightError       = $state('');
+  let catTargetWeightError = $state('');
+
+  // ── Step 3 error (shown in top banner) ──
+  let photosError   = $state('');
+
+  // ── Step 4 error (shown in top banner) ──
+  let scheduleError = $state('');
 
   // ── Wizard navigation ──
   let currentStep = $state(1);
@@ -22,6 +39,39 @@
   let catName               = $state('');
   let catBreed              = $state('');
   let catDob                = $state('');
+
+  // Custom date picker state - three selects that combine into YYYY-MM-DD
+  function parseDobParts(dob: string) {
+    if (!dob) return { d: '', mo: '', y: '' };
+    const parts = dob.split('-');
+    if (parts.length !== 3) return { d: '', mo: '', y: '' };
+    return { y: parts[0], mo: String(parseInt(parts[1])), d: String(parseInt(parts[2])) };
+  }
+  const initDob = parseDobParts(catDob);
+  let dobDay   = $state(initDob.d);
+  let dobMonth = $state(initDob.mo);
+  let dobYear  = $state(initDob.y);
+
+  function onDobChange() {
+    if (dobDay && dobMonth && dobYear) {
+      catDob = `${dobYear}-${String(Number(dobMonth)).padStart(2, '0')}-${String(Number(dobDay)).padStart(2, '0')}`;
+    } else {
+      catDob = '';
+    }
+  }
+
+  const dobDays = Array.from({ length: 31 }, (_, i) => i + 1);
+  const dobYears = $derived.by(() => {
+    const cur = new Date().getFullYear();
+    return Array.from({ length: cur - 1999 }, (_, i) => cur - i);
+  });
+  const monthOptions = $derived(
+    Array.from({ length: 12 }, (_, i) => ({
+      value: String(i + 1),
+      label: new Intl.DateTimeFormat(language, { month: 'long' }).format(new Date(2000, i, 1))
+    }))
+  );
+
   let catCurrentWeight      = $state('');
   let catTargetWeight       = $state('');
   let catWeightGoal         = $state<WeightGoal>('maintenance');
@@ -72,26 +122,100 @@
   function goToNext() {
     error = '';
     if (currentStep === 1) {
-      if (!email.trim())          { error = 'Email is required'; return; }
-      if (password.length < 8)    { error = 'Password must be at least 8 characters'; return; }
-      if (password !== confirmPassword) { error = 'Passwords do not match'; return; }
+      emailError = '';
+      passwordError = '';
+      confirmPasswordError = '';
+      let hasError = false;
+
+      if (!email.trim()) {
+        emailError = m.error_email_required();
+        hasError = true;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        emailError = m.error_email_invalid();
+        hasError = true;
+      }
+
+      if (!password) {
+        passwordError = m.error_password_required();
+        hasError = true;
+      } else if (password.length < 8) {
+        passwordError = m.error_password_too_short();
+        hasError = true;
+      }
+
+      if (!confirmPassword) {
+        confirmPasswordError = m.error_confirm_password();
+        hasError = true;
+      } else if (password !== confirmPassword) {
+        confirmPasswordError = m.error_passwords_mismatch();
+        hasError = true;
+      }
+
+      if (hasError) return;
     } else if (currentStep === 2) {
-      if (!catName.trim())        { error = 'Cat name is required'; return; }
+      catNameError = '';
+      catWeightError = '';
+      catTargetWeightError = '';
+      let hasError = false;
+
+      if (!catName.trim()) {
+        catNameError = m.error_cat_name_required();
+        hasError = true;
+      }
+
       const w = parseFloat(catCurrentWeight);
-      if (!w || w < 0.5 || w > 20) { error = 'Please enter a valid weight (0.5 – 20 kg)'; return; }
+      if (!catCurrentWeight || !w) {
+        catWeightError = m.error_weight_required();
+        hasError = true;
+      } else if (w < 0.5 || w > 20) {
+        catWeightError = m.error_weight_range();
+        hasError = true;
+      }
+
+      if (catWeightGoal === 'weight_loss' || catWeightGoal === 'weight_gain') {
+        const tw = parseFloat(catTargetWeight);
+        if (!catTargetWeight || !tw) {
+          catTargetWeightError = m.error_target_weight_required();
+          hasError = true;
+        } else if (catWeightGoal === 'weight_loss' && tw >= w) {
+          catTargetWeightError = m.error_target_weight_loss();
+          hasError = true;
+        } else if (catWeightGoal === 'weight_gain' && tw <= w) {
+          catTargetWeightError = m.error_target_weight_gain();
+          hasError = true;
+        }
+      }
+
+      if (hasError) return;
     } else if (currentStep === 3) {
-      if (uploadedPhotos.length < 3) { error = 'Please upload at least 3 photos'; return; }
+      if (uploadedFiles.length < 3) {
+        photosError = m.error_photos_minimum();
+        return;
+      }
+      photosError = '';
     }
     currentStep++;
   }
 
   function goToPrev() { error = ''; currentStep--; }
 
-  // ── Finish: single register call with full onboarding payload, then login ──
+  // ── Finish: register with full onboarding payload, then redirect to dashboard ──
   async function handleFinish() {
-    loading = true; error = '';
+    scheduleError = '';
+
+    if (feedingSlots.length === 0) {
+      scheduleError = m.error_feeding_time_required();
+      return;
+    }
+    const hasEmptyPortion = feedingSlots.some(s => !s.portionGrams || s.portionGrams <= 0);
+    if (hasEmptyPortion) {
+      scheduleError = m.error_portion_required();
+      return;
+    }
+
+    loading = true;
+    error = '';
     try {
-      // 1. Register with cat and schedule included - creates everything atomically
       const res = await fetch('/api/v1/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,39 +241,35 @@
         })
       });
       const data = await res.json();
-      if (!data.success) { error = data.error?.message ?? 'Registration failed'; return; }
-
-      const catId: string | undefined = data.data.catId;
-
-      // 2. Auto-login to establish session cookie
-      const loginRes = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, rememberMe: false })
-      });
-      const loginData = await loginRes.json();
-      if (!loginData.success) { goto('/login'); return; }
-
-      // 3. Upload photos if any (requires session from step 2)
-      if (uploadedPhotos.length > 0 && catId) {
-        const formData = new FormData();
-        for (const file of uploadedPhotos) {
-          formData.append('photos', file);
-        }
-        const photoUploadRes = await fetch(`/api/v1/cats/${catId}/photos`, {
+      if (data.success) {
+        // Auto-login to set session cookie, then force a full page reload so the
+        // browser sends the cookie and the auth hook validates it before SSR runs
+        const loginRes = await fetch('/api/v1/auth/login', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, rememberMe: false })
         });
-        if (!photoUploadRes.ok) {
-          const photoErr = await photoUploadRes.json().catch(() => null);
-          error = photoErr?.error?.message ?? 'Photo upload failed. Your account was created - please add photos from the cat profile.';
-          return;
+        const loginData = await loginRes.json();
+        if (loginData.success) {
+          window.location.href = '/';
+        } else {
+          // Registration succeeded but session could not be created - show message
+          // and send to login so they can sign in manually
+          error = 'Account created! Please sign in to continue.';
+          setTimeout(() => { window.location.href = '/login'; }, 1500);
+        }
+      } else {
+        const status = res.status;
+        if (status === 409) {
+          error = m.error_email_exists();
+        } else if (status === 422) {
+          error = m.error_invalid_details();
+        } else {
+          error = data.error?.message ?? m.error_invalid_details();
         }
       }
-
-      goto('/');
     } catch {
-      error = 'Network error. Please try again.';
+      error = m.error_connection();
     } finally {
       loading = false;
     }
@@ -163,20 +283,65 @@
   }
 
   // ── Step 3: Photos ──
-  let uploadedPhotos = $state<File[]>([]);
+  let uploadedFiles = $state<File[]>([]);
+  let previewUrls   = $state<string[]>([]);
   let photoFileInput: HTMLInputElement;
+  let isDragging    = $state(false);
 
-  const visiblePhotoSlots = $derived(Math.min(10, Math.max(uploadedPhotos.length + 2, 5)));
-  const photoGridSlots    = $derived(Array.from({ length: visiblePhotoSlots }, (_, i) => i));
+  function handleFiles(files: File[]) {
+    photosError = '';
+    const valid = files.filter(f =>
+      (f.type === 'image/jpeg' || f.type === 'image/png') && f.size <= 15 * 1024 * 1024
+    );
+    const rejected = files.length - valid.length;
+    if (rejected > 0) {
+      error = `${rejected} file${rejected > 1 ? 's' : ''} skipped - JPEG or PNG only, max 15MB each`;
+    }
+    const slots = 10 - uploadedFiles.length;
+    const toAdd = valid.slice(0, slots);
+    for (const file of toAdd) {
+      uploadedFiles = [...uploadedFiles, file];
+      previewUrls   = [...previewUrls, URL.createObjectURL(file)];
+    }
+  }
+
+  function removePhoto(index: number) {
+    URL.revokeObjectURL(previewUrls[index]);
+    uploadedFiles = uploadedFiles.filter((_, i) => i !== index);
+    previewUrls   = previewUrls.filter((_, i) => i !== index);
+  }
+
+  onDestroy(() => {
+    previewUrls.forEach(url => URL.revokeObjectURL(url));
+  });
 
   function handleFileSelect(e: Event) {
     const input = e.target as HTMLInputElement;
     if (!input.files) return;
-    const newFiles = Array.from(input.files).filter(f =>
-      (f.type === 'image/jpeg' || f.type === 'image/png') && f.size <= 15 * 1024 * 1024
-    );
-    uploadedPhotos = [...uploadedPhotos, ...newFiles].slice(0, 10);
+    handleFiles(Array.from(input.files));
     input.value = '';
+  }
+
+  function handleDragOver(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    isDragging = true;
+  }
+
+  function handleDragLeave(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    isDragging = false;
+  }
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    isDragging = false;
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      handleFiles(Array.from(files));
+    }
   }
 
   const stepLabels = ['Account', 'Your cat', 'Photos', 'Schedule'];
@@ -250,9 +415,13 @@
           <input
             id="reg-email" type="email" autocomplete="email"
             bind:value={email} onkeydown={handleKeydown}
+            oninput={() => { emailError = ''; }}
             placeholder="you@example.com"
-            class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+            class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {emailError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
           />
+          {#if emailError}
+            <p class="text-[#EF4444] text-xs mt-1">{emailError}</p>
+          {/if}
         </div>
 
         <!-- Password -->
@@ -264,8 +433,9 @@
             <input
               id="reg-password" type={showPassword ? 'text' : 'password'} autocomplete="new-password"
               bind:value={password} onkeydown={handleKeydown}
+              oninput={() => { passwordError = ''; }}
               placeholder="Min. 8 characters"
-              class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 pr-10 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 pr-10 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {passwordError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
             />
             <button type="button" onclick={() => (showPassword = !showPassword)}
               class="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
@@ -284,6 +454,9 @@
               {/if}
             </button>
           </div>
+          {#if passwordError}
+            <p class="text-[#EF4444] text-xs mt-1">{passwordError}</p>
+          {/if}
         </div>
 
         <!-- Confirm password -->
@@ -295,8 +468,9 @@
             <input
               id="reg-confirm" type={showConfirmPassword ? 'text' : 'password'} autocomplete="new-password"
               bind:value={confirmPassword} onkeydown={handleKeydown}
+              oninput={() => { confirmPasswordError = ''; }}
               placeholder="Repeat your password"
-              class="w-full bg-[#0F0F1A] border rounded-lg px-3 py-2.5 pr-10 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {confirmPassword && confirmPassword !== password ? 'border-[#EF4444]' : 'border-[#2D2D4A] focus:border-[#7C3AED]'}"
+              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 pr-10 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {confirmPasswordError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
             />
             <button type="button" onclick={() => (showConfirmPassword = !showConfirmPassword)}
               class="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
@@ -315,8 +489,8 @@
               {/if}
             </button>
           </div>
-          {#if confirmPassword && confirmPassword !== password}
-            <p class="text-[11px] text-[#EF4444] mt-1">Passwords do not match</p>
+          {#if confirmPasswordError}
+            <p class="text-[#EF4444] text-xs mt-1">{confirmPasswordError}</p>
           {/if}
         </div>
 
@@ -358,9 +532,13 @@
             <input
               id="cat-name" type="text" autocomplete="off"
               bind:value={catName} onkeydown={handleKeydown}
+              oninput={() => { catNameError = ''; }}
               placeholder="e.g. Luna"
-              class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {catNameError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
             />
+            {#if catNameError}
+              <p class="text-[#EF4444] text-xs mt-1">{catNameError}</p>
+            {/if}
           </div>
           <div>
             <label for="cat-breed" class="text-xs text-[#94A3B8] mb-1.5 block flex items-center gap-1">
@@ -378,16 +556,45 @@
 
         <!-- Date of birth -->
         <div>
-          <label for="cat-dob" class="text-xs text-[#94A3B8] mb-1.5 block flex items-center gap-1">
+          <p class="text-xs text-[#94A3B8] mb-1.5 flex items-center gap-1">
             Date of birth
             <span class="bg-[#2D2D4A] rounded text-[10px] text-[#94A3B8] px-1.5 py-0.5">optional</span>
-          </label>
-          <input
-            id="cat-dob" type="date"
-            bind:value={catDob}
-            class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors"
-            style="color-scheme:dark;"
-          />
+          </p>
+          <div class="flex flex-row gap-2 w-full min-w-0">
+            <!-- Day -->
+            <select
+              bind:value={dobDay}
+              onchange={onDobChange}
+              class="flex-none w-20 min-w-0 bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer"
+            >
+              <option value="">DD</option>
+              {#each dobDays as d}
+                <option value={String(d)}>{d}</option>
+              {/each}
+            </select>
+            <!-- Month -->
+            <select
+              bind:value={dobMonth}
+              onchange={onDobChange}
+              class="flex-1 min-w-0 bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer"
+            >
+              <option value="">Month</option>
+              {#each monthOptions as opt}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
+            <!-- Year -->
+            <select
+              bind:value={dobYear}
+              onchange={onDobChange}
+              class="flex-none w-24 min-w-0 bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer"
+            >
+              <option value="">YYYY</option>
+              {#each dobYears as y}
+                <option value={String(y)}>{y}</option>
+              {/each}
+            </select>
+          </div>
           <p class="text-[11px] text-[#94A3B8] mt-1">Used to track age-related needs</p>
         </div>
 
@@ -400,9 +607,13 @@
             <input
               id="cat-weight" type="number" min="0.5" max="20" step="0.1"
               bind:value={catCurrentWeight} onkeydown={handleKeydown}
+              oninput={() => { catWeightError = ''; }}
               placeholder="e.g. 4.2"
-              class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {catWeightError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
             />
+            {#if catWeightError}
+              <p class="text-[#EF4444] text-xs mt-1">{catWeightError}</p>
+            {/if}
           </div>
           <div>
             <label for="cat-target" class="text-xs text-[#94A3B8] mb-1.5 block flex items-center gap-1">
@@ -412,9 +623,13 @@
             <input
               id="cat-target" type="number" min="0.5" max="20" step="0.1"
               bind:value={catTargetWeight}
+              oninput={() => { catTargetWeightError = ''; }}
               placeholder="e.g. 4.0"
-              class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {catTargetWeightError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
             />
+            {#if catTargetWeightError}
+              <p class="text-[#EF4444] text-xs mt-1">{catTargetWeightError}</p>
+            {/if}
           </div>
         </div>
 
@@ -429,7 +644,7 @@
             ] as opt}
               <button
                 type="button"
-                onclick={() => (catWeightGoal = opt.value)}
+                onclick={() => { catWeightGoal = opt.value; catTargetWeightError = ''; }}
                 class="flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all duration-150 text-center"
                 style="{catWeightGoal === opt.value
                   ? 'border-color:#7C3AED;background:rgba(124,58,237,0.1);'
@@ -527,20 +742,38 @@
         </p>
       </div>
 
+      <!-- Photos error banner -->
+      {#if photosError}
+        <div class="mb-4 flex items-center gap-2 rounded-lg px-4 py-3 text-[13px]"
+          style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#F87171;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {photosError}
+        </div>
+      {/if}
+
       <!-- Upload area -->
-      <button
-        type="button"
+      <div
+        role="region"
+        aria-label="Photo upload area"
         onclick={() => photoFileInput.click()}
-        class="w-full border-2 border-dashed border-[#2D2D4A] hover:border-[#7C3AED] rounded-xl p-8 text-center cursor-pointer mb-4 transition-colors bg-transparent"
+        ondragover={handleDragOver}
+        ondragleave={handleDragLeave}
+        ondrop={handleDrop}
+        class="w-full border-2 border-dashed rounded-xl p-8 text-center cursor-pointer mb-4 transition-colors"
+        style="{isDragging
+          ? 'border-color:#7C3AED;background:rgba(124,58,237,0.08);'
+          : 'border-color:#2D2D4A;background:transparent;'}"
       >
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2D2D4A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="{isDragging ? '#7C3AED' : '#2D2D4A'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3" aria-hidden="true">
           <polyline points="16 16 12 12 8 16"/>
           <line x1="12" y1="12" x2="12" y2="21"/>
           <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
         </svg>
         <p class="text-[13px] font-semibold text-[#F8FAFC] mb-1">Drop photos here or click to browse</p>
         <p class="text-sm text-[#94A3B8]">JPEG, PNG only · max 15MB per photo</p>
-      </button>
+      </div>
       <input
         bind:this={photoFileInput}
         type="file"
@@ -552,49 +785,57 @@
 
       <!-- Photo grid -->
       <div class="grid grid-cols-5 gap-2 mb-3">
-        {#each photoGridSlots as idx (idx)}
-          {#if idx < uploadedPhotos.length}
-            <div class="aspect-square rounded-lg bg-[#0F0F1A] border border-[#7C3AED] flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-              </svg>
+        {#each Array(10) as _, i}
+          {#if i < uploadedFiles.length}
+            <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-[#7C3AED]">
+              <img
+                src={previewUrls[i]}
+                alt="Cat photo {i + 1}"
+                class="w-full h-full object-cover"
+              />
+              <button
+                type="button"
+                onclick={() => removePhoto(i)}
+                class="absolute top-1 right-1 w-5 h-5 bg-[rgba(0,0,0,0.6)] rounded-full flex items-center justify-center text-white text-xs hover:bg-[#EF4444] transition-colors"
+                aria-label="Remove photo {i + 1}"
+              >x</button>
             </div>
-          {:else}
-            <div class="aspect-square rounded-lg bg-[#0F0F1A] border border-[#2D2D4A] flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-            </div>
+          {:else if i < uploadedFiles.length + 2 && uploadedFiles.length < 10}
+            <div
+              class="aspect-square rounded-xl border-2 border-dashed border-[#2D2D4A] flex items-center justify-center text-[#94A3B8] text-xl cursor-pointer hover:border-[#7C3AED] transition-colors"
+              onclick={() => photoFileInput.click()}
+              role="button"
+              aria-label="Add photo"
+            >+</div>
           {/if}
         {/each}
       </div>
 
       <!-- Photo count -->
-      <p class="text-[12px] mb-4" style="color:{uploadedPhotos.length >= 3 ? '#7C3AED' : '#F59E0B'}">
-        {uploadedPhotos.length} of 10 photos uploaded · minimum 3 required
+      <p class="text-[12px] mb-4" style="color:{uploadedFiles.length >= 3 ? '#7C3AED' : '#F59E0B'}">
+        {uploadedFiles.length} of 10 photos uploaded · minimum 3 required
       </p>
 
       <!-- Rekognition training status -->
       <div class="rounded-xl p-3 bg-[#0F0F1A]">
         <div class="flex items-center justify-between mb-2">
           <span class="text-[12px] text-[#94A3B8]">Rekognition training</span>
-          {#if uploadedPhotos.length >= 3}
+          {#if uploadedFiles.length >= 3}
             <span class="text-[12px] font-medium" style="color:#10B981;">Ready</span>
           {:else}
             <span class="text-[12px] font-medium" style="color:#F59E0B;">
-              Needs {3 - uploadedPhotos.length} more {3 - uploadedPhotos.length === 1 ? 'photo' : 'photos'}
+              Needs {3 - uploadedFiles.length} more {3 - uploadedFiles.length === 1 ? 'photo' : 'photos'}
             </span>
           {/if}
         </div>
         <div class="w-full rounded-full h-1.5 mb-2" style="background:#2D2D4A;">
           <div
             class="h-1.5 rounded-full transition-all duration-300"
-            style="width:{uploadedPhotos.length >= 3 ? 100 : Math.round(uploadedPhotos.length / 3 * 100)}%;background:{uploadedPhotos.length >= 3 ? '#10B981' : '#F59E0B'};"
+            style="width:{uploadedFiles.length >= 3 ? 100 : Math.round(uploadedFiles.length / 3 * 100)}%;background:{uploadedFiles.length >= 3 ? '#10B981' : '#F59E0B'};"
           ></div>
         </div>
         <p class="text-[11px] text-[#94A3B8]">
-          {uploadedPhotos.length} face embedding{uploadedPhotos.length !== 1 ? 's' : ''} indexed in AWS Rekognition
+          {uploadedFiles.length} face embedding{uploadedFiles.length !== 1 ? 's' : ''} indexed in AWS Rekognition
         </p>
       </div>
     {/if}
@@ -604,6 +845,7 @@
       <h2 style="font-size:20px;font-weight:700;color:#F8FAFC;" class="mb-1">
         Set up {catName || 'your cat'}'s feeding schedule
       </h2>
+
       <p style="font-size:13px;color:#94A3B8;" class="mb-5">
         Configure when and how much to dispense each day
       </p>
@@ -627,6 +869,17 @@
           </div>
         </div>
       </div>
+
+      <!-- Schedule error banner -->
+      {#if scheduleError}
+        <div class="mb-4 flex items-center gap-2 rounded-lg px-4 py-3 text-[13px]"
+          style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#F87171;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {scheduleError}
+        </div>
+      {/if}
 
       <!-- Feeding time slots -->
       <div class="flex flex-col gap-2 mb-3">
@@ -755,8 +1008,7 @@
         </button>
       {:else if currentStep === 3}
         <button type="button" onclick={goToNext}
-          disabled={uploadedPhotos.length < 3}
-          class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
           Next – Schedule <span aria-hidden="true">→</span>
         </button>
       {:else}

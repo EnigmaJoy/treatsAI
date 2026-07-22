@@ -2,7 +2,7 @@
   import type { DeviceStatus, CameraStatus } from '$lib/types';
 
   interface Props {
-    deviceId: string;
+    deviceId: string | null;
     status: DeviceStatus;
     foodReservoirPercent: number;
     currentFoodTypeLabel?: string;
