@@ -110,7 +110,7 @@
     goto('/login');
   }
 
-  // ── Visual-only UI state ──
+  // - Visual-only UI state -
   type Section = 'appearance' | 'feeder' | 'notifications' | 'household' | 'security' | 'account';
   let activeSection = $state<Section>('appearance');
 
@@ -118,7 +118,7 @@
   let selectedLanguage = $state<'en' | 'it' | 'es'>('en');
   let selectedPalette = $state('midnight-paws');
 
-  // ── Language switching ──
+  // - Language switching -
   function switchLanguage(lang: 'en' | 'it' | 'es') {
     selectedLanguage = lang;
     setLocale(lang, { reload: false });
@@ -178,7 +178,7 @@
     </nav>
   </aside>
 
-  <!-- ── Right content ── -->
+  <!-- - Right content - -->
   <div class="flex-1 flex flex-col gap-5 min-w-0">
 
     <!-- ══ APPEARANCE ══ -->

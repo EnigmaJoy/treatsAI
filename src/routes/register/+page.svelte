@@ -4,7 +4,7 @@
   import type { Language, WeightGoal } from '$lib/types';
   import * as m from '$lib/paraglide/messages';
 
-  // ── Existing account state (preserved exactly) ──
+  // - Existing account state (preserved exactly) -
   let email          = $state('');
   let password       = $state('');
   let confirmPassword = $state('');
@@ -12,30 +12,30 @@
   let error          = $state('');
   let loading        = $state(false);
 
-  // ── Step 1 field errors ──
+  // - Step 1 field errors -
   let emailError           = $state('');
   let passwordError        = $state('');
   let confirmPasswordError = $state('');
 
-  // ── Step 2 field errors ──
+  // - Step 2 field errors -
   let catNameError         = $state('');
   let catWeightError       = $state('');
   let catTargetWeightError = $state('');
 
-  // ── Step 3 error (shown in top banner) ──
+  // - Step 3 error (shown in top banner) -
   let photosError   = $state('');
 
-  // ── Step 4 error (shown in top banner) ──
+  // - Step 4 error (shown in top banner) -
   let scheduleError = $state('');
 
-  // ── Wizard navigation ──
+  // - Wizard navigation -
   let currentStep = $state(1);
 
-  // ── Visual-only UI state ──
+  // - Visual-only UI state -
   let showPassword        = $state(false);
   let showConfirmPassword = $state(false);
 
-  // ── Step 2: Cat details ──
+  // - Step 2: Cat details -
   let catName               = $state('');
   let catBreed              = $state('');
   let catDob                = $state('');
@@ -79,7 +79,7 @@
   let catMicrochip          = $state('');
   let catReminderInterval   = $state<3 | 7 | 14>(7);
 
-  // ── Step 3: Schedule ──
+  // - Step 3: Schedule -
   interface FeedingSlot { id: number; time: string; portionGrams: number }
   let slotCounter = 3;
   let feedingSlots = $state<FeedingSlot[]>([
@@ -89,7 +89,7 @@
   ]);
   let foodTypeLabel = $state('');
 
-  // ── Derived ──
+  // - Derived -
   const suggestedPortion = $derived.by(() => {
     const w = parseFloat(catCurrentWeight) || 4;
     const mult = catWeightGoal === 'weight_loss' ? 40 : catWeightGoal === 'weight_gain' ? 60 : 50;
@@ -99,7 +99,7 @@
   const totalDaily     = $derived(feedingSlots.reduce((s, slot) => s + (slot.portionGrams || 0), 0));
   const avgPortionMeal = $derived(feedingSlots.length > 0 ? Math.round(totalDaily / feedingSlots.length) : 0);
 
-  // ── Slot helpers ──
+  // - Slot helpers -
   function addSlot() {
     feedingSlots = [...feedingSlots, { id: slotCounter++, time: '12:00', portionGrams: suggestedPortion }];
   }
@@ -118,7 +118,7 @@
     await fetch('/api/v1/auth/logout', { method: 'POST' });
   });
 
-  // ── Step navigation ──
+  // - Step navigation -
   function goToNext() {
     error = '';
     if (currentStep === 1) {
@@ -199,7 +199,7 @@
 
   function goToPrev() { error = ''; currentStep--; }
 
-  // ── Finish: register with full onboarding payload, then redirect to dashboard ──
+  // - Finish: register with full onboarding payload, then redirect to dashboard -
   async function uploadPhotos(catId: string, files: File[]) {
     const formData = new FormData();
     for (const file of files) {
@@ -299,7 +299,7 @@
     }
   }
 
-  // ── Step 3: Photos ──
+  // - Step 3: Photos -
   let uploadedFiles = $state<File[]>([]);
   let previewUrls   = $state<string[]>([]);
   let photoFileInput: HTMLInputElement;
@@ -374,7 +374,7 @@
     <span style="font-size:20px;font-weight:700;color:#F8FAFC;">Treats</span><span style="font-size:20px;font-weight:700;color:#7C3AED;">AI</span>
   </div>
 
-  <!-- ── Progress bar ── -->
+  <!-- - Progress bar - -->
   <div class="mb-8 flex items-center">
     {#each [1, 2, 3, 4] as stepNum, i}
       <!-- Step circle + label -->
@@ -403,7 +403,7 @@
     {/each}
   </div>
 
-  <!-- ── Card ── -->
+  <!-- - Card - -->
   <div class="w-full max-w-[560px] bg-[#1A1A2E] border border-[#2D2D4A] rounded-2xl p-8">
 
     <!-- Error banner -->
@@ -996,7 +996,7 @@
       </div>
     {/if}
 
-    <!-- ── Card footer ── -->
+    <!-- - Card footer - -->
     <div class="mt-6 pt-5 border-t border-[#2D2D4A] flex items-center justify-between">
 
       <!-- Back or spacer -->

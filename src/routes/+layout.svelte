@@ -3,7 +3,6 @@
   import { navigating } from '$app/stores';
   import PawLoader from '$lib/components/PawLoader.svelte';
   import './layout.css';
-  import favicon from '$lib/assets/favicon.svg';
   import * as m from '$lib/paraglide/messages';
   import type { AlertType } from '$lib/types';
   import { getLocale, setLocale, locales } from '$lib/paraglide/runtime';
@@ -82,10 +81,6 @@
   }
 </script>
 
-<svelte:head>
-  <link rel="icon" href={favicon} />
-</svelte:head>
-
 {#if isAuthPage}
   <div class="min-h-screen bg-[#0F0F1A] text-[#F8FAFC]">
     {@render children()}
@@ -93,7 +88,7 @@
 {:else}
   <div class="flex h-screen text-[#F8FAFC] overflow-hidden" style="background:var(--color-bg)">
 
-    <!-- ── Sidebar (desktop) ── -->
+    <!-- - Sidebar (desktop) - -->
     <aside class="hidden md:flex flex-col w-[220px] shrink-0 border-r border-[#2D2D4A]" style="background:var(--color-surface)">
 
       <!-- Logo -->
@@ -161,7 +156,7 @@
       </div>
     </aside>
 
-    <!-- ── Main content area ── -->
+    <!-- - Main content area - -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Topbar -->
       <div class="h-14 shrink-0 border-b border-[#2D2D4A] px-6 flex items-center justify-between">
@@ -329,7 +324,7 @@
       </div>
     </div>
 
-    <!-- ── Mobile bottom tab bar ── -->
+    <!-- - Mobile bottom tab bar - -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[#2D2D4A] flex" style="background:var(--color-surface)">
       {#each navLinks as link (link.href)}
         {@const active = isActive(link.href)}
