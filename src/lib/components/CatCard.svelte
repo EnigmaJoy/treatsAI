@@ -8,10 +8,11 @@
     weightGoal: WeightGoal;
     consumptionBaseline: number;
     breed?: string;
+    profilePhotoUrl?: string | null;
     onClick?: () => void;
   }
 
-  let { catId: _catId, name, currentWeightKg, weightGoal, consumptionBaseline, breed, onClick }: Props = $props();
+  let { catId: _catId, name, currentWeightKg, weightGoal, consumptionBaseline, breed, profilePhotoUrl, onClick }: Props = $props();
 
   const goalLabel = $derived(
     weightGoal === 'weight_loss' ? 'Weight Loss' :
@@ -31,7 +32,18 @@
 {#snippet cardContent()}
   <!-- Header -->
   <div class="flex items-start justify-between">
-    <div class="text-4xl select-none">🐱</div>
+    {#if profilePhotoUrl}
+      <img
+        src={profilePhotoUrl}
+        alt={name}
+        class="w-12 h-12 rounded-full object-cover border-2 border-[#7C3AED] shrink-0"
+      />
+    {:else}
+      <div
+        class="w-12 h-12 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#F59E0B] flex items-center justify-center text-2xl shrink-0"
+        aria-hidden="true"
+      >🐱</div>
+    {/if}
     <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/40">
       {currentWeightKg.toFixed(2)} kg
     </span>

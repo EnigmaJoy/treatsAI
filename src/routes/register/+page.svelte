@@ -200,6 +200,18 @@
   function goToPrev() { error = ''; currentStep--; }
 
   // ── Finish: register with full onboarding payload, then redirect to dashboard ──
+  async function uploadPhotos(catId: string, files: File[]) {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('photos', file);
+    }
+    const res = await fetch(`/api/v1/cats/${catId}/photos`, {
+      method: 'POST',
+      body: formData
+    });
+    return res.json();
+  }
+
   async function handleFinish() {
     scheduleError = '';
 
@@ -251,6 +263,11 @@
         });
         const loginData = await loginRes.json();
         if (loginData.success) {
+          if (uploadedFiles.length > 0 && data.data.catId) {
+            console.log('[registration] uploading', uploadedFiles.length, 'photos for cat', data.data.catId);
+            await uploadPhotos(data.data.catId, uploadedFiles);
+            console.log('[registration] photo upload complete');
+          }
           window.location.href = '/';
         } else {
           // Registration succeeded but session could not be created - show message
@@ -291,11 +308,11 @@
   function handleFiles(files: File[]) {
     photosError = '';
     const valid = files.filter(f =>
-      (f.type === 'image/jpeg' || f.type === 'image/png') && f.size <= 15 * 1024 * 1024
+      (f.type === 'image/jpeg' || f.type === 'image/png' || f.type === 'image/webp') && f.size <= 15 * 1024 * 1024
     );
     const rejected = files.length - valid.length;
     if (rejected > 0) {
-      error = `${rejected} file${rejected > 1 ? 's' : ''} skipped - JPEG or PNG only, max 15MB each`;
+      error = `${rejected} file${rejected > 1 ? 's' : ''} skipped - JPEG, PNG or WebP only, max 15MB each`;
     }
     const slots = 10 - uploadedFiles.length;
     const toAdd = valid.slice(0, slots);
@@ -738,7 +755,7 @@
           <p class="text-[13px] font-semibold" style="color:#7C3AED;">Photo tips for best results</p>
         </div>
         <p class="text-[12px] text-[#94A3B8] leading-relaxed">
-          Good lighting, front-facing, one cat per photo. JPEG or PNG only (max 15MB each). iPhone users: convert HEIC to JPEG before uploading.
+          Good lighting, front-facing, one cat per photo. JPEG, PNG, WebP only (max 15MB each). iPhone users: convert HEIC to JPEG before uploading.
         </p>
       </div>
 
@@ -772,12 +789,12 @@
           <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
         </svg>
         <p class="text-[13px] font-semibold text-[#F8FAFC] mb-1">Drop photos here or click to browse</p>
-        <p class="text-sm text-[#94A3B8]">JPEG, PNG only · max 15MB per photo</p>
+        <p class="text-sm text-[#94A3B8]">JPEG, PNG, WebP only · max 15MB per photo</p>
       </div>
       <input
         bind:this={photoFileInput}
         type="file"
-        accept="image/jpeg,image/png"
+        accept="image/jpeg,image/png,image/webp"
         multiple
         class="hidden"
         onchange={handleFileSelect}

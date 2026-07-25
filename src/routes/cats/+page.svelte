@@ -58,6 +58,7 @@
           weightGoal={cat.weightGoal}
           consumptionBaseline={cat.consumptionBaseline}
           breed={cat.breed}
+          profilePhotoUrl={cat.profilePhotoUrl}
           onClick={() => goto(`/cats/${cat.catId}`)}
         />
       {/each}

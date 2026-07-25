@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import { saveCat, listCats } from '$lib/server/db/cats';
+import { getProfilePhotoUrl } from '$lib/server/aws/s3';
 import type { Cat, WeightGoal } from '$lib/types';
 
 const VALID_WEIGHT_GOALS: WeightGoal[] = ['weight_loss', 'maintenance', 'weight_gain'];
@@ -158,14 +159,21 @@ export const GET: RequestHandler = async ({ request }) => {
 
         const cats = await listCats(auth.householdId);
 
-        const mapped = cats.map((c) => ({
-            catId: c.catId,
-            householdId: c.householdId,
-            name: c.name,
-            currentWeightKg: c.currentWeightKg,
-            weightGoal: c.weightGoal,
-            consumptionBaseline: c.consumptionBaseline,
-            createdAt: c.createdAt
+        const mapped = await Promise.all(cats.map(async (c) => {
+            const profilePhotoUrl = await getProfilePhotoUrl(c);
+            return {
+                catId: c.catId,
+                householdId: c.householdId,
+                name: c.name,
+                breed: c.breed ?? null,
+                currentWeightKg: c.currentWeightKg,
+                weightGoal: c.weightGoal,
+                consumptionBaseline: c.consumptionBaseline,
+                photoS3Keys: c.photoS3Keys,
+                profilePhotoKey: c.profilePhotoKey ?? null,
+                profilePhotoUrl,
+                createdAt: c.createdAt
+            };
         }));
 
         return json({ success: true, data: { cats: mapped } }, { status: 200 });

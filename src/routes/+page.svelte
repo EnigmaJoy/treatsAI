@@ -25,7 +25,6 @@
     device = data.device;
   });
 
-  let firstCatPhotoUrl = $state<string | null>(data.firstCatPhotoUrl ?? null);
   let dispensing = $state(false);
 
   const totalCats = $derived(data.cats.length);
@@ -204,17 +203,15 @@
 
         <!-- Cat header -->
         <div class="flex items-center gap-3">
-          {#if firstCatPhotoUrl}
+          {#if cat.profilePhotoUrl}
             <img
-              src={firstCatPhotoUrl}
+              src={cat.profilePhotoUrl}
               alt={cat.name}
-              style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #7C3AED;flex-shrink:0"
-              onerror={() => { firstCatPhotoUrl = null; }}
+              class="w-12 h-12 rounded-full object-cover border-2 border-[#7C3AED] shrink-0"
             />
           {:else}
             <div
-              class="w-[52px] h-[52px] rounded-full flex items-center justify-center text-2xl shrink-0"
-              style="background: linear-gradient(135deg, #7C3AED, #F59E0B)"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#F59E0B] flex items-center justify-center text-2xl shrink-0"
               aria-hidden="true"
             >🐱</div>
           {/if}
