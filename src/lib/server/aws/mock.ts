@@ -3,6 +3,42 @@
 // When MOCK_AWS=false, real AWS services are used
 // Swap is seamless - the rest of the app never knows the difference
 
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+
+// Persist mock S3 files to disk so they survive dev server restarts.
+// Files are written to .mock-s3/ at the project root (process.cwd()).
+const MOCK_S3_DIR = join(process.cwd(), '.mock-s3');
+
+function mockS3DiskPath(s3Key: string): string {
+    return join(MOCK_S3_DIR, s3Key);
+}
+
+function mockS3WriteFile(s3Key: string, data: Uint8Array, contentType: string): void {
+    const filePath = mockS3DiskPath(s3Key);
+    const dir = dirname(filePath);
+    if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+    }
+    // Write image bytes and a sidecar .meta file for content-type
+    writeFileSync(filePath, data);
+    writeFileSync(filePath + '.meta', contentType, 'utf8');
+}
+
+function mockS3ReadFile(s3Key: string): { contentType: string; data: Uint8Array } | null {
+    const filePath = mockS3DiskPath(s3Key);
+    if (!existsSync(filePath)) return null;
+    try {
+        const data = new Uint8Array(readFileSync(filePath));
+        const contentType = existsSync(filePath + '.meta')
+            ? readFileSync(filePath + '.meta', 'utf8')
+            : 'image/jpeg';
+        return { data, contentType };
+    } catch {
+        return null;
+    }
+}
+
 import type {
     Alert,
     AlertStatus,
@@ -164,10 +200,11 @@ export const mockDB = {
 // ---------------------------------------------------------------------------
 
 export const mockS3 = {
-    // Store the file bytes and return an S3 key
+    // Store the file bytes in memory and on disk so they survive dev server restarts
     uploadPhoto: async (catId: string, fileName: string, data: Uint8Array, contentType: string) => {
         const s3Key = `cats/${catId}/${fileName}`;
         mockS3FileStore.set(s3Key, { contentType, data });
+        mockS3WriteFile(s3Key, data, contentType);
         return s3Key;
     },
 
@@ -176,9 +213,16 @@ export const mockS3 = {
         return `/api/mock-s3/${encodeURIComponent(s3Key)}`;
     },
 
-    // Read stored file content for the serving route
+    // Read stored file content - checks in-memory store first, then falls back to disk
     getFile: (s3Key: string): { contentType: string; data: Uint8Array } | null => {
-        return mockS3FileStore.get(s3Key) ?? null;
+        const inMemory = mockS3FileStore.get(s3Key);
+        if (inMemory) return inMemory;
+        const fromDisk = mockS3ReadFile(s3Key);
+        if (fromDisk) {
+            // Warm the in-memory cache for subsequent reads
+            mockS3FileStore.set(s3Key, fromDisk);
+        }
+        return fromDisk;
     }
 };
 

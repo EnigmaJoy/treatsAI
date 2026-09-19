@@ -1,18 +1,57 @@
+import { RekognitionClient, SearchFacesByImageCommand } from '@aws-sdk/client-rekognition';
 import { mockRekognition, mockDB, mockAlerts, mockCats } from '../aws/mock.js';
 import type { Alert, AlertType, FeedingEvent } from '../../types.js';
+
+const IS_MOCK = process.env.MOCK_AWS === 'true';
+
+const rekognitionClient = IS_MOCK
+    ? null
+    : new RekognitionClient({
+        region: process.env.AWS_REGION ?? 'eu-west-1',
+        credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+        }
+    });
 
 // ---------------------------------------------------------------------------
 // recognizeCat
 // ---------------------------------------------------------------------------
 
 export async function recognizeCat(
-    catId: string
+    catId: string,
+    collectionId: string,
+    imageBuffer?: Uint8Array
 ): Promise<{ outcome: 'dispensed' | 'skipped' | 'rejected'; confidenceScore: number }> {
-    const result = await mockRekognition.searchFacesByImage(catId);
-    return {
-        outcome: result.outcome,
-        confidenceScore: result.confidence
-    };
+    if (IS_MOCK || !rekognitionClient) {
+        const result = await mockRekognition.searchFacesByImage(catId);
+        return { outcome: result.outcome, confidenceScore: result.confidence };
+    }
+
+    if (!imageBuffer) {
+        return { outcome: 'skipped', confidenceScore: 0 };
+    }
+
+    try {
+        const command = new SearchFacesByImageCommand({
+            CollectionId: collectionId,
+            Image: { Bytes: imageBuffer },
+            FaceMatchThreshold: 80,
+            MaxFaces: 1
+        });
+        const result = await rekognitionClient.send(command);
+        const match = result.FaceMatches?.[0];
+        if (!match) {
+            return { outcome: 'skipped', confidenceScore: 0 };
+        }
+        const confidence = match.Similarity ?? 0;
+        if (confidence >= 90) {
+            return { outcome: 'dispensed', confidenceScore: confidence };
+        }
+        return { outcome: 'rejected', confidenceScore: confidence };
+    } catch {
+        return { outcome: 'skipped', confidenceScore: 0 };
+    }
 }
 
 // ---------------------------------------------------------------------------

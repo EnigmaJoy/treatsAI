@@ -9,20 +9,9 @@ export async function load({ fetch }) {
     const alerts = alertsRes.ok ? (await alertsRes.json()).data?.alerts ?? [] : [];
     const device = deviceRes.ok ? (await deviceRes.json()).data ?? null : null;
 
-    // Fetch photo URL for the first cat if it has photos
-    let firstCatPhotoUrl: string | null = null;
-    const firstCat = cats[0];
-    if (firstCat?.photoS3Keys?.length > 0) {
-      const photoRes = await fetch(`/api/v1/cats/${firstCat.catId}/photo`);
-      if (photoRes.ok) {
-        const photoData = await photoRes.json();
-        firstCatPhotoUrl = photoData.data?.url ?? null;
-      }
-    }
-
-    return { cats, alerts, device, firstCatPhotoUrl };
+    return { cats, alerts, device };
   } catch (err) {
     console.error('[dashboard load] error:', err);
-    return { cats: [], alerts: [], device: null, firstCatPhotoUrl: null };
+    return { cats: [], alerts: [], device: null };
   }
 }

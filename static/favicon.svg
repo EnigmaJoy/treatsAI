@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="treatsAI icon">
+  <rect x="0" y="0" width="120" height="120" rx="28" fill="#403B3A"/>
+  <g transform="translate(16 14) scale(0.72)">
+    <g fill="#F2A9A0">
+      <ellipse cx="28" cy="48" rx="9" ry="11"/>
+      <ellipse cx="47" cy="33" rx="9.5" ry="12"/>
+      <ellipse cx="73" cy="33" rx="9.5" ry="12"/>
+      <ellipse cx="92" cy="48" rx="9" ry="11"/>
+    </g>
+    <path fill="#FFF7F0" d="M60 58 C42 58 32 70 32 82 C32 89 37 94 43 92 C47 90.5 49 90 52 91.5 C55 93 58 93.5 60 93.5 C62 93.5 65 93 68 91.5 C71 90 73 90.5 77 92 C83 94 88 89 88 82 C88 70 78 58 60 58 Z"/>
+  </g>
+</svg>

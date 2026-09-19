@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAuthenticatedUser } from '$lib/server/auth';
 import { getCat, updateCat, deleteCat } from '$lib/server/db/cats';
+import { getProfilePhotoUrl } from '$lib/server/aws/s3';
 import type { WeightGoal } from '$lib/types';
 
 const VALID_WEIGHT_GOALS: WeightGoal[] = ['weight_loss', 'maintenance', 'weight_gain'];
@@ -25,7 +26,29 @@ export const GET: RequestHandler = async ({ request, params }) => {
             );
         }
 
-        return json({ success: true, data: cat }, { status: 200 });
+        // Deduplicate keys before processing - DynamoDB records may contain duplicates
+        // from a prior bug where the same key was appended more than once.
+        cat.photoS3Keys = [...new Set(cat.photoS3Keys ?? [])];
+
+        // Generate profile photo URL (1-hour expiry, used across multiple pages)
+        const profilePhotoUrl = await getProfilePhotoUrl(cat);
+
+        // Generate proxy URLs for the thumbnail picker.
+        // Routing through the SvelteKit server avoids S3 CORS restrictions when the
+        // browser would otherwise be making a cross-origin request to S3 directly.
+        const photoUrls = cat.photoS3Keys.map((key) => ({
+            key,
+            url: `/api/v1/cats/${params.catId}/photo/${key}`
+        }));
+
+        const seen = new Set<string>();
+        const uniqueUrls = (photoUrls ?? []).filter(p => {
+            if (!p.url || !p.key || seen.has(p.key)) return false;
+            seen.add(p.key);
+            return true;
+        });
+
+        return json({ success: true, data: { ...cat, profilePhotoUrl, photoUrls: uniqueUrls } }, { status: 200 });
     } catch {
         return json(
             { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } },
@@ -154,6 +177,22 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
                 );
             }
             updates.microchipNumber = body.microchipNumber;
+        }
+
+        if ('profilePhotoKey' in body) {
+            if (body.profilePhotoKey !== null && body.profilePhotoKey !== undefined && typeof body.profilePhotoKey !== 'string') {
+                return json(
+                    { success: false, error: { code: 'VALIDATION_ERROR', message: 'profilePhotoKey must be a string' } },
+                    { status: 422 }
+                );
+            }
+            if (body.profilePhotoKey && !cat.photoS3Keys.includes(body.profilePhotoKey as string)) {
+                return json(
+                    { success: false, error: { code: 'VALIDATION_ERROR', message: 'profilePhotoKey must be one of the cat\'s uploaded photo keys' } },
+                    { status: 422 }
+                );
+            }
+            updates.profilePhotoKey = (body.profilePhotoKey as string | null | undefined) ?? undefined;
         }
 
         const now = new Date().toISOString();

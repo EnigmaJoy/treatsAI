@@ -25,7 +25,6 @@
     device = data.device;
   });
 
-  let firstCatPhotoUrl = $state<string | null>(data.firstCatPhotoUrl ?? null);
   let dispensing = $state(false);
 
   const totalCats = $derived(data.cats.length);
@@ -110,7 +109,7 @@
     alerts = alerts.filter(a => a.alertId !== alertId);
   }
 
-  // ── Derived stats for stat cards ──
+  // - Derived stats for stat cards -
   const todayStr = new Date().toISOString().split('T')[0];
   const todayDispensed = $derived(events.filter(e => e.timestamp.startsWith(todayStr) && e.outcome === 'dispensed').length);
   const todaySkipped   = $derived(events.filter(e => e.timestamp.startsWith(todayStr) && e.outcome === 'skipped').length);
@@ -141,7 +140,7 @@
     <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.dashboard_subtitle()}</p>
   </div>
 
-  <!-- ── Section 1: Stat cards ── -->
+  <!-- - Section 1: Stat cards - -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
     <!-- Card 1: Today's meals (progress ring) -->
@@ -189,12 +188,12 @@
     </div>
   </div>
 
-  <!-- ── Section 2: Alert banner ── -->
+  <!-- - Section 2: Alert banner - -->
   {#if alerts.length > 0}
     <AlertBanner {alerts} onDismiss={dismissAlert} />
   {/if}
 
-  <!-- ── Section 3: Middle row (cat status + device panel) ── -->
+  <!-- - Section 3: Middle row (cat status + device panel) - -->
   <div class="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-4">
 
     <!-- Left: Cat status card -->
@@ -204,17 +203,15 @@
 
         <!-- Cat header -->
         <div class="flex items-center gap-3">
-          {#if firstCatPhotoUrl}
+          {#if cat.profilePhotoUrl}
             <img
-              src={firstCatPhotoUrl}
+              src={cat.profilePhotoUrl}
               alt={cat.name}
-              style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #7C3AED;flex-shrink:0"
-              onerror={() => { firstCatPhotoUrl = null; }}
+              class="w-12 h-12 rounded-full object-cover border-2 border-[#7C3AED] shrink-0"
             />
           {:else}
             <div
-              class="w-[52px] h-[52px] rounded-full flex items-center justify-center text-2xl shrink-0"
-              style="background: linear-gradient(135deg, #7C3AED, #F59E0B)"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#F59E0B] flex items-center justify-center text-2xl shrink-0"
               aria-hidden="true"
             >🐱</div>
           {/if}
@@ -288,7 +285,7 @@
     {/if}
   </div>
 
-  <!-- ── Section 4: 7-day chart ── -->
+  <!-- - Section 4: 7-day chart - -->
   <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5">
     <!-- Header + custom legend -->
     <div class="flex items-center justify-between mb-4 flex-wrap gap-2">

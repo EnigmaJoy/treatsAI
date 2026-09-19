@@ -24,11 +24,14 @@ export interface Cat {
     consumptionBaseline: number;
     suggestedPortionGrams?: number;
     photoS3Keys: string[];
+    profilePhotoKey?: string;
     rekognitionCollectionId: string;
     microchipNumber?: string;
     weightReminderInterval: 3 | 7 | 14;
     createdAt: string;
     updatedAt: string;
+    // Computed fields returned by API responses (not stored in DB)
+    profilePhotoUrl?: string | null;
 }
 
 export interface FeedingEvent {

@@ -298,9 +298,9 @@
     <h1 style="font-size:28px; font-weight:700; color:white; margin:0 0 4px;">Welcome back</h1>
     <p style="font-size:13px; color:#94A3B8; margin:0 0 32px;">Sign in to your TreatsAI account to check on your cats.</p>
 
-    <!-- ─────────────────────────────────────
+    <!-- -
          Main login form
-    ───────────────────────────────────── -->
+    - -->
     {#if !showOtp}
 
       <!-- Email -->
@@ -406,9 +406,9 @@
 
     {/if}
 
-    <!-- ─────────────────────────────────────
+    <!-- -
          2FA / OTP section
-    ───────────────────────────────────── -->
+    - -->
     {#if showOtp}
       <!-- Divider -->
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">

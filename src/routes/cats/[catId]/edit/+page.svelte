@@ -20,6 +20,91 @@
   let loading = $state(false);
   let error   = $state('');
 
+  // Profile photo state
+  let profilePhotoUrl    = $state<string | null>((data.cat as any)?.profilePhotoUrl ?? null);
+  let pendingProfileKey  = $state<string | undefined>(cat?.profilePhotoKey ?? cat?.photoS3Keys?.[0]);
+  let photoPickerOpen    = $state(false);
+  let photoUrls          = $state<Array<{ key: string; url: string }>>((data.cat as any)?.photoUrls ?? []);
+  let uniquePhotoUrls    = $derived((() => {
+    const seenKeys = new Set<string>();
+    const result: Array<{ key: string; url: string }> = [];
+    for (const photo of photoUrls) {
+      if (photo.url && photo.key && !seenKeys.has(photo.key)) {
+        seenKeys.add(photo.key);
+        result.push(photo);
+      }
+    }
+    return result;
+  })());
+  let photoUploading     = $state(false);
+  let photoSaving        = $state(false);
+  let photoError         = $state('');
+
+  async function saveProfilePhoto() {
+    if (!pendingProfileKey) return;
+    photoSaving = true;
+    photoError = '';
+    try {
+      const res = await fetch(`/api/v1/cats/${catId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profilePhotoKey: pendingProfileKey })
+      });
+      const resJson = await res.json();
+      if (resJson.success) {
+        const found = photoUrls.find(p => p.key === pendingProfileKey);
+        if (found) profilePhotoUrl = found.url;
+        photoPickerOpen = false;
+      } else {
+        photoError = resJson.error?.message ?? 'Failed to update profile photo';
+      }
+    } catch {
+      photoError = 'Network error. Please try again.';
+    } finally {
+      photoSaving = false;
+    }
+  }
+
+  async function handleNewPhotoUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!ALLOWED.includes(file.type)) {
+      photoError = 'Only JPEG, PNG, or WebP files are allowed';
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      photoError = 'File must be no larger than 15MB';
+      return;
+    }
+
+    photoUploading = true;
+    photoError = '';
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      const res = await fetch(`/api/v1/cats/${catId}/photo`, {
+        method: 'POST',
+        body: formData
+      });
+      const resJson = await res.json();
+      if (resJson.success) {
+        const { s3Key, url } = resJson.data;
+        photoUrls = [...photoUrls, { key: s3Key, url }];
+        pendingProfileKey = s3Key;
+      } else {
+        photoError = resJson.error?.message ?? 'Upload failed';
+      }
+    } catch {
+      photoError = 'Upload failed. Please try again.';
+    } finally {
+      photoUploading = false;
+      input.value = '';
+    }
+  }
+
   async function handleSubmit() {
     if (!name.trim()) { error = 'Name is required'; return; }
     const kg = parseFloat(currentWeightKg);
@@ -90,6 +175,105 @@
           <p class="text-red-400 text-sm">{error}</p>
         </div>
       {/if}
+
+      <!-- Profile photo -->
+      <div class="flex flex-col gap-3">
+        <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Profile photo</p>
+        <div class="flex items-center gap-4">
+          {#if profilePhotoUrl}
+            <img
+              src={profilePhotoUrl}
+              alt={cat.name}
+              class="w-20 h-20 rounded-full object-cover border-2 border-[#7c3aed] shrink-0"
+              onerror={() => { profilePhotoUrl = null; }}
+            />
+          {:else}
+            <div
+              class="w-20 h-20 rounded-full flex items-center justify-center text-3xl shrink-0 select-none"
+              style="background: linear-gradient(135deg, #7c3aed, #f59e0b);"
+              aria-hidden="true"
+            >🐱</div>
+          {/if}
+          <button
+            type="button"
+            onclick={() => { photoPickerOpen = !photoPickerOpen; photoError = ''; if (photoPickerOpen) { console.log('[photo picker] opened, photoUrls:', photoUrls); } }}
+            class="text-sm font-medium text-[#a78bfa] hover:text-white transition-colors"
+          >
+            {photoPickerOpen ? 'Close picker' : 'Change photo'}
+          </button>
+        </div>
+
+        {#if photoPickerOpen}
+          <div class="bg-[#0f0f1a] border border-white/10 rounded-xl p-4 flex flex-col gap-4">
+            {#if photoError}
+              <p class="text-red-400 text-sm">{photoError}</p>
+            {/if}
+
+            {#if uniquePhotoUrls.length > 0}
+              <div>
+                <p class="text-slate-500 text-xs mb-3">Choose from uploaded photos</p>
+                <div class="flex flex-wrap gap-2">
+                  {#each uniquePhotoUrls as photo (photo.key)}
+                    <button
+                      type="button"
+                      onclick={() => (pendingProfileKey = photo.key)}
+                      class="w-[60px] h-[60px] rounded-lg overflow-hidden border-2 transition-all shrink-0"
+                      style="border-color:{pendingProfileKey === photo.key ? '#7c3aed' : 'rgba(255,255,255,0.1)'}"
+                    >
+                      <img
+                        src={photo.url}
+                        alt="Cat photo"
+                        class="w-full h-full object-cover rounded-lg"
+                        onerror={(e) => {
+                          const target = e.currentTarget;
+                          target.closest('button').style.display = 'none';
+                        }}
+                      />
+                    </button>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+
+            <div>
+              <p class="text-slate-500 text-xs mb-2">Upload a new photo</p>
+              <label
+                class="cursor-pointer inline-flex items-center gap-2 bg-[#1a1a2e] border border-white/10 hover:border-white/20 text-slate-300 text-sm px-3 py-2 rounded-lg transition-colors {photoUploading ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''}"
+              >
+                {photoUploading ? 'Uploading...' : 'Choose file'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="hidden"
+                  disabled={photoUploading}
+                  onchange={handleNewPhotoUpload}
+                />
+              </label>
+              <p class="text-slate-600 text-xs mt-1">JPEG, PNG, WebP - max 15MB</p>
+            </div>
+
+            <div class="flex gap-2 pt-1 border-t border-white/5">
+              <button
+                type="button"
+                onclick={() => { photoPickerOpen = false; photoError = ''; }}
+                class="flex-1 text-center bg-transparent border border-white/10 hover:border-white/20 text-slate-400 hover:text-white font-medium py-2 rounded-xl transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onclick={saveProfilePhoto}
+                disabled={!pendingProfileKey || photoSaving}
+                class="flex-1 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-60 text-white font-medium py-2 rounded-xl transition-colors text-sm"
+              >
+                {photoSaving ? 'Saving...' : 'Save profile photo'}
+              </button>
+            </div>
+          </div>
+        {/if}
+      </div>
+
+      <div class="h-px bg-white/5"></div>
 
       <!-- Name -->
       <div class="flex flex-col gap-1.5">
