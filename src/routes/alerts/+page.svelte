@@ -20,11 +20,11 @@
 
   function typeBadgeStyle(type: AlertType): { bg: string; text: string; border: string } {
     switch (type) {
-      case 'skip_meal':           return { bg: 'rgba(245,158,11,0.15)',  text: '#F59E0B', border: 'rgba(245,158,11,0.35)' };
-      case 'baseline_deviation':  return { bg: 'rgba(249,115,22,0.15)',  text: '#FB923C', border: 'rgba(249,115,22,0.35)' };
-      case 'weight_reminder':     return { bg: 'rgba(139,92,246,0.15)',  text: '#A78BFA', border: 'rgba(139,92,246,0.35)' };
-      case 'low_food_level':      return { bg: 'rgba(239,68,68,0.15)',   text: '#F87171', border: 'rgba(239,68,68,0.35)'  };
-      default:                    return { bg: 'rgba(148,163,184,0.15)', text: '#94A3B8', border: 'rgba(148,163,184,0.35)' };
+      case 'skip_meal':           return { bg: 'rgba(245,158,11,0.15)',  text: 'var(--theme-warning)', border: 'rgba(245,158,11,0.35)' };
+      case 'baseline_deviation':  return { bg: 'rgba(249,115,22,0.15)',  text: 'var(--theme-orange)', border: 'rgba(249,115,22,0.35)' };
+      case 'weight_reminder':     return { bg: 'rgba(139,92,246,0.15)',  text: 'var(--theme-primary-soft)', border: 'rgba(139,92,246,0.35)' };
+      case 'low_food_level':      return { bg: 'rgba(239,68,68,0.15)',   text: 'var(--theme-danger)', border: 'rgba(239,68,68,0.35)'  };
+      default:                    return { bg: 'rgba(148,163,184,0.15)', text: 'var(--theme-text-muted)', border: 'rgba(148,163,184,0.35)' };
     }
   }
 
@@ -69,29 +69,29 @@
   <!-- Page header -->
   <div>
     <div class="flex items-center gap-2.5">
-      <h1 class="text-[18px] font-bold text-[#F8FAFC]">{m.alerts_title()}</h1>
+      <h1 class="text-[18px] font-bold text-fg">{m.alerts_title()}</h1>
       {#if alertCount > 0}
-        <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">
+        <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-warning border border-amber-500/40">
           {alertCount}
         </span>
       {/if}
     </div>
-    <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.alerts_subtitle()}</p>
+    <p class="text-[12px] text-fg-muted mt-0.5">{m.alerts_subtitle()}</p>
   </div>
 
   <!-- Tabs -->
-  <div class="flex gap-1 p-1 rounded-[10px] w-fit" style="background:var(--color-surface); border:1px solid #2D2D4A">
+  <div class="flex gap-1 p-1 rounded-[10px] w-fit" style="background:var(--theme-surface); border:1px solid var(--theme-border)">
     <button
       type="button"
       class="px-4 py-1.5 rounded-[7px] text-[13px] font-medium transition-all duration-150
         {activeTab === 'active'
-          ? 'bg-[rgba(124,58,237,0.18)] text-[#A78BFA] border border-[rgba(124,58,237,0.4)]'
-          : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[rgba(255,255,255,0.04)] border border-transparent'}"
+          ? 'bg-primary/18 text-primary-soft border border-primary/40'
+          : 'text-fg-muted hover:text-fg hover:bg-hover border border-transparent'}"
       onclick={() => (activeTab = 'active')}
     >
       {m.alert_tab_active()}
       {#if alertCount > 0}
-        <span class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold bg-amber-500/30 text-amber-400">
+        <span class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold bg-amber-500/30 text-warning">
           {alertCount}
         </span>
       {/if}
@@ -100,8 +100,8 @@
       type="button"
       class="px-4 py-1.5 rounded-[7px] text-[13px] font-medium transition-all duration-150
         {activeTab === 'history'
-          ? 'bg-[rgba(124,58,237,0.18)] text-[#A78BFA] border border-[rgba(124,58,237,0.4)]'
-          : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[rgba(255,255,255,0.04)] border border-transparent'}"
+          ? 'bg-primary/18 text-primary-soft border border-primary/40'
+          : 'text-fg-muted hover:text-fg hover:bg-hover border border-transparent'}"
       onclick={() => (activeTab = 'history')}
     >
       {m.alert_tab_history()}
@@ -109,7 +109,7 @@
   </div>
 
   <!-- Table card -->
-  <div class="rounded-[12px] border border-[#2D2D4A] overflow-hidden" style="background:var(--color-surface)">
+  <div class="rounded-[12px] border border-line overflow-hidden bg-surface">
 
     {#if loading}
       <div class="flex justify-center py-12">
@@ -123,25 +123,25 @@
       {#if rows.length === 0}
         <!-- Empty state -->
         <div class="flex flex-col items-center justify-center py-20 px-6 text-center gap-2">
-          <p class="text-[15px] font-semibold text-[#F8FAFC]">{m.alert_empty_title()}</p>
-          <p class="text-[13px] text-[#94A3B8] max-w-xs">{m.alert_empty_desc()}</p>
+          <p class="text-[15px] font-semibold text-fg">{m.alert_empty_title()}</p>
+          <p class="text-[13px] text-fg-muted max-w-xs">{m.alert_empty_desc()}</p>
         </div>
 
       {:else}
         <table class="w-full text-[13px]">
           <thead>
-            <tr class="border-b border-[#2D2D4A]">
-              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_type()}</th>
-              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_cat()}</th>
-              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_triggered()}</th>
-              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_status()}</th>
-              <th class="text-left text-[11px] font-medium text-[#94A3B8] uppercase tracking-wide px-4 py-3">{m.alert_col_action()}</th>
+            <tr class="border-b border-line">
+              <th class="text-left text-[11px] font-medium text-fg-muted uppercase tracking-wide px-4 py-3">{m.alert_col_type()}</th>
+              <th class="text-left text-[11px] font-medium text-fg-muted uppercase tracking-wide px-4 py-3">{m.alert_col_cat()}</th>
+              <th class="text-left text-[11px] font-medium text-fg-muted uppercase tracking-wide px-4 py-3">{m.alert_col_triggered()}</th>
+              <th class="text-left text-[11px] font-medium text-fg-muted uppercase tracking-wide px-4 py-3">{m.alert_col_status()}</th>
+              <th class="text-left text-[11px] font-medium text-fg-muted uppercase tracking-wide px-4 py-3">{m.alert_col_action()}</th>
             </tr>
           </thead>
           <tbody>
             {#each rows as alert (alert.alertId)}
               {@const badge = typeBadgeStyle(alert.type)}
-              <tr class="border-b border-[#2D2D4A] last:border-0 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+              <tr class="border-b border-line last:border-0 hover:bg-hover transition-colors">
 
                 <!-- Type badge -->
                 <td class="px-4 py-3">
@@ -154,23 +154,23 @@
                 </td>
 
                 <!-- Cat -->
-                <td class="px-4 py-3 text-[#F8FAFC]">
+                <td class="px-4 py-3 text-fg">
                   {alert.catName ?? '—'}
                 </td>
 
                 <!-- Triggered -->
-                <td class="px-4 py-3 text-[#94A3B8]">
+                <td class="px-4 py-3 text-fg-muted">
                   {timeSince(alert.triggeredAt)}
                 </td>
 
                 <!-- Status -->
                 <td class="px-4 py-3">
                   {#if alert.status === 'acknowledged'}
-                    <span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-success border border-emerald-500/30">
                       {m.alert_acknowledged()}
                     </span>
                   {:else}
-                    <span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                    <span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-warning border border-amber-500/30">
                       {m.alert_active()}
                     </span>
                   {/if}
@@ -181,13 +181,13 @@
                   {#if alert.status !== 'acknowledged'}
                     <button
                       type="button"
-                      class="text-[12px] font-medium px-3 py-1.5 rounded-[6px] border border-[#2D2D4A] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[rgba(124,58,237,0.4)] hover:bg-[rgba(124,58,237,0.08)] transition-all duration-150"
+                      class="text-[12px] font-medium px-3 py-1.5 rounded-[6px] border border-line text-fg-muted hover:text-fg hover:border-primary/40 hover:bg-primary/8 transition-all duration-150"
                       onclick={() => acknowledge(alert.alertId)}
                     >
                       {m.alert_dismiss()}
                     </button>
                   {:else}
-                    <span class="text-[#2D2D4A] text-[12px]">—</span>
+                    <span class="text-fg-subtle text-[12px]">—</span>
                   {/if}
                 </td>
 

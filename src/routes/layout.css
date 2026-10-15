@@ -1,15 +1,94 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
+/* Theme tokens. <html data-theme="dark|light"> is set by src/lib/theme.ts (and early in app.html).
+   The palette (src/lib/palette.ts) sets --palette-* for the dark surfaces plus --theme-primary/--theme-accent;
+   light mode ignores the palette's dark surfaces so it stays readable.
+   Components use the Tailwind utilities registered below (bg-surface, text-fg, border-line, ...)
+   or var(--theme-*) in inline styles - never raw hex for anything that should follow the theme. */
 :root {
-  --color-bg:      #0F0F1A;
-  --color-surface: #1A1A2E;
-  --color-border:  #2D2D4A;
-  --color-primary: #7C3AED;
-  --color-accent:  #F59E0B;
+  --theme-bg:            var(--palette-bg, #0F0F1A);
+  --theme-surface:       var(--palette-surface, #1A1A2E);
+  --theme-inset:         var(--palette-bg, #0F0F1A);
+  --theme-border:        var(--palette-border, #2D2D4A);
+  --theme-border-subtle: rgba(255, 255, 255, 0.06);
+  --theme-border-strong: rgba(255, 255, 255, 0.2);
+  --theme-hover:         rgba(255, 255, 255, 0.04);
+  --theme-overlay:       rgba(15, 15, 26, 0.85);
+  --theme-shadow:        rgba(0, 0, 0, 0.45);
+
+  --theme-text:          #F8FAFC;
+  --theme-text-muted:    #94A3B8;
+  --theme-text-subtle:   #64748B;
+
+  --theme-primary:       #7C3AED;
+  --theme-primary-hover: color-mix(in srgb, var(--theme-primary) 85%, black);
+  --theme-primary-soft:  color-mix(in srgb, var(--theme-primary) 60%, white);
+  --theme-accent:        #F59E0B;
+
+  --theme-success:       #10B981;
+  --theme-warning:       #FBBF24;
+  --theme-danger:        #EF4444;
+  --theme-info:          #22D3EE;
+  --theme-orange:        #FB923C;
+
+  color-scheme: dark;
+}
+
+/* Light: high-contrast text (body ~16:1, muted ~7:1 on white) and darker status colours
+   so tinted badges stay legible on light surfaces. */
+:root[data-theme='light'] {
+  --theme-bg:            #F1F5F9;
+  --theme-surface:       #FFFFFF;
+  --theme-inset:         #F8FAFC;
+  --theme-border:        #E2E8F0;
+  --theme-border-subtle: #EEF2F6;
+  --theme-border-strong: #CBD5E1;
+  --theme-hover:         rgba(15, 23, 42, 0.05);
+  --theme-overlay:       rgba(241, 245, 249, 0.85);
+  --theme-shadow:        rgba(15, 23, 42, 0.12);
+
+  --theme-text:          #0F172A;
+  --theme-text-muted:    #475569;
+  --theme-text-subtle:   #64748B;
+
+  --theme-primary-soft:  color-mix(in srgb, var(--theme-primary) 80%, black);
+
+  --theme-success:       #047857;
+  --theme-warning:       #B45309;
+  --theme-danger:        #DC2626;
+  --theme-info:          #0E7490;
+  --theme-orange:        #C2410C;
+
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-app:           var(--theme-bg);
+  --color-surface:       var(--theme-surface);
+  --color-inset:         var(--theme-inset);
+  --color-line:          var(--theme-border);
+  --color-line-subtle:   var(--theme-border-subtle);
+  --color-line-strong:   var(--theme-border-strong);
+  --color-hover:         var(--theme-hover);
+
+  --color-fg:            var(--theme-text);
+  --color-fg-muted:      var(--theme-text-muted);
+  --color-fg-subtle:     var(--theme-text-subtle);
+
+  --color-primary:       var(--theme-primary);
+  --color-primary-hover: var(--theme-primary-hover);
+  --color-primary-soft:  var(--theme-primary-soft);
+  --color-accent:        var(--theme-accent);
+
+  --color-success:       var(--theme-success);
+  --color-warning:       var(--theme-warning);
+  --color-danger:        var(--theme-danger);
+  --color-info:          var(--theme-info);
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--color-bg);
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
 }

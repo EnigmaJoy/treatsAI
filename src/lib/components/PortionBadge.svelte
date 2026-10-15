@@ -15,13 +15,13 @@
 
   const colorClass = $derived.by(() => {
     if (!suggestedPortionGrams) {
-      return 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40';
+      return 'bg-primary/20 text-primary-soft border border-primary/40';
     }
     const diff = Math.abs(portionGrams - suggestedPortionGrams) / suggestedPortionGrams;
     if (diff > 0.10) {
-      return 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      return 'bg-amber-500/20 text-warning border border-amber-500/40';
     }
-    return 'bg-[#06b6d4]/20 text-[#22d3ee] border border-[#06b6d4]/40';
+    return 'bg-[#06b6d4]/20 text-info border border-[#06b6d4]/40';
   });
 
   const showWarning = $derived(

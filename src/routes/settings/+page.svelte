@@ -5,6 +5,7 @@
   import { setLocale, getLocale } from '$lib/paraglide/runtime';
   import * as m from '$lib/paraglide/messages';
   import { applyPalette, getSavedPalette } from '$lib/palette';
+  import { applyTheme, getSavedTheme, type Theme } from '$lib/theme';
 
   let { data } = $props();
 
@@ -31,6 +32,9 @@
 
   // Fetch cats on mount + restore saved preferences
   onMount(async () => {
+    // Sync theme dropdown to the saved choice (already applied by app.html)
+    selectedTheme = getSavedTheme();
+
     const res = await fetch('/api/v1/cats');
     if (res.ok) {
       cats = (await res.json()).data?.cats ?? [];
@@ -114,7 +118,7 @@
   type Section = 'appearance' | 'feeder' | 'notifications' | 'household' | 'security' | 'account';
   let activeSection = $state<Section>('appearance');
 
-  let selectedTheme = $state<'dark' | 'light' | 'system'>('dark');
+  let selectedTheme = $state<Theme>('dark');
   let selectedLanguage = $state<'en' | 'it' | 'es'>('en');
   let selectedPalette = $state('midnight-paws');
 
@@ -158,20 +162,20 @@
 
   <!-- Left sub-nav -->
   <aside class="w-full md:w-[180px] md:shrink-0">
-    <nav class="flex flex-row overflow-x-auto gap-2 pb-2 border-b border-[#2D2D4A] md:flex-col md:gap-0.5 md:pb-0 md:border-b-0">
+    <nav class="flex flex-row overflow-x-auto gap-2 pb-2 border-b border-line md:flex-col md:gap-0.5 md:pb-0 md:border-b-0">
       {#each navItems as item}
         <button
           type="button"
           onclick={() => (activeSection = item.id)}
           class="flex items-center gap-2 rounded-[8px] text-sm text-left flex-shrink-0 md:w-full transition-all duration-150
             {activeSection === item.id
-              ? 'bg-[rgba(124,58,237,0.12)] text-[#F8FAFC] font-semibold'
-              : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[rgba(255,255,255,0.04)]'}"
+              ? 'bg-primary/12 text-fg font-semibold'
+              : 'text-fg-muted hover:text-fg hover:bg-hover'}"
           style="padding: 9px 12px;"
         >
           {item.label}
           {#if !item.active && activeSection !== item.id}
-            <span class="ml-auto text-[9px] text-[#94A3B8] bg-[#2D2D4A] rounded px-1 py-0.5 shrink-0">{m.settings_soon()}</span>
+            <span class="ml-auto text-[9px] text-fg-muted bg-line rounded px-1 py-0.5 shrink-0">{m.settings_soon()}</span>
           {/if}
         </button>
       {/each}
@@ -183,22 +187,23 @@
 
     <!-- ══ APPEARANCE ══ -->
     {#if activeSection === 'appearance'}
-      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-4 md:p-6 flex flex-col gap-6">
+      <div class="bg-surface border border-line rounded-xl p-4 md:p-6 flex flex-col gap-6">
         <!-- Header -->
         <div>
-          <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_appearance()}</h2>
-          <p class="text-[13px] text-[#94A3B8]">{m.settings_appearance_desc()}</p>
+          <h2 class="text-[16px] font-bold text-fg mb-0.5">{m.settings_appearance()}</h2>
+          <p class="text-[13px] text-fg-muted">{m.settings_appearance_desc()}</p>
         </div>
 
         <!-- Theme row -->
         <div class="relative flex items-center justify-between gap-4">
           <div>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_theme()}</p>
-            <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.settings_theme_desc()}</p>
+            <p class="text-[13px] font-medium text-fg">{m.settings_theme()}</p>
+            <p class="text-[12px] text-fg-muted mt-0.5">{m.settings_theme_desc()}</p>
           </div>
           <select
             bind:value={selectedTheme}
-            class="bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer shrink-0"
+            onchange={(e) => applyTheme(e.currentTarget.value as Theme)}
+            class="bg-inset border border-line rounded-lg px-3 py-2 text-fg text-sm outline-none focus:border-primary transition-colors cursor-pointer shrink-0"
             style="min-width:130px;"
           >
             <option value="dark">{m.settings_theme_dark()}</option>
@@ -208,13 +213,13 @@
         </div>
 
         <!-- Divider -->
-        <div class="h-px bg-[#2D2D4A]"></div>
+        <div class="h-px bg-line"></div>
 
         <!-- Language row -->
         <div class="flex items-center justify-between gap-4">
           <div>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_language()}</p>
-            <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.settings_language_desc()}</p>
+            <p class="text-[13px] font-medium text-fg">{m.settings_language()}</p>
+            <p class="text-[12px] text-fg-muted mt-0.5">{m.settings_language_desc()}</p>
           </div>
           <div class="flex gap-2 shrink-0 flex-wrap">
             {#each (['en', 'it', 'es'] as const) as lang}
@@ -223,8 +228,8 @@
                 onclick={() => switchLanguage(lang)}
                 class="flex-shrink-0 min-w-[44px] text-center px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-all duration-150"
                 style="{selectedLanguage === lang
-                  ? 'border-color:#7C3AED;background:rgba(124,58,237,0.1);color:#7C3AED;'
-                  : 'border-color:#2D2D4A;background:#0F0F1A;color:#94A3B8;'}"
+                  ? 'border-color:var(--theme-primary);background:color-mix(in srgb, var(--theme-primary) 10%, transparent);color:var(--theme-primary);'
+                  : 'border-color:var(--theme-border);background:var(--theme-inset);color:var(--theme-text-muted);'}"
               >
                 {lang.toUpperCase()}
               </button>
@@ -233,12 +238,12 @@
         </div>
 
         <!-- Divider -->
-        <div class="h-px bg-[#2D2D4A]"></div>
+        <div class="h-px bg-line"></div>
 
         <!-- Colour palette -->
         <div>
-          <p class="text-[13px] font-medium text-[#F8FAFC] mb-0.5">{m.settings_palette()}</p>
-          <p class="text-[12px] text-[#94A3B8] mb-4">{m.settings_palette_desc()}</p>
+          <p class="text-[13px] font-medium text-fg mb-0.5">{m.settings_palette()}</p>
+          <p class="text-[12px] text-fg-muted mb-4">{m.settings_palette_desc()}</p>
 
           <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             {#each palettes as palette}
@@ -246,12 +251,12 @@
               <button
                 type="button"
                 onclick={() => { selectedPalette = palette.id; applyPalette(palette.id); }}
-                class="relative text-left rounded-xl p-3 border-2 transition-all duration-150 hover:border-[#7C3AED] min-w-0 overflow-hidden"
-                style="border-color:{selected ? '#7C3AED' : '#2D2D4A'}; background:{selected ? 'rgba(124,58,237,0.06)' : 'transparent'};"
+                class="relative text-left rounded-xl p-3 border-2 transition-all duration-150 hover:border-primary min-w-0 overflow-hidden"
+                style="border-color:{selected ? 'var(--theme-primary)' : 'var(--theme-border)'}; background:{selected ? 'color-mix(in srgb, var(--theme-primary) 6%, transparent)' : 'transparent'};"
               >
                 <!-- Checkmark -->
                 {#if selected}
-                  <div class="absolute top-2 right-2 w-4 h-4 rounded-full bg-[#7C3AED] flex items-center justify-center">
+                  <div class="absolute top-2 right-2 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
                     <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
@@ -263,8 +268,8 @@
                     <div class="w-5 h-5 rounded-full shrink-0" style="background:{color};"></div>
                   {/each}
                 </div>
-                <p class="text-[12px] font-semibold text-[#F8FAFC] leading-tight">{palette.name}</p>
-                <p class="text-[11px] text-[#94A3B8] mt-0.5">{palette.vibe}</p>
+                <p class="text-[12px] font-semibold text-fg leading-tight">{palette.name}</p>
+                <p class="text-[11px] text-fg-muted mt-0.5">{palette.vibe}</p>
               </button>
             {/each}
           </div>
@@ -273,28 +278,28 @@
 
     <!-- ══ FEEDER ══ -->
     {:else if activeSection === 'feeder'}
-      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-6 flex flex-col gap-5">
+      <div class="bg-surface border border-line rounded-xl p-6 flex flex-col gap-5">
         <!-- Header -->
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-0.5">{m.settings_feeder_title()}</h2>
-            <p class="text-[13px] text-[#94A3B8]">{m.settings_feeder_subtitle()}</p>
+            <h2 class="text-[16px] font-bold text-fg mb-0.5">{m.settings_feeder_title()}</h2>
+            <p class="text-[13px] text-fg-muted">{m.settings_feeder_subtitle()}</p>
           </div>
           <img src="/feeder.svg" alt="TreatsAI Feeder" class="h-[120px] w-auto shrink-0 opacity-90 select-none" draggable="false" />
         </div>
 
         <!-- Online status row -->
-        <div class="flex items-center gap-3 rounded-lg px-4 py-3" style="background:#0F0F1A;border:1px solid #2D2D4A;">
+        <div class="flex items-center gap-3 rounded-lg px-4 py-3" style="background:var(--theme-inset);border:1px solid var(--theme-border);">
           <span class="w-2 h-2 rounded-full shrink-0
             {device?.status === 'online'
               ? 'bg-[#10B981] shadow-[0_0_6px_2px_rgba(16,185,129,0.4)]'
               : 'bg-[#EF4444]'}">
           </span>
           <div>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">
+            <p class="text-[13px] font-medium text-fg">
               {device?.status === 'online' ? m.settings_feeder_online() : m.settings_feeder_offline()}
             </p>
-            <p class="text-[11px] text-[#94A3B8]">
+            <p class="text-[11px] text-fg-muted">
               {m.settings_firmware_v()}{device?.firmwareVersion ?? '—'}
             </p>
           </div>
@@ -303,26 +308,26 @@
         <!-- Food reservoir bar -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <label for="reservoir-level" class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_food_reservoir()}</label>
-            <span class="text-[13px] font-bold" style="color:#7C3AED;">{foodReservoirPercent}%</span>
+            <label for="reservoir-level" class="text-[13px] font-medium text-fg">{m.settings_food_reservoir()}</label>
+            <span class="text-[13px] font-bold" style="color:var(--theme-primary);">{foodReservoirPercent}%</span>
           </div>
-          <div class="h-2 rounded-full overflow-hidden" style="background:#0F0F1A;">
+          <div class="h-2 rounded-full overflow-hidden" style="background:var(--theme-inset);">
             <div
               class="h-full rounded-full transition-all duration-500"
-              style="width:{Math.min(100, Math.max(0, foodReservoirPercent))}%;background:#7C3AED;"
+              style="width:{Math.min(100, Math.max(0, foodReservoirPercent))}%;background:var(--theme-primary);"
             ></div>
           </div>
         </div>
 
         <!-- Food type input -->
         <div>
-          <label for="food-type-label" class="text-[12px] text-[#94A3B8] mb-1.5 block">{m.settings_food_type()}</label>
+          <label for="food-type-label" class="text-[12px] text-fg-muted mb-1.5 block">{m.settings_food_type()}</label>
           <input
             id="food-type-label"
             type="text"
             bind:value={currentFoodTypeLabel}
             placeholder="e.g. Royal Canin Indoor Adult"
-            class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+            class="w-full bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors placeholder-fg-subtle"
           />
         </div>
 
@@ -332,7 +337,7 @@
             type="button"
             onclick={saveFeederSettings}
             disabled={feederSaving}
-            class="bg-[#7C3AED] hover:bg-[#8B5CF6] disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-semibold transition-colors"
+            class="bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-semibold transition-colors"
           >
             {feederSaving ? m.common_saving() : m.settings_save_changes()}
           </button>
@@ -340,43 +345,43 @@
             type="button"
             onclick={simulateRefill}
             disabled={feederSaving}
-            class="bg-transparent border border-[#2D2D4A] text-[#94A3B8] hover:text-[#F8FAFC] hover:border-[#94A3B8] rounded-lg px-5 py-2 text-sm transition-colors disabled:opacity-60"
+            class="bg-transparent border border-line text-fg-muted hover:text-fg hover:border-fg-muted rounded-lg px-5 py-2 text-sm transition-colors disabled:opacity-60"
           >
             {m.settings_simulate_refill()}
           </button>
           {#if feederToast}
-            <span class="text-[12px] text-[#10B981]">{feederToast}</span>
+            <span class="text-[12px] text-success">{feederToast}</span>
           {/if}
         </div>
       </div>
 
     <!-- ══ COMING SOON ══ -->
     {:else}
-      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-10 flex flex-col items-center justify-center gap-3 text-center">
-        <div class="w-10 h-10 rounded-full bg-[rgba(124,58,237,0.12)] flex items-center justify-center mb-1">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <div class="bg-surface border border-line rounded-xl p-10 flex flex-col items-center justify-center gap-3 text-center">
+        <div class="w-10 h-10 rounded-full bg-primary/12 flex items-center justify-center mb-1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
         </div>
-        <p class="text-[14px] font-semibold text-[#F8FAFC]">{m.settings_coming_soon()}</p>
-        <p class="text-[12px] text-[#94A3B8]">{m.settings_coming_soon_desc()}</p>
+        <p class="text-[14px] font-semibold text-fg">{m.settings_coming_soon()}</p>
+        <p class="text-[12px] text-fg-muted">{m.settings_coming_soon_desc()}</p>
       </div>
     {/if}
 
     <!-- ══ DANGER ZONE ══ -->
-    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-xl p-6">
-      <h2 class="text-[16px] font-bold text-[#F8FAFC] mb-4">{m.settings_danger_zone()}</h2>
+    <div class="bg-surface border border-line rounded-xl p-6">
+      <h2 class="text-[16px] font-bold text-fg mb-4">{m.settings_danger_zone()}</h2>
       <div class="flex items-center justify-between gap-4">
         <div>
-          <p class="text-[13px] font-medium text-[#F8FAFC]">{m.settings_delete_account()}</p>
-          <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.settings_delete_account_desc()}</p>
+          <p class="text-[13px] font-medium text-fg">{m.settings_delete_account()}</p>
+          <p class="text-[12px] text-fg-muted mt-0.5">{m.settings_delete_account_desc()}</p>
         </div>
         <button
           type="button"
           onclick={signOut}
-          class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-[#EF4444] transition-colors hover:bg-[rgba(239,68,68,0.1)]"
+          class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-danger transition-colors hover:bg-[rgba(239,68,68,0.1)]"
           style="border:1px solid rgba(239,68,68,0.4);"
         >
           {m.settings_delete_account()}
@@ -385,7 +390,7 @@
     </div>
 
     <!-- ══ VERSION FOOTER ══ -->
-    <p class="text-xs text-[#94A3B8] text-center mt-2 pb-2">
+    <p class="text-xs text-fg-muted text-center mt-2 pb-2">
       TreatsAI v1.0.0 · Hack the Kitty · Cat World Domination Day 2026
     </p>
 

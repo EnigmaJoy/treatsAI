@@ -17,12 +17,12 @@
   <!-- Page header -->
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-white">{m.cats_title()}</h1>
-      <p class="text-slate-500 text-sm mt-0.5">{m.cats_subtitle()}</p>
+      <h1 class="text-2xl font-bold text-fg">{m.cats_title()}</h1>
+      <p class="text-fg-subtle text-sm mt-0.5">{m.cats_subtitle()}</p>
     </div>
     <a
       href="/cats/new"
-      class="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors duration-150"
+      class="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors duration-150"
     >
       <span aria-hidden="true">+</span>
       {m.cats_add()}
@@ -36,12 +36,12 @@
     <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
       <span class="text-6xl">🐱</span>
       <div>
-        <h2 class="text-white font-semibold text-lg">{m.cats_none()}</h2>
-        <p class="text-slate-500 text-sm mt-1">{m.cats_none_desc()}</p>
+        <h2 class="text-fg font-semibold text-lg">{m.cats_none()}</h2>
+        <p class="text-fg-subtle text-sm mt-1">{m.cats_none_desc()}</p>
       </div>
       <a
         href="/cats/new"
-        class="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors duration-150 mt-2"
+        class="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors duration-150 mt-2"
       >
         <span aria-hidden="true">+</span>
         {m.cats_add_first()}

@@ -14,11 +14,12 @@ export function applyPalette(name: string): void {
     const p = paletteDefs[name];
     if (!p) return;
     const root = document.documentElement;
-    root.style.setProperty('--color-bg',     p.bg);
-    root.style.setProperty('--color-surface', p.surface);
-    root.style.setProperty('--color-border',  p.border);
-    root.style.setProperty('--color-primary', p.primary);
-    root.style.setProperty('--color-accent',  p.accent);
+    // Surfaces go through --palette-* so light mode (layout.css) can override them
+    root.style.setProperty('--palette-bg',      p.bg);
+    root.style.setProperty('--palette-surface', p.surface);
+    root.style.setProperty('--palette-border',  p.border);
+    root.style.setProperty('--theme-primary', p.primary);
+    root.style.setProperty('--theme-accent',  p.accent);
     localStorage.setItem(PALETTE_KEY, name);
 }
 

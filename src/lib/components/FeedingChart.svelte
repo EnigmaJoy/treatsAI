@@ -9,6 +9,7 @@
     Tooltip,
     Legend,
   } from 'chart.js';
+  import { followTheme } from '$lib/chartTheme';
   import type { FeedingOutcome } from '$lib/types';
 
   Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
@@ -98,16 +99,9 @@
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            labels: {
-              color: '#9ca3af',
-              font: { size: 12 },
-            },
+            labels: { font: { size: 12 } },
           },
           tooltip: {
-            backgroundColor: '#1a1a2e',
-            titleColor: '#e5e7eb',
-            bodyColor: '#9ca3af',
-            borderColor: '#7c3aed',
             borderWidth: 1,
             callbacks: {
               label: (ctx) => ` ${ctx.parsed.y}g`,
@@ -117,24 +111,17 @@
         scales: {
           x: {
             stacked: false,
-            ticks: { color: '#9ca3af' },
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            border: { color: 'rgba(255,255,255,0.1)' },
           },
           y: {
             stacked: false,
             beginAtZero: true,
             ticks: {
-              color: '#9ca3af',
               stepSize: 1,
               callback: (val) => (Number.isInteger(Number(val)) ? val : ''),
             },
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            border: { color: 'rgba(255,255,255,0.1)' },
             title: {
               display: true,
               text: 'Meals',
-              color: '#9ca3af',
               font: { size: 11 },
             },
           },
@@ -142,12 +129,15 @@
       },
     });
 
+    const stopFollowingTheme = followTheme(chart);
+
     return () => {
+      stopFollowingTheme();
       chart?.destroy();
     };
   });
 </script>
 
-<div class="w-full h-64 bg-[#1a1a2e] rounded-2xl p-4 border border-[#7c3aed]/20">
+<div class="w-full h-64 bg-surface rounded-2xl p-4 border border-line">
   <canvas bind:this={canvas}></canvas>
 </div>

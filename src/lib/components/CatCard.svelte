@@ -24,13 +24,13 @@
   );
 
   const goalClass = $derived(
-    weightGoal === 'weight_loss' ? 'bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40' :
-    weightGoal === 'weight_gain' ? 'bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/40' :
-    'bg-[#06b6d4]/20 text-[#22d3ee] border border-[#06b6d4]/40'
+    weightGoal === 'weight_loss' ? 'bg-primary/20 text-primary-soft border border-primary/40' :
+    weightGoal === 'weight_gain' ? 'bg-[#f59e0b]/20 text-warning border border-[#f59e0b]/40' :
+    'bg-[#06b6d4]/20 text-info border border-[#06b6d4]/40'
   );
 
-  const cardBase = 'bg-[#1a1a2e] border border-[#7c3aed]/30 rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200 text-left w-full';
-  const cardHover = 'hover:border-[#7c3aed]/70 hover:shadow-lg hover:shadow-[#7c3aed]/20';
+  const cardBase = 'bg-surface border border-line rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200 text-left w-full';
+  const cardHover = 'hover:border-primary/70 hover:shadow-lg hover:shadow-primary/20';
 </script>
 
 {#snippet cardContent()}
@@ -40,24 +40,24 @@
       <img
         src={profilePhotoUrl}
         alt={name}
-        class="w-12 h-12 rounded-full object-cover border-2 border-[#7C3AED] shrink-0"
+        class="w-12 h-12 rounded-full object-cover border-2 border-primary shrink-0"
       />
     {:else}
       <div
-        class="w-12 h-12 rounded-full bg-linear-to-br from-[#7C3AED] to-[#F59E0B] flex items-center justify-center text-2xl shrink-0"
+        class="w-12 h-12 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-2xl shrink-0"
         aria-hidden="true"
       >🐱</div>
     {/if}
-    <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/40">
+    <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f59e0b]/20 text-warning border border-[#f59e0b]/40">
       {weightKg.toFixed(2)} kg
     </span>
   </div>
 
   <!-- Name & Breed -->
   <div>
-    <h3 class="text-white font-semibold text-lg leading-tight">{name}</h3>
+    <h3 class="text-fg font-semibold text-lg leading-tight">{name}</h3>
     {#if breed}
-      <p class="text-[#9ca3af] text-sm mt-0.5">{breed}</p>
+      <p class="text-fg-muted text-sm mt-0.5">{breed}</p>
     {/if}
   </div>
 
@@ -66,7 +66,7 @@
     <span class="text-xs font-medium px-2.5 py-1 rounded-full {goalClass}">
       {goalLabel}
     </span>
-    <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-[#1e1e3a] text-[#9ca3af] border border-[#ffffff]/10">
+    <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-inset text-fg-muted border border-line">
       {consumptionBaseline} g/day
     </span>
   </div>

@@ -367,11 +367,11 @@
 <!-- ═══════════════════════════════════════════════════════
      PAGE WRAPPER
 ════════════════════════════════════════════════════════ -->
-<div class="min-h-screen bg-[#0F0F1A] flex flex-col items-center py-10 px-4">
+<div class="min-h-screen bg-inset flex flex-col items-center py-10 px-4">
 
   <!-- Logo -->
   <div class="mb-8 mt-2">
-    <span style="font-size:20px;font-weight:700;color:#F8FAFC;">Treats</span><span style="font-size:20px;font-weight:700;color:#7C3AED;">AI</span>
+    <span style="font-size:20px;font-weight:700;color:var(--theme-text);">Treats</span><span style="font-size:20px;font-weight:700;color:var(--theme-primary);">AI</span>
   </div>
 
   <!-- - Progress bar - -->
@@ -381,35 +381,35 @@
       <div class="flex flex-col items-center">
         <div
           class="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-semibold transition-all duration-200"
-          style="background:{currentStep >= stepNum ? '#7C3AED' : '#2D2D4A'};{currentStep === stepNum ? 'box-shadow:0 0 0 4px rgba(124,58,237,0.2)' : ''}"
+          style="background:{currentStep >= stepNum ? 'var(--theme-primary)' : 'var(--theme-border)'};{currentStep === stepNum ? 'box-shadow:0 0 0 4px color-mix(in srgb, var(--theme-primary) 20%, transparent)' : ''}"
         >
           {#if currentStep > stepNum}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
           {:else}
-            <span style="color:{currentStep >= stepNum ? 'white' : '#94A3B8'}">{stepNum}</span>
+            <span style="color:{currentStep >= stepNum ? 'white' : 'var(--theme-text-muted)'}">{stepNum}</span>
           {/if}
         </div>
-        <span class="text-[11px] mt-1.5 whitespace-nowrap" style="color:{currentStep >= stepNum ? '#F8FAFC' : '#94A3B8'}">
+        <span class="text-[11px] mt-1.5 whitespace-nowrap" style="color:{currentStep >= stepNum ? 'var(--theme-text)' : 'var(--theme-text-muted)'}">
           {stepLabels[i]}
         </span>
       </div>
       <!-- Connector line -->
       {#if i < 3}
         <div class="w-[60px] h-0.5 mb-5 transition-colors duration-200"
-          style="background:{currentStep > stepNum ? '#7C3AED' : '#2D2D4A'}"></div>
+          style="background:{currentStep > stepNum ? 'var(--theme-primary)' : 'var(--theme-border)'}"></div>
       {/if}
     {/each}
   </div>
 
   <!-- - Card - -->
-  <div class="w-full max-w-[560px] bg-[#1A1A2E] border border-[#2D2D4A] rounded-2xl p-8">
+  <div class="w-full max-w-[560px] bg-surface border border-line rounded-2xl p-8">
 
     <!-- Error banner -->
     {#if error}
       <div class="mb-5 flex items-center gap-2 rounded-lg px-4 py-3 text-[13px]"
-        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#F87171;">
+        style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--theme-danger);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
@@ -419,32 +419,32 @@
 
     <!-- ════════════════════ STEP 1 ════════════════════ -->
     {#if currentStep === 1}
-      <h2 style="font-size:20px;font-weight:700;color:#F8FAFC;" class="mb-1">Create your account</h2>
-      <p style="font-size:13px;color:#94A3B8;" class="mb-6">Set up your TreatsAI account to get started</p>
+      <h2 style="font-size:20px;font-weight:700;color:var(--theme-text);" class="mb-1">Create your account</h2>
+      <p style="font-size:13px;color:var(--theme-text-muted);" class="mb-6">Set up your TreatsAI account to get started</p>
 
       <div class="flex flex-col gap-5">
 
         <!-- Email -->
         <div>
-          <label for="reg-email" class="text-xs text-[#94A3B8] mb-1.5 block">
-            Email address<span class="text-[#EF4444] ml-0.5">*</span>
+          <label for="reg-email" class="text-xs text-fg-muted mb-1.5 block">
+            Email address<span class="text-danger ml-0.5">*</span>
           </label>
           <input
             id="reg-email" type="email" autocomplete="email"
             bind:value={email} onkeydown={handleKeydown}
             oninput={() => { emailError = ''; }}
             placeholder="you@example.com"
-            class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {emailError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
+            class="w-full bg-inset rounded-lg px-3 py-2.5 text-fg text-sm outline-none transition-colors placeholder-fg-subtle {emailError ? 'border border-danger' : 'border border-line focus:border-primary'}"
           />
           {#if emailError}
-            <p class="text-[#EF4444] text-xs mt-1">{emailError}</p>
+            <p class="text-danger text-xs mt-1">{emailError}</p>
           {/if}
         </div>
 
         <!-- Password -->
         <div>
-          <label for="reg-password" class="text-xs text-[#94A3B8] mb-1.5 block">
-            Password<span class="text-[#EF4444] ml-0.5">*</span>
+          <label for="reg-password" class="text-xs text-fg-muted mb-1.5 block">
+            Password<span class="text-danger ml-0.5">*</span>
           </label>
           <div class="relative">
             <input
@@ -452,10 +452,10 @@
               bind:value={password} onkeydown={handleKeydown}
               oninput={() => { passwordError = ''; }}
               placeholder="Min. 8 characters"
-              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 pr-10 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {passwordError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
+              class="w-full bg-inset rounded-lg px-3 py-2.5 pr-10 text-fg text-sm outline-none transition-colors placeholder-fg-subtle {passwordError ? 'border border-danger' : 'border border-line focus:border-primary'}"
             />
             <button type="button" onclick={() => (showPassword = !showPassword)}
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg transition-colors"
               aria-label={showPassword ? 'Hide password' : 'Show password'}>
               {#if showPassword}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -472,14 +472,14 @@
             </button>
           </div>
           {#if passwordError}
-            <p class="text-[#EF4444] text-xs mt-1">{passwordError}</p>
+            <p class="text-danger text-xs mt-1">{passwordError}</p>
           {/if}
         </div>
 
         <!-- Confirm password -->
         <div>
-          <label for="reg-confirm" class="text-xs text-[#94A3B8] mb-1.5 block">
-            Confirm password<span class="text-[#EF4444] ml-0.5">*</span>
+          <label for="reg-confirm" class="text-xs text-fg-muted mb-1.5 block">
+            Confirm password<span class="text-danger ml-0.5">*</span>
           </label>
           <div class="relative">
             <input
@@ -487,10 +487,10 @@
               bind:value={confirmPassword} onkeydown={handleKeydown}
               oninput={() => { confirmPasswordError = ''; }}
               placeholder="Repeat your password"
-              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 pr-10 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {confirmPasswordError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
+              class="w-full bg-inset rounded-lg px-3 py-2.5 pr-10 text-fg text-sm outline-none transition-colors placeholder-fg-subtle {confirmPasswordError ? 'border border-danger' : 'border border-line focus:border-primary'}"
             />
             <button type="button" onclick={() => (showConfirmPassword = !showConfirmPassword)}
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg transition-colors"
               aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
               {#if showConfirmPassword}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -507,13 +507,13 @@
             </button>
           </div>
           {#if confirmPasswordError}
-            <p class="text-[#EF4444] text-xs mt-1">{confirmPasswordError}</p>
+            <p class="text-danger text-xs mt-1">{confirmPasswordError}</p>
           {/if}
         </div>
 
         <!-- Language -->
         <div>
-          <p class="text-xs text-[#94A3B8] mb-1.5">Language</p>
+          <p class="text-xs text-fg-muted mb-1.5">Language</p>
           <div class="flex gap-2">
             {#each (['en', 'it', 'es'] as const) as lang}
               <button
@@ -521,8 +521,8 @@
                 onclick={() => (language = lang)}
                 class="flex-1 py-2.5 rounded-lg text-sm font-medium border transition-all duration-150"
                 style="{language === lang
-                  ? 'border-color:#7C3AED;background:rgba(124,58,237,0.1);color:#7C3AED;'
-                  : 'border-color:#2D2D4A;background:#0F0F1A;color:#94A3B8;'}"
+                  ? 'border-color:var(--theme-primary);background:color-mix(in srgb, var(--theme-primary) 10%, transparent);color:var(--theme-primary);'
+                  : 'border-color:var(--theme-border);background:var(--theme-inset);color:var(--theme-text-muted);'}"
               >
                 {lang.toUpperCase()}
               </button>
@@ -535,54 +535,54 @@
 
     <!-- ════════════════════ STEP 2 ════════════════════ -->
     {#if currentStep === 2}
-      <h2 style="font-size:20px;font-weight:700;color:#F8FAFC;" class="mb-1">Tell us about your cat</h2>
-      <p style="font-size:13px;color:#94A3B8;" class="mb-6">This helps TreatsAI personalise portions and track health</p>
+      <h2 style="font-size:20px;font-weight:700;color:var(--theme-text);" class="mb-1">Tell us about your cat</h2>
+      <p style="font-size:13px;color:var(--theme-text-muted);" class="mb-6">This helps TreatsAI personalise portions and track health</p>
 
       <div class="flex flex-col gap-5">
 
         <!-- Name + Breed (2-col) -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="cat-name" class="text-xs text-[#94A3B8] mb-1.5 block">
-              Cat name<span class="text-[#EF4444] ml-0.5">*</span>
+            <label for="cat-name" class="text-xs text-fg-muted mb-1.5 block">
+              Cat name<span class="text-danger ml-0.5">*</span>
             </label>
             <input
               id="cat-name" type="text" autocomplete="off"
               bind:value={catName} onkeydown={handleKeydown}
               oninput={() => { catNameError = ''; }}
               placeholder="e.g. Luna"
-              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {catNameError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
+              class="w-full bg-inset rounded-lg px-3 py-2.5 text-fg text-sm outline-none transition-colors placeholder-fg-subtle {catNameError ? 'border border-danger' : 'border border-line focus:border-primary'}"
             />
             {#if catNameError}
-              <p class="text-[#EF4444] text-xs mt-1">{catNameError}</p>
+              <p class="text-danger text-xs mt-1">{catNameError}</p>
             {/if}
           </div>
           <div>
-            <label for="cat-breed" class="text-xs text-[#94A3B8] mb-1.5 block flex items-center gap-1">
+            <label for="cat-breed" class="text-xs text-fg-muted mb-1.5 block flex items-center gap-1">
               Breed
-              <span class="bg-[#2D2D4A] rounded text-[10px] text-[#94A3B8] px-1.5 py-0.5">optional</span>
+              <span class="bg-line rounded text-[10px] text-fg-muted px-1.5 py-0.5">optional</span>
             </label>
             <input
               id="cat-breed" type="text" autocomplete="off"
               bind:value={catBreed}
               placeholder="e.g. Maine Coon"
-              class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+              class="w-full bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors placeholder-fg-subtle"
             />
           </div>
         </div>
 
         <!-- Date of birth -->
         <div>
-          <p class="text-xs text-[#94A3B8] mb-1.5 flex items-center gap-1">
+          <p class="text-xs text-fg-muted mb-1.5 flex items-center gap-1">
             Date of birth
-            <span class="bg-[#2D2D4A] rounded text-[10px] text-[#94A3B8] px-1.5 py-0.5">optional</span>
+            <span class="bg-line rounded text-[10px] text-fg-muted px-1.5 py-0.5">optional</span>
           </p>
           <div class="flex flex-row gap-2 w-full min-w-0">
             <!-- Day -->
             <select
               bind:value={dobDay}
               onchange={onDobChange}
-              class="flex-none w-20 min-w-0 bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer"
+              class="flex-none w-20 min-w-0 bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors cursor-pointer"
             >
               <option value="">DD</option>
               {#each dobDays as d}
@@ -593,7 +593,7 @@
             <select
               bind:value={dobMonth}
               onchange={onDobChange}
-              class="flex-1 min-w-0 bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer"
+              class="flex-1 min-w-0 bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors cursor-pointer"
             >
               <option value="">Month</option>
               {#each monthOptions as opt}
@@ -604,7 +604,7 @@
             <select
               bind:value={dobYear}
               onchange={onDobChange}
-              class="flex-none w-24 min-w-0 bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer"
+              class="flex-none w-24 min-w-0 bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors cursor-pointer"
             >
               <option value="">YYYY</option>
               {#each dobYears as y}
@@ -612,47 +612,47 @@
               {/each}
             </select>
           </div>
-          <p class="text-[11px] text-[#94A3B8] mt-1">Used to track age-related needs</p>
+          <p class="text-[11px] text-fg-muted mt-1">Used to track age-related needs</p>
         </div>
 
         <!-- Current weight + Target weight (2-col) -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="cat-weight" class="text-xs text-[#94A3B8] mb-1.5 block">
-              Current weight (kg)<span class="text-[#EF4444] ml-0.5">*</span>
+            <label for="cat-weight" class="text-xs text-fg-muted mb-1.5 block">
+              Current weight (kg)<span class="text-danger ml-0.5">*</span>
             </label>
             <input
               id="cat-weight" type="number" min="0.5" max="20" step="0.1"
               bind:value={catCurrentWeight} onkeydown={handleKeydown}
               oninput={() => { catWeightError = ''; }}
               placeholder="e.g. 4.2"
-              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {catWeightError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
+              class="w-full bg-inset rounded-lg px-3 py-2.5 text-fg text-sm outline-none transition-colors placeholder-fg-subtle {catWeightError ? 'border border-danger' : 'border border-line focus:border-primary'}"
             />
             {#if catWeightError}
-              <p class="text-[#EF4444] text-xs mt-1">{catWeightError}</p>
+              <p class="text-danger text-xs mt-1">{catWeightError}</p>
             {/if}
           </div>
           <div>
-            <label for="cat-target" class="text-xs text-[#94A3B8] mb-1.5 block flex items-center gap-1">
+            <label for="cat-target" class="text-xs text-fg-muted mb-1.5 block flex items-center gap-1">
               Target weight (kg)
-              <span class="bg-[#2D2D4A] rounded text-[10px] text-[#94A3B8] px-1.5 py-0.5">optional</span>
+              <span class="bg-line rounded text-[10px] text-fg-muted px-1.5 py-0.5">optional</span>
             </label>
             <input
               id="cat-target" type="number" min="0.5" max="20" step="0.1"
               bind:value={catTargetWeight}
               oninput={() => { catTargetWeightError = ''; }}
               placeholder="e.g. 4.0"
-              class="w-full bg-[#0F0F1A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none transition-colors placeholder-[#4B5563] {catTargetWeightError ? 'border border-[#EF4444]' : 'border border-[#2D2D4A] focus:border-[#7C3AED]'}"
+              class="w-full bg-inset rounded-lg px-3 py-2.5 text-fg text-sm outline-none transition-colors placeholder-fg-subtle {catTargetWeightError ? 'border border-danger' : 'border border-line focus:border-primary'}"
             />
             {#if catTargetWeightError}
-              <p class="text-[#EF4444] text-xs mt-1">{catTargetWeightError}</p>
+              <p class="text-danger text-xs mt-1">{catTargetWeightError}</p>
             {/if}
           </div>
         </div>
 
         <!-- Weight goal (3-option grid) -->
         <div>
-          <p class="text-xs text-[#94A3B8] mb-2">Weight goal</p>
+          <p class="text-xs text-fg-muted mb-2">Weight goal</p>
           <div class="grid grid-cols-3 gap-2">
             {#each [
               { value: 'weight_loss' as WeightGoal,  label: 'Weight loss',  sub: 'Reduce portion over time' },
@@ -664,10 +664,10 @@
                 onclick={() => { catWeightGoal = opt.value; catTargetWeightError = ''; }}
                 class="flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all duration-150 text-center"
                 style="{catWeightGoal === opt.value
-                  ? 'border-color:#7C3AED;background:rgba(124,58,237,0.1);'
-                  : 'border-color:#2D2D4A;background:#0F0F1A;'}"
+                  ? 'border-color:var(--theme-primary);background:color-mix(in srgb, var(--theme-primary) 10%, transparent);'
+                  : 'border-color:var(--theme-border);background:var(--theme-inset);'}"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{catWeightGoal === opt.value ? '#7C3AED' : '#94A3B8'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:{catWeightGoal === opt.value ? 'var(--theme-primary)' : 'var(--theme-text-muted)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   {#if opt.value === 'weight_loss'}
                     <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
                     <polyline points="17 18 23 18 23 12"/>
@@ -678,8 +678,8 @@
                     <polyline points="17 6 23 6 23 12"/>
                   {/if}
                 </svg>
-                <span class="text-[12px] font-medium" style="color:{catWeightGoal === opt.value ? '#F8FAFC' : '#94A3B8'}">{opt.label}</span>
-                <span class="text-[10px]" style="color:#94A3B8;line-height:1.3">{opt.sub}</span>
+                <span class="text-[12px] font-medium" style="color:{catWeightGoal === opt.value ? 'var(--theme-text)' : 'var(--theme-text-muted)'}">{opt.label}</span>
+                <span class="text-[10px]" style="color:var(--theme-text-muted);line-height:1.3">{opt.sub}</span>
               </button>
             {/each}
           </div>
@@ -688,46 +688,46 @@
         <!-- Consumption baseline slider -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <p class="text-xs text-[#94A3B8]">How much does your cat normally eat?</p>
-            <span class="text-sm font-bold" style="color:#7C3AED">{catConsumptionBaseline}%</span>
+            <p class="text-xs text-fg-muted">How much does your cat normally eat?</p>
+            <span class="text-sm font-bold" style="color:var(--theme-primary)">{catConsumptionBaseline}%</span>
           </div>
           <input
             type="range" min="50" max="100" step="1"
             bind:value={catConsumptionBaseline}
-            class="w-full accent-[#7C3AED] cursor-pointer"
+            class="w-full accent-primary cursor-pointer"
           />
           <div class="flex justify-between mt-1">
-            <span class="text-[10px] text-[#94A3B8]">Picky eater (50%)</span>
-            <span class="text-[10px] text-[#94A3B8]">Always finishes (100%)</span>
+            <span class="text-[10px] text-fg-muted">Picky eater (50%)</span>
+            <span class="text-[10px] text-fg-muted">Always finishes (100%)</span>
           </div>
-          <p class="text-[11px] text-[#94A3B8] mt-2 leading-relaxed">
+          <p class="text-[11px] text-fg-muted mt-2 leading-relaxed">
             This becomes your cat's consumption baseline. Alerts fire when eating drops significantly below this.
           </p>
         </div>
 
         <!-- Microchip (optional) -->
         <div>
-          <label for="cat-chip" class="text-xs text-[#94A3B8] mb-1.5 flex items-center gap-1">
+          <label for="cat-chip" class="text-xs text-fg-muted mb-1.5 flex items-center gap-1">
             Microchip number
-            <span class="bg-[#2D2D4A] rounded text-[10px] text-[#94A3B8] px-1.5 py-0.5">optional</span>
-            <span class="bg-[rgba(245,158,11,0.15)] rounded text-[10px] text-[#F59E0B] px-1.5 py-0.5">post-MVP</span>
+            <span class="bg-line rounded text-[10px] text-fg-muted px-1.5 py-0.5">optional</span>
+            <span class="bg-[rgba(245,158,11,0.15)] rounded text-[10px] text-warning px-1.5 py-0.5">post-MVP</span>
           </label>
           <input
             id="cat-chip" type="text"
             bind:value={catMicrochip}
             placeholder="15-digit ISO 11784/11785 number"
-            class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+            class="w-full bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors placeholder-fg-subtle"
           />
-          <p class="text-[11px] text-[#94A3B8] mt-1">Secondary identity verification alongside camera recognition</p>
+          <p class="text-[11px] text-fg-muted mt-1">Secondary identity verification alongside camera recognition</p>
         </div>
 
         <!-- Weight reminder interval -->
         <div>
-          <label for="cat-reminder" class="text-xs text-[#94A3B8] mb-1.5 block">Weight reminder</label>
+          <label for="cat-reminder" class="text-xs text-fg-muted mb-1.5 block">Weight reminder</label>
           <select
             id="cat-reminder"
             bind:value={catReminderInterval}
-            class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors cursor-pointer"
+            class="w-full bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors cursor-pointer"
           >
             <option value={3}>Every 3 days</option>
             <option value={7}>Every 7 days</option>
@@ -740,21 +740,21 @@
 
     <!-- ════════════════════ STEP 3 ════════════════════ -->
     {#if currentStep === 3}
-      <h2 style="font-size:20px;font-weight:700;color:#F8FAFC;" class="mb-1">Train face recognition</h2>
-      <p style="font-size:13px;color:#94A3B8;" class="mb-5">
+      <h2 style="font-size:20px;font-weight:700;color:var(--theme-text);" class="mb-1">Train face recognition</h2>
+      <p style="font-size:13px;color:var(--theme-text-muted);" class="mb-5">
         Upload 3 to 10 clear photos of your cat's face. These train the AI to recognize your cat at the feeder.
       </p>
 
       <!-- Tip box -->
-      <div class="rounded-xl p-3 mb-4" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);">
+      <div class="rounded-xl p-3 mb-4" style="background:color-mix(in srgb, var(--theme-primary) 8%, transparent);border:1px solid color-mix(in srgb, var(--theme-primary) 20%, transparent);">
         <div class="flex items-center gap-2 mb-1">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
             <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
             <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
           </svg>
-          <p class="text-[13px] font-semibold" style="color:#7C3AED;">Photo tips for best results</p>
+          <p class="text-[13px] font-semibold" style="color:var(--theme-primary);">Photo tips for best results</p>
         </div>
-        <p class="text-[12px] text-[#94A3B8] leading-relaxed">
+        <p class="text-[12px] text-fg-muted leading-relaxed">
           Good lighting, front-facing, one cat per photo. JPEG, PNG, WebP only (max 15MB each). iPhone users: convert HEIC to JPEG before uploading.
         </p>
       </div>
@@ -762,7 +762,7 @@
       <!-- Photos error banner -->
       {#if photosError}
         <div class="mb-4 flex items-center gap-2 rounded-lg px-4 py-3 text-[13px]"
-          style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#F87171;">
+          style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--theme-danger);">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
@@ -780,16 +780,16 @@
         ondrop={handleDrop}
         class="w-full border-2 border-dashed rounded-xl p-8 text-center cursor-pointer mb-4 transition-colors"
         style="{isDragging
-          ? 'border-color:#7C3AED;background:rgba(124,58,237,0.08);'
-          : 'border-color:#2D2D4A;background:transparent;'}"
+          ? 'border-color:var(--theme-primary);background:color-mix(in srgb, var(--theme-primary) 8%, transparent);'
+          : 'border-color:var(--theme-border);background:transparent;'}"
       >
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="{isDragging ? '#7C3AED' : '#2D2D4A'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:{isDragging ? 'var(--theme-primary)' : 'var(--theme-border-strong)'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3" aria-hidden="true">
           <polyline points="16 16 12 12 8 16"/>
           <line x1="12" y1="12" x2="12" y2="21"/>
           <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
         </svg>
-        <p class="text-[13px] font-semibold text-[#F8FAFC] mb-1">Drop photos here or click to browse</p>
-        <p class="text-sm text-[#94A3B8]">JPEG, PNG, WebP only · max 15MB per photo</p>
+        <p class="text-[13px] font-semibold text-fg mb-1">Drop photos here or click to browse</p>
+        <p class="text-sm text-fg-muted">JPEG, PNG, WebP only · max 15MB per photo</p>
       </div>
       <input
         bind:this={photoFileInput}
@@ -804,7 +804,7 @@
       <div class="grid grid-cols-5 gap-2 mb-3">
         {#each Array(10) as _, i}
           {#if i < uploadedFiles.length}
-            <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-[#7C3AED]">
+            <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-primary">
               <img
                 src={previewUrls[i]}
                 alt="Cat photo {i + 1}"
@@ -819,7 +819,7 @@
             </div>
           {:else if i < uploadedFiles.length + 2 && uploadedFiles.length < 10}
             <div
-              class="aspect-square rounded-xl border-2 border-dashed border-[#2D2D4A] flex items-center justify-center text-[#94A3B8] text-xl cursor-pointer hover:border-[#7C3AED] transition-colors"
+              class="aspect-square rounded-xl border-2 border-dashed border-line flex items-center justify-center text-fg-muted text-xl cursor-pointer hover:border-primary transition-colors"
               onclick={() => photoFileInput.click()}
               role="button"
               aria-label="Add photo"
@@ -829,29 +829,29 @@
       </div>
 
       <!-- Photo count -->
-      <p class="text-[12px] mb-4" style="color:{uploadedFiles.length >= 3 ? '#7C3AED' : '#F59E0B'}">
+      <p class="text-[12px] mb-4" style="color:{uploadedFiles.length >= 3 ? 'var(--theme-primary)' : 'var(--theme-warning)'}">
         {uploadedFiles.length} of 10 photos uploaded · minimum 3 required
       </p>
 
       <!-- Rekognition training status -->
-      <div class="rounded-xl p-3 bg-[#0F0F1A]">
+      <div class="rounded-xl p-3 bg-inset">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-[12px] text-[#94A3B8]">Rekognition training</span>
+          <span class="text-[12px] text-fg-muted">Rekognition training</span>
           {#if uploadedFiles.length >= 3}
-            <span class="text-[12px] font-medium" style="color:#10B981;">Ready</span>
+            <span class="text-[12px] font-medium" style="color:var(--theme-success);">Ready</span>
           {:else}
-            <span class="text-[12px] font-medium" style="color:#F59E0B;">
+            <span class="text-[12px] font-medium" style="color:var(--theme-warning);">
               Needs {3 - uploadedFiles.length} more {3 - uploadedFiles.length === 1 ? 'photo' : 'photos'}
             </span>
           {/if}
         </div>
-        <div class="w-full rounded-full h-1.5 mb-2" style="background:#2D2D4A;">
+        <div class="w-full rounded-full h-1.5 mb-2" style="background:var(--theme-border);">
           <div
             class="h-1.5 rounded-full transition-all duration-300"
-            style="width:{uploadedFiles.length >= 3 ? 100 : Math.round(uploadedFiles.length / 3 * 100)}%;background:{uploadedFiles.length >= 3 ? '#10B981' : '#F59E0B'};"
+            style="width:{uploadedFiles.length >= 3 ? 100 : Math.round(uploadedFiles.length / 3 * 100)}%;background:{uploadedFiles.length >= 3 ? 'var(--theme-success)' : 'var(--theme-warning)'};"
           ></div>
         </div>
-        <p class="text-[11px] text-[#94A3B8]">
+        <p class="text-[11px] text-fg-muted">
           {uploadedFiles.length} face embedding{uploadedFiles.length !== 1 ? 's' : ''} indexed in AWS Rekognition
         </p>
       </div>
@@ -859,28 +859,28 @@
 
     <!-- ════════════════════ STEP 4 ════════════════════ -->
     {#if currentStep === 4}
-      <h2 style="font-size:20px;font-weight:700;color:#F8FAFC;" class="mb-1">
+      <h2 style="font-size:20px;font-weight:700;color:var(--theme-text);" class="mb-1">
         Set up {catName || 'your cat'}'s feeding schedule
       </h2>
 
-      <p style="font-size:13px;color:#94A3B8;" class="mb-5">
+      <p style="font-size:13px;color:var(--theme-text-muted);" class="mb-5">
         Configure when and how much to dispense each day
       </p>
 
       <!-- AI suggestion box -->
-      <div class="rounded-[10px] p-[14px] mb-5" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);">
+      <div class="rounded-[10px] p-[14px] mb-5" style="background:color-mix(in srgb, var(--theme-primary) 8%, transparent);border:1px solid color-mix(in srgb, var(--theme-primary) 20%, transparent);">
         <div class="flex items-start gap-2">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 shrink-0" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 shrink-0" aria-hidden="true">
             <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
             <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
           </svg>
           <div>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">
+            <p class="text-[13px] font-medium text-fg">
               Based on {catName || 'your cat'}'s weight and goal, we suggest
-              <span style="color:#7C3AED;font-weight:700;">{suggestedPortion}g per meal</span>
+              <span style="color:var(--theme-primary);font-weight:700;">{suggestedPortion}g per meal</span>
               across {feedingSlots.length} daily feedings.
             </p>
-            <p class="text-[11px] text-[#94A3B8] mt-1">
+            <p class="text-[11px] text-fg-muted mt-1">
               You can override any portion below. Suggestions update when you log new weight.
             </p>
           </div>
@@ -890,7 +890,7 @@
       <!-- Schedule error banner -->
       {#if scheduleError}
         <div class="mb-4 flex items-center gap-2 rounded-lg px-4 py-3 text-[13px]"
-          style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#F87171;">
+          style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--theme-danger);">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
@@ -901,29 +901,29 @@
       <!-- Feeding time slots -->
       <div class="flex flex-col gap-2 mb-3">
         {#each feedingSlots as slot (slot.id)}
-          <div class="flex items-end gap-3 rounded-[10px] p-4" style="background:#0F0F1A;border:1px solid #2D2D4A;">
+          <div class="flex items-end gap-3 rounded-[10px] p-4" style="background:var(--theme-inset);border:1px solid var(--theme-border);">
             <!-- Time -->
             <div class="flex flex-col gap-1">
-              <label class="text-[10px] text-[#94A3B8]" for="slot-time-{slot.id}">Time</label>
+              <label class="text-[10px] text-fg-muted" for="slot-time-{slot.id}">Time</label>
               <input
                 id="slot-time-{slot.id}"
                 type="time"
                 value={slot.time}
                 oninput={(e) => updateSlotTime(slot.id, (e.target as HTMLInputElement).value)}
-                class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-lg px-3 py-2 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors"
+                class="bg-surface border border-line rounded-lg px-3 py-2 text-fg text-sm outline-none focus:border-primary transition-colors"
                 style="color-scheme:dark;width:110px;"
               />
             </div>
 
             <!-- Divider -->
-            <div class="w-px self-stretch" style="background:#2D2D4A;margin-bottom:0;"></div>
+            <div class="w-px self-stretch" style="background:var(--theme-border);margin-bottom:0;"></div>
 
             <!-- Portion -->
             <div class="flex flex-col gap-1 flex-1">
               <div class="flex items-center gap-2">
-                <label class="text-[10px] text-[#94A3B8]" for="slot-portion-{slot.id}">Portion (g)</label>
+                <label class="text-[10px] text-fg-muted" for="slot-portion-{slot.id}">Portion (g)</label>
                 {#if slot.portionGrams === suggestedPortion}
-                  <span class="text-[10px] px-1.5 py-0.5 rounded" style="background:rgba(124,58,237,0.15);color:#7C3AED;">Suggested</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded" style="background:color-mix(in srgb, var(--theme-primary) 15%, transparent);color:var(--theme-primary);">Suggested</span>
                 {/if}
               </div>
               <input
@@ -931,7 +931,7 @@
                 type="number" min="10" max="500" step="5"
                 value={slot.portionGrams}
                 oninput={(e) => updateSlotPortion(slot.id, parseInt((e.target as HTMLInputElement).value) || 0)}
-                class="w-full bg-[#1A1A2E] border border-[#2D2D4A] rounded-lg px-3 py-2 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors"
+                class="w-full bg-surface border border-line rounded-lg px-3 py-2 text-fg text-sm outline-none focus:border-primary transition-colors"
               />
             </div>
 
@@ -940,7 +940,7 @@
               type="button"
               onclick={() => removeSlot(slot.id)}
               disabled={feedingSlots.length <= 1}
-              class="text-[#94A3B8] hover:text-[#EF4444] transition-colors disabled:opacity-30 disabled:cursor-not-allowed pb-2"
+              class="text-fg-muted hover:text-danger transition-colors disabled:opacity-30 disabled:cursor-not-allowed pb-2"
               aria-label="Remove feeding slot"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -956,53 +956,53 @@
       <button
         type="button"
         onclick={addSlot}
-        class="w-full rounded-[10px] py-3 text-sm text-[#94A3B8] transition-all duration-150 hover:text-[#7C3AED] hover:border-[#7C3AED] mb-5"
-        style="border:1px dashed #2D2D4A;"
-        onmouseenter={(e) => (e.currentTarget as HTMLElement).style.borderColor = '#7C3AED'}
-        onmouseleave={(e) => (e.currentTarget as HTMLElement).style.borderColor = '#2D2D4A'}
+        class="w-full rounded-[10px] py-3 text-sm text-fg-muted transition-all duration-150 hover:text-primary hover:border-primary mb-5"
+        style="border:1px dashed var(--theme-border);"
+        onmouseenter={(e) => (e.currentTarget as HTMLElement).style.borderColor = 'var(--theme-primary)'}
+        onmouseleave={(e) => (e.currentTarget as HTMLElement).style.borderColor = 'var(--theme-border)'}
       >
         + Add feeding time
       </button>
 
       <!-- Food type (optional) -->
       <div class="mb-5">
-        <label for="food-type" class="text-xs text-[#94A3B8] mb-1.5 flex items-center gap-1">
+        <label for="food-type" class="text-xs text-fg-muted mb-1.5 flex items-center gap-1">
           Food type
-          <span class="bg-[#2D2D4A] rounded text-[10px] text-[#94A3B8] px-1.5 py-0.5">optional</span>
+          <span class="bg-line rounded text-[10px] text-fg-muted px-1.5 py-0.5">optional</span>
         </label>
         <input
           id="food-type" type="text"
           bind:value={foodTypeLabel}
           placeholder="e.g. Whiskas Tuna, Royal Canin Indoor"
-          class="w-full bg-[#0F0F1A] border border-[#2D2D4A] rounded-lg px-3 py-2.5 text-[#F8FAFC] text-sm outline-none focus:border-[#7C3AED] transition-colors placeholder-[#4B5563]"
+          class="w-full bg-inset border border-line rounded-lg px-3 py-2.5 text-fg text-sm outline-none focus:border-primary transition-colors placeholder-fg-subtle"
         />
       </div>
 
       <!-- Daily summary -->
-      <div class="rounded-[10px] p-4" style="background:#0F0F1A;">
+      <div class="rounded-[10px] p-4" style="background:var(--theme-inset);">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-[12px] text-[#94A3B8]">Feeding times</span>
-          <span class="text-[13px] font-medium text-[#F8FAFC]">{feedingSlots.length} per day</span>
+          <span class="text-[12px] text-fg-muted">Feeding times</span>
+          <span class="text-[13px] font-medium text-fg">{feedingSlots.length} per day</span>
         </div>
         <div class="flex items-center justify-between mb-3">
-          <span class="text-[12px] text-[#94A3B8]">Avg. portion per meal</span>
-          <span class="text-[13px] font-medium text-[#F8FAFC]">{avgPortionMeal}g</span>
+          <span class="text-[12px] text-fg-muted">Avg. portion per meal</span>
+          <span class="text-[13px] font-medium text-fg">{avgPortionMeal}g</span>
         </div>
-        <div class="h-px mb-3" style="background:#2D2D4A;"></div>
+        <div class="h-px mb-3" style="background:var(--theme-border);"></div>
         <div class="flex items-center justify-between">
-          <span class="text-[12px] text-[#94A3B8]">Total daily food</span>
-          <span class="text-[14px] font-bold" style="color:#7C3AED;">{totalDaily}g / day</span>
+          <span class="text-[12px] text-fg-muted">Total daily food</span>
+          <span class="text-[14px] font-bold" style="color:var(--theme-primary);">{totalDaily}g / day</span>
         </div>
       </div>
     {/if}
 
     <!-- - Card footer - -->
-    <div class="mt-6 pt-5 border-t border-[#2D2D4A] flex items-center justify-between">
+    <div class="mt-6 pt-5 border-t border-line flex items-center justify-between">
 
       <!-- Back or spacer -->
       {#if currentStep > 1}
         <button type="button" onclick={goToPrev}
-          class="bg-transparent border border-[#2D2D4A] text-[#94A3B8] rounded-lg px-4 py-2 text-sm hover:text-[#F8FAFC] hover:border-[#94A3B8] transition-colors">
+          class="bg-transparent border border-line text-fg-muted rounded-lg px-4 py-2 text-sm hover:text-fg hover:border-fg-muted transition-colors">
           ← Back
         </button>
       {:else}
@@ -1010,22 +1010,22 @@
       {/if}
 
       <!-- Step counter -->
-      <span class="text-[12px] text-[#94A3B8]">Step {currentStep} of 4</span>
+      <span class="text-[12px] text-fg-muted">Step {currentStep} of 4</span>
 
       <!-- Next or Finish -->
       {#if currentStep === 1}
         <button type="button" onclick={goToNext}
-          class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
+          class="bg-primary hover:bg-primary-hover text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
           Next – Your cat <span aria-hidden="true">→</span>
         </button>
       {:else if currentStep === 2}
         <button type="button" onclick={goToNext}
-          class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
+          class="bg-primary hover:bg-primary-hover text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
           Next – Photos <span aria-hidden="true">→</span>
         </button>
       {:else if currentStep === 3}
         <button type="button" onclick={goToNext}
-          class="bg-[#7C3AED] hover:bg-[#8B5CF6] text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
+          class="bg-primary hover:bg-primary-hover text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-1.5 transition-colors">
           Next – Schedule <span aria-hidden="true">→</span>
         </button>
       {:else}
@@ -1039,9 +1039,9 @@
   </div>
 
   <!-- Sign in link -->
-  <p class="text-center text-[#94A3B8] text-sm mt-6 mb-4">
+  <p class="text-center text-fg-muted text-sm mt-6 mb-4">
     Already have an account?
-    <a href="/login" class="text-[#7C3AED] hover:text-[#8B5CF6] transition-colors font-medium">Sign in</a>
+    <a href="/login" class="text-primary hover:text-primary-soft transition-colors font-medium">Sign in</a>
   </p>
 
 </div>

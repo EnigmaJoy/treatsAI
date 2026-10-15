@@ -8,6 +8,7 @@
     LinearScale,
     Tooltip,
   } from 'chart.js';
+  import { followTheme } from '$lib/chartTheme';
   import type { FeedingOutcome } from '$lib/types';
 
   interface FeedingEventInput {
@@ -105,10 +106,6 @@
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1A1A2E',
-            titleColor: '#F8FAFC',
-            bodyColor: '#94A3B8',
-            borderColor: '#2D2D4A',
             borderWidth: 1,
             callbacks: {
               label: (ctx) => ` ${ctx.parsed.y} meal${ctx.parsed.y !== 1 ? 's' : ''}`,
@@ -117,24 +114,18 @@
         },
         scales: {
           x: {
-            ticks: { color: '#94A3B8', font: { size: 11 } },
-            grid: { color: '#2D2D4A' },
-            border: { color: '#2D2D4A' },
+            ticks: { font: { size: 11 } },
           },
           y: {
             min: 0,
             ticks: {
-              color: '#94A3B8',
               stepSize: 1,
               font: { size: 11 },
               callback: (val) => (Number.isInteger(Number(val)) ? val : ''),
             },
-            grid: { color: '#2D2D4A' },
-            border: { color: '#2D2D4A' },
             title: {
               display: true,
               text: 'Meals',
-              color: '#94A3B8',
               font: { size: 11 },
             },
           },
@@ -142,7 +133,10 @@
       },
     });
 
+    const stopFollowingTheme = followTheme(chart);
+
     return () => {
+      stopFollowingTheme();
       chart?.destroy();
     };
   });

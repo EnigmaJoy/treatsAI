@@ -151,74 +151,74 @@
   <div>
     <a
       href="/cats/{catId}"
-      class="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-sm transition-colors mb-4"
+      class="inline-flex items-center gap-1.5 text-fg-subtle hover:text-fg-muted text-sm transition-colors mb-4"
     >
       <span aria-hidden="true">←</span> {m.cat_back_to_profile()}
     </a>
-    <h1 class="text-2xl font-bold text-white">{m.cat_edit_title()}</h1>
+    <h1 class="text-2xl font-bold text-fg">{m.cat_edit_title()}</h1>
     {#if cat}
-      <p class="text-slate-500 text-sm mt-0.5">{m.cat_editing({ name: cat.name })}</p>
+      <p class="text-fg-subtle text-sm mt-0.5">{m.cat_editing({ name: cat.name })}</p>
     {/if}
   </div>
 
   {#if !cat}
-    <div class="bg-[#1a1a2e] border border-[#2D2D4A] rounded-2xl p-8 text-center">
-      <p class="text-slate-400">{m.cat_not_found()}</p>
-      <a href="/cats" class="text-[#a78bfa] hover:underline text-sm mt-2 inline-block">{m.cat_back_to_cats()}</a>
+    <div class="bg-surface border border-line rounded-2xl p-8 text-center">
+      <p class="text-fg-muted">{m.cat_not_found()}</p>
+      <a href="/cats" class="text-primary-soft hover:underline text-sm mt-2 inline-block">{m.cat_back_to_cats()}</a>
     </div>
   {:else}
     <!-- Form card -->
-    <div class="bg-[#1a1a2e] border border-[#7c3aed]/30 rounded-2xl p-6 flex flex-col gap-5">
+    <div class="bg-surface border border-line rounded-2xl p-6 flex flex-col gap-5">
 
       {#if error}
         <div class="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
-          <p class="text-red-400 text-sm">{error}</p>
+          <p class="text-danger text-sm">{error}</p>
         </div>
       {/if}
 
       <!-- Profile photo -->
       <div class="flex flex-col gap-3">
-        <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Profile photo</p>
+        <p class="text-fg-muted text-xs font-medium uppercase tracking-wider">Profile photo</p>
         <div class="flex items-center gap-4">
           {#if profilePhotoUrl}
             <img
               src={profilePhotoUrl}
               alt={cat.name}
-              class="w-20 h-20 rounded-full object-cover border-2 border-[#7c3aed] shrink-0"
+              class="w-20 h-20 rounded-full object-cover border-2 border-primary shrink-0"
               onerror={() => { profilePhotoUrl = null; }}
             />
           {:else}
             <div
               class="w-20 h-20 rounded-full flex items-center justify-center text-3xl shrink-0 select-none"
-              style="background: linear-gradient(135deg, #7c3aed, #f59e0b);"
+              style="background: linear-gradient(135deg, var(--theme-primary), var(--theme-warning));"
               aria-hidden="true"
             >🐱</div>
           {/if}
           <button
             type="button"
             onclick={() => { photoPickerOpen = !photoPickerOpen; photoError = ''; if (photoPickerOpen) { console.log('[photo picker] opened, photoUrls:', photoUrls); } }}
-            class="text-sm font-medium text-[#a78bfa] hover:text-white transition-colors"
+            class="text-sm font-medium text-primary-soft hover:text-fg transition-colors"
           >
             {photoPickerOpen ? 'Close picker' : 'Change photo'}
           </button>
         </div>
 
         {#if photoPickerOpen}
-          <div class="bg-[#0f0f1a] border border-white/10 rounded-xl p-4 flex flex-col gap-4">
+          <div class="bg-inset border border-line rounded-xl p-4 flex flex-col gap-4">
             {#if photoError}
-              <p class="text-red-400 text-sm">{photoError}</p>
+              <p class="text-danger text-sm">{photoError}</p>
             {/if}
 
             {#if uniquePhotoUrls.length > 0}
               <div>
-                <p class="text-slate-500 text-xs mb-3">Choose from uploaded photos</p>
+                <p class="text-fg-subtle text-xs mb-3">Choose from uploaded photos</p>
                 <div class="flex flex-wrap gap-2">
                   {#each uniquePhotoUrls as photo (photo.key)}
                     <button
                       type="button"
                       onclick={() => (pendingProfileKey = photo.key)}
                       class="w-[60px] h-[60px] rounded-lg overflow-hidden border-2 transition-all shrink-0"
-                      style="border-color:{pendingProfileKey === photo.key ? '#7c3aed' : 'rgba(255,255,255,0.1)'}"
+                      style="border-color:{pendingProfileKey === photo.key ? 'var(--theme-primary)' : 'var(--theme-border)'}"
                     >
                       <!-- svelte-ignore a11y_img_redundant_alt -->
                       <img
@@ -237,9 +237,9 @@
             {/if}
 
             <div>
-              <p class="text-slate-500 text-xs mb-2">Upload a new photo</p>
+              <p class="text-fg-subtle text-xs mb-2">Upload a new photo</p>
               <label
-                class="cursor-pointer inline-flex items-center gap-2 bg-[#1a1a2e] border border-white/10 hover:border-white/20 text-slate-300 text-sm px-3 py-2 rounded-lg transition-colors {photoUploading ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''}"
+                class="cursor-pointer inline-flex items-center gap-2 bg-surface border border-line hover:border-line-strong text-fg-muted text-sm px-3 py-2 rounded-lg transition-colors {photoUploading ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''}"
               >
                 {photoUploading ? 'Uploading...' : 'Choose file'}
                 <input
@@ -250,14 +250,14 @@
                   onchange={handleNewPhotoUpload}
                 />
               </label>
-              <p class="text-slate-600 text-xs mt-1">JPEG, PNG, WebP - max 15MB</p>
+              <p class="text-fg-subtle text-xs mt-1">JPEG, PNG, WebP - max 15MB</p>
             </div>
 
-            <div class="flex gap-2 pt-1 border-t border-white/5">
+            <div class="flex gap-2 pt-1 border-t border-line-subtle">
               <button
                 type="button"
                 onclick={() => { photoPickerOpen = false; photoError = ''; }}
-                class="flex-1 text-center bg-transparent border border-white/10 hover:border-white/20 text-slate-400 hover:text-white font-medium py-2 rounded-xl transition-colors text-sm"
+                class="flex-1 text-center bg-transparent border border-line hover:border-line-strong text-fg-muted hover:text-fg font-medium py-2 rounded-xl transition-colors text-sm"
               >
                 Cancel
               </button>
@@ -265,7 +265,7 @@
                 type="button"
                 onclick={saveProfilePhoto}
                 disabled={!pendingProfileKey || photoSaving}
-                class="flex-1 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-60 text-white font-medium py-2 rounded-xl transition-colors text-sm"
+                class="flex-1 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white font-medium py-2 rounded-xl transition-colors text-sm"
               >
                 {photoSaving ? 'Saving...' : 'Save profile photo'}
               </button>
@@ -274,48 +274,48 @@
         {/if}
       </div>
 
-      <div class="h-px bg-white/5"></div>
+      <div class="h-px bg-hover"></div>
 
       <!-- Name -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-slate-400 text-xs font-medium uppercase tracking-wider" for="edit-name">
-          {m.cat_field_name()}<span class="text-red-400 ml-0.5">*</span>
+        <label class="text-fg-muted text-xs font-medium uppercase tracking-wider" for="edit-name">
+          {m.cat_field_name()}<span class="text-danger ml-0.5">*</span>
         </label>
         <input
           id="edit-name"
           type="text"
           bind:value={name}
           placeholder="e.g. Luna"
-          class="bg-[#0f0f1a] border border-white/10 focus:border-[#7c3aed]/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors"
+          class="bg-inset border border-line focus:border-primary/60 rounded-xl px-4 py-2.5 text-sm text-fg placeholder-fg-subtle outline-none transition-colors"
         />
       </div>
 
       <!-- Breed -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-slate-400 text-xs font-medium uppercase tracking-wider" for="edit-breed">
+        <label class="text-fg-muted text-xs font-medium uppercase tracking-wider" for="edit-breed">
           {m.cat_field_breed()}
-          <span class="normal-case font-normal text-slate-600 ml-1">{m.common_optional()}</span>
+          <span class="normal-case font-normal text-fg-subtle ml-1">{m.common_optional()}</span>
         </label>
         <input
           id="edit-breed"
           type="text"
           bind:value={breed}
           placeholder="e.g. Maine Coon"
-          class="bg-[#0f0f1a] border border-white/10 focus:border-[#7c3aed]/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors"
+          class="bg-inset border border-line focus:border-primary/60 rounded-xl px-4 py-2.5 text-sm text-fg placeholder-fg-subtle outline-none transition-colors"
         />
       </div>
 
       <!-- Date of birth -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-slate-400 text-xs font-medium uppercase tracking-wider" for="edit-dob">
+        <label class="text-fg-muted text-xs font-medium uppercase tracking-wider" for="edit-dob">
           {m.cat_field_dob()}
-          <span class="normal-case font-normal text-slate-600 ml-1">{m.common_optional()}</span>
+          <span class="normal-case font-normal text-fg-subtle ml-1">{m.common_optional()}</span>
         </label>
         <input
           id="edit-dob"
           type="date"
           bind:value={dateOfBirth}
-          class="bg-[#0f0f1a] border border-white/10 focus:border-[#7c3aed]/60 rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-colors"
+          class="bg-inset border border-line focus:border-primary/60 rounded-xl px-4 py-2.5 text-sm text-fg outline-none transition-colors"
           style="color-scheme: dark;"
         />
       </div>
@@ -323,8 +323,8 @@
       <!-- Current weight + Target weight -->
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
-          <label class="text-slate-400 text-xs font-medium uppercase tracking-wider" for="edit-weight">
-            {m.cat_field_current_weight()}<span class="text-red-400 ml-0.5">*</span>
+          <label class="text-fg-muted text-xs font-medium uppercase tracking-wider" for="edit-weight">
+            {m.cat_field_current_weight()}<span class="text-danger ml-0.5">*</span>
           </label>
           <input
             id="edit-weight"
@@ -333,13 +333,13 @@
             min="0.1"
             bind:value={currentWeightKg}
             placeholder="e.g. 4.5"
-            class="bg-[#0f0f1a] border border-white/10 focus:border-[#7c3aed]/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors"
+            class="bg-inset border border-line focus:border-primary/60 rounded-xl px-4 py-2.5 text-sm text-fg placeholder-fg-subtle outline-none transition-colors"
           />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-slate-400 text-xs font-medium uppercase tracking-wider" for="edit-target">
+          <label class="text-fg-muted text-xs font-medium uppercase tracking-wider" for="edit-target">
             {m.cat_field_target_weight()}
-            <span class="normal-case font-normal text-slate-600 ml-1">{m.common_optional()}</span>
+            <span class="normal-case font-normal text-fg-subtle ml-1">{m.common_optional()}</span>
           </label>
           <input
             id="edit-target"
@@ -348,14 +348,14 @@
             min="0.1"
             bind:value={targetWeightKg}
             placeholder="e.g. 4.0"
-            class="bg-[#0f0f1a] border border-white/10 focus:border-[#7c3aed]/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-colors"
+            class="bg-inset border border-line focus:border-primary/60 rounded-xl px-4 py-2.5 text-sm text-fg placeholder-fg-subtle outline-none transition-colors"
           />
         </div>
       </div>
 
       <!-- Weight goal -->
       <div class="flex flex-col gap-2">
-        <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">{m.cat_field_weight_goal()}</p>
+        <p class="text-fg-muted text-xs font-medium uppercase tracking-wider">{m.cat_field_weight_goal()}</p>
         <div class="grid grid-cols-3 gap-2">
           {#each [
             { value: 'weight_loss' as WeightGoal,  label: m.cat_goal_weight_loss() },
@@ -367,8 +367,8 @@
               onclick={() => (weightGoal = opt.value)}
               class="py-2.5 rounded-xl text-sm font-medium border transition-all duration-150"
               style="{weightGoal === opt.value
-                ? 'border-color:#7C3AED;background:rgba(124,58,237,0.15);color:#a78bfa;'
-                : 'border-color:rgba(255,255,255,0.08);background:#0f0f1a;color:#94A3B8;'}"
+                ? 'border-color:var(--theme-primary);background:color-mix(in srgb, var(--theme-primary) 15%, transparent);color:var(--theme-primary-soft);'
+                : 'border-color:var(--theme-border);background:var(--theme-inset);color:var(--theme-text-muted);'}"
             >
               {opt.label}
             </button>
@@ -379,8 +379,8 @@
       <!-- Consumption baseline slider -->
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
-          <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">{m.cat_field_consumption()}</p>
-          <span class="text-sm font-bold" style="color:#7C3AED">{consumptionBaseline}%</span>
+          <p class="text-fg-muted text-xs font-medium uppercase tracking-wider">{m.cat_field_consumption()}</p>
+          <span class="text-sm font-bold" style="color:var(--theme-primary)">{consumptionBaseline}%</span>
         </div>
         <input
           type="range"
@@ -388,26 +388,26 @@
           max="100"
           step="1"
           bind:value={consumptionBaseline}
-          class="w-full accent-[#7C3AED] cursor-pointer"
+          class="w-full accent-primary cursor-pointer"
         />
         <div class="flex justify-between">
-          <span class="text-[10px] text-slate-600">{m.cat_picky_eater()}</span>
-          <span class="text-[10px] text-slate-600">{m.cat_always_finishes()}</span>
+          <span class="text-[10px] text-fg-subtle">{m.cat_picky_eater()}</span>
+          <span class="text-[10px] text-fg-subtle">{m.cat_always_finishes()}</span>
         </div>
-        <p class="text-[11px] text-slate-500 leading-relaxed">
+        <p class="text-[11px] text-fg-subtle leading-relaxed">
           {m.cat_baseline_desc()}
         </p>
       </div>
 
       <!-- Weight reminder interval -->
       <div class="flex flex-col gap-1.5">
-        <label class="text-slate-400 text-xs font-medium uppercase tracking-wider" for="edit-reminder">
+        <label class="text-fg-muted text-xs font-medium uppercase tracking-wider" for="edit-reminder">
           {m.cat_field_reminder()}
         </label>
         <select
           id="edit-reminder"
           bind:value={weightReminderInterval}
-          class="bg-[#0f0f1a] border border-white/10 focus:border-[#7c3aed]/60 rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer appearance-none"
+          class="bg-inset border border-line focus:border-primary/60 rounded-xl px-4 py-2.5 text-sm text-fg outline-none transition-colors cursor-pointer appearance-none"
         >
           <option value={3}>{m.cat_reminder_3()}</option>
           <option value={7}>{m.cat_reminder_7()}</option>
@@ -419,7 +419,7 @@
       <div class="flex gap-3 pt-1">
         <a
           href="/cats/{catId}"
-          class="flex-1 text-center bg-transparent border border-white/10 hover:border-white/20 text-slate-400 hover:text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
+          class="flex-1 text-center bg-transparent border border-line hover:border-line-strong text-fg-muted hover:text-fg font-medium py-2.5 rounded-xl transition-colors text-sm"
         >
           {m.common_cancel()}
         </a>
@@ -427,7 +427,7 @@
           type="button"
           onclick={handleSubmit}
           disabled={loading}
-          class="flex-1 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-60 text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
+          class="flex-1 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
         >
           {loading ? m.common_saving() : m.settings_save_changes()}
         </button>

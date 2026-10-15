@@ -36,8 +36,8 @@
           width={size}
           height={size}
           viewBox="0 0 24 24"
-          fill="#7C3AED"
-          style="filter: drop-shadow(0 0 8px rgba(124,58,237,0.6))"
+          fill="currentColor"
+          style="color: var(--theme-primary); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--theme-primary) 60%, transparent))"
           aria-hidden="true"
         >
           <path d="M12 13.2c-2.6 0-4.7 1.9-4.7 4.2 0 1.7 1.4 2.6 3 2.6.7 0 1.2-.2 1.7-.2s1 .2 1.7.2c1.6 0 3-.9 3-2.6 0-2.3-2.1-4.2-4.7-4.2Z" />
@@ -92,7 +92,7 @@
 
   .paw-label {
     font-size: 0.75rem;
-    color: #94A3B8;
+    color: var(--theme-text-muted);
     letter-spacing: 0.05em;
   }
 </style>

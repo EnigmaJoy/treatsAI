@@ -51,7 +51,7 @@
     style="background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); padding: 12px 16px;"
   >
     <!-- Warning icon -->
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
       <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
       <path d="M12 9v4"/>
       <path d="M12 17h.01"/>
@@ -59,15 +59,15 @@
 
     <!-- Text -->
     <div class="flex-1 min-w-0">
-      <span class="text-[13px] font-medium text-[#F8FAFC]">{getMessage(mostRecent)}</span>
-      <span class="text-[12px] text-[#94A3B8] ml-2">{timeElapsed(mostRecent.triggeredAt)}</span>
+      <span class="text-[13px] font-medium text-fg">{getMessage(mostRecent)}</span>
+      <span class="text-[12px] text-fg-muted ml-2">{timeElapsed(mostRecent.triggeredAt)}</span>
     </div>
 
     <!-- Actions -->
     <div class="flex items-center gap-2 shrink-0">
       {#if onDismiss}
         <button
-          class="text-[12px] font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-colors px-3 py-1.5 rounded-[6px] hover:bg-[rgba(255,255,255,0.06)]"
+          class="text-[12px] font-medium text-fg-muted hover:text-fg transition-colors px-3 py-1.5 rounded-[6px] hover:bg-hover"
           onclick={() => onDismiss!(mostRecent!.alertId)}
         >
           Dismiss
@@ -76,7 +76,7 @@
       {#if onDispense}
         <button
           class="text-[12px] font-semibold rounded-[6px] px-3 py-1.5 transition-colors"
-          style="background: rgba(245,158,11,0.2); color: #F59E0B; border: 1px solid rgba(245,158,11,0.4);"
+          style="background: rgba(245,158,11,0.2); color: var(--theme-warning); border: 1px solid rgba(245,158,11,0.4);"
           onclick={onDispense}
         >
           Dispense now

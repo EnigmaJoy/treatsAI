@@ -21,14 +21,29 @@
 					var p = palettes[palette];
 					if (p) {
 						var r = document.documentElement;
-						r.style.setProperty('--color-bg', p.bg);
-						r.style.setProperty('--color-surface', p.surface);
-						r.style.setProperty('--color-border', p.border);
-						r.style.setProperty('--color-primary', p.primary);
-						r.style.setProperty('--color-accent', p.accent);
+						r.style.setProperty('--palette-bg', p.bg);
+						r.style.setProperty('--palette-surface', p.surface);
+						r.style.setProperty('--palette-border', p.border);
+						r.style.setProperty('--theme-primary', p.primary);
+						r.style.setProperty('--theme-accent', p.accent);
 					}
 				}
 			} catch(e) {}
+
+			// Theme - mirrors src/lib/theme.ts; runs before paint to avoid a dark flash in light mode
+			(function () {
+				var mq = window.matchMedia('(prefers-color-scheme: light)');
+				function saved() {
+					try { return localStorage.getItem('treatsai-theme') || 'dark'; } catch (e) { return 'dark'; }
+				}
+				function apply() {
+					var t = saved();
+					if (t === 'system') t = mq.matches ? 'light' : 'dark';
+					document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+				}
+				apply();
+				mq.addEventListener('change', function () { if (saved() === 'system') apply(); });
+			})();
 		</script>
 
 		<link rel="manifest" href="/manifest.json" />

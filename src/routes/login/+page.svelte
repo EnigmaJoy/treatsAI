@@ -139,7 +139,7 @@
 </script>
 
 <!-- Full viewport two-column layout, no scroll -->
-<div style="display:flex; height:100vh; overflow:hidden; background:#0F0F1A;">
+<div style="display:flex; height:100vh; overflow:hidden; background:var(--theme-inset);">
 
   <!-- ═══════════════════════════════════════
        LEFT PANEL - cat photo + feature cards
@@ -164,11 +164,11 @@
     <div style="position:absolute; top:0; left:0; right:0; z-index:10; padding:28px 32px; display:flex; align-items:center;">
       <!-- Logo -->
       <div style="display:flex; align-items:center; gap:8px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/>
           <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/>
         </svg>
-        <span style="font-size:22px; font-weight:700; line-height:1; color:white;">Treats<span style="color:#7C3AED;">AI</span></span>
+        <span style="font-size:22px; font-weight:700; line-height:1; color:white;">Treats<span style="color:var(--theme-primary);">AI</span></span>
       </div>
       <!-- Feeder badge - centered absolutely so it doesn't depend on logo width -->
       <div style="
@@ -190,9 +190,9 @@
       <!-- Tag pill -->
       <div style="
         display:inline-flex; align-items:center;
-        background:rgba(124,58,237,0.3);
-        border:1px solid #7C3AED;
-        color:#7C3AED;
+        background:color-mix(in srgb, var(--theme-primary) 30%, transparent);
+        border:1px solid var(--theme-primary);
+        color:var(--theme-primary);
         border-radius:9999px;
         padding:4px 12px;
         font-size:12px;
@@ -215,8 +215,8 @@
           border:1px solid rgba(255,255,255,0.1); border-radius:12px;
           padding:12px; display:flex; align-items:flex-start; gap:12px;
         ">
-          <div style="width:32px; height:32px; flex-shrink:0; background:rgba(124,58,237,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <div style="width:32px; height:32px; flex-shrink:0; background:color-mix(in srgb, var(--theme-primary) 20%, transparent); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </div>
           <div>
             <p style="color:white; font-size:13px; font-weight:600; line-height:1.3; margin:0 0 2px;">AI-powered cat recognition</p>
@@ -230,8 +230,8 @@
           border:1px solid rgba(255,255,255,0.1); border-radius:12px;
           padding:12px; display:flex; align-items:flex-start; gap:12px;
         ">
-          <div style="width:32px; height:32px; flex-shrink:0; background:rgba(124,58,237,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 16L12 12 8 16"/><path d="M12 12V21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <div style="width:32px; height:32px; flex-shrink:0; background:color-mix(in srgb, var(--theme-primary) 20%, transparent); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 16L12 12 8 16"/><path d="M12 12V21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
           </div>
           <div>
             <p style="color:white; font-size:13px; font-weight:600; line-height:1.3; margin:0 0 2px;">Smart portion adjustment</p>
@@ -245,8 +245,8 @@
           border:1px solid rgba(255,255,255,0.1); border-radius:12px;
           padding:12px; display:flex; align-items:flex-start; gap:12px;
         ">
-          <div style="width:32px; height:32px; flex-shrink:0; background:rgba(124,58,237,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div style="width:32px; height:32px; flex-shrink:0; background:color-mix(in srgb, var(--theme-primary) 20%, transparent); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
           <div>
             <p style="color:white; font-size:13px; font-weight:600; line-height:1.3; margin:0 0 2px;">Real-time health alerts</p>
@@ -260,8 +260,8 @@
           border:1px solid rgba(255,255,255,0.1); border-radius:12px;
           padding:12px; display:flex; align-items:flex-start; gap:12px;
         ">
-          <div style="width:32px; height:32px; flex-shrink:0; background:rgba(124,58,237,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div style="width:32px; height:32px; flex-shrink:0; background:color-mix(in srgb, var(--theme-primary) 20%, transparent); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div>
             <p style="color:white; font-size:13px; font-weight:600; line-height:1.3; margin:0 0 2px;">Built for families</p>
@@ -278,25 +278,25 @@
   ════════════════════════════════════════ -->
   <div
     class="w-full lg:w-[460px]"
-    style="flex-shrink:0; background:#0F0F1A; display:flex; flex-direction:column; justify-content:center; overflow-y:auto; padding:48px 40px;"
+    style="flex-shrink:0; background:var(--theme-inset); display:flex; flex-direction:column; justify-content:center; overflow-y:auto; padding:48px 40px;"
   >
 
     <!-- Sign in / Create account tabs -->
-    <div style="background:#1A1A2E; border-radius:12px; padding:4px; display:flex; margin-bottom:32px;">
+    <div style="background:var(--theme-surface); border-radius:12px; padding:4px; display:flex; margin-bottom:32px;">
       <a
         href="/login"
-        style="flex:1; text-align:center; padding:8px 0; border-radius:8px; font-size:13px; font-weight:600; background:#7C3AED; color:white; text-decoration:none; display:block;"
+        style="flex:1; text-align:center; padding:8px 0; border-radius:8px; font-size:13px; font-weight:600; background:var(--theme-primary); color:white; text-decoration:none; display:block;"
       >Sign in</a>
       <a
         href="/register"
-        style="flex:1; text-align:center; padding:8px 0; font-size:13px; color:#94A3B8; text-decoration:none; display:block; transition:color 0.15s;"
-        class="hover:text-white"
+        style="flex:1; text-align:center; padding:8px 0; font-size:13px; color:var(--theme-text-muted); text-decoration:none; display:block; transition:color 0.15s;"
+        class="hover:text-fg"
       >Create account</a>
     </div>
 
     <!-- Heading -->
-    <h1 style="font-size:28px; font-weight:700; color:white; margin:0 0 4px;">Welcome back</h1>
-    <p style="font-size:13px; color:#94A3B8; margin:0 0 32px;">Sign in to your TreatsAI account to check on your cats.</p>
+    <h1 style="font-size:28px; font-weight:700; color:var(--theme-text); margin:0 0 4px;">Welcome back</h1>
+    <p style="font-size:13px; color:var(--theme-text-muted); margin:0 0 32px;">Sign in to your TreatsAI account to check on your cats.</p>
 
     <!-- -
          Main login form
@@ -305,9 +305,9 @@
 
       <!-- Email -->
       <div style="margin-bottom:16px;">
-        <label for="email" style="display:block; font-size:11px; color:#94A3B8; margin-bottom:6px;">Email address</label>
+        <label for="email" style="display:block; font-size:11px; color:var(--theme-text-muted); margin-bottom:6px;">Email address</label>
         <div style="position:relative;">
-          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94A3B8; display:flex; pointer-events:none;">
+          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--theme-text-muted); display:flex; pointer-events:none;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           </span>
           <input
@@ -318,25 +318,25 @@
             onkeydown={handleKeydown}
             oninput={() => { emailError = ''; loginError = null; }}
             placeholder="you@example.com"
-            class="w-full outline-none placeholder-[#4B5563] transition-colors"
-            style="background:#1A1A2E; border:1px solid {emailError ? '#EF4444' : '#2D2D4A'}; border-radius:12px; padding:12px 16px 12px 40px; color:#F8FAFC; font-size:13px;"
-            onfocus={(e) => { if (!emailError) (e.currentTarget as HTMLInputElement).style.borderColor = '#7C3AED'; }}
-            onblur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = emailError ? '#EF4444' : '#2D2D4A'; }}
+            class="w-full outline-none placeholder-fg-subtle transition-colors"
+            style="background:var(--theme-surface); border:1px solid {emailError ? 'var(--theme-danger)' : 'var(--theme-border)'}; border-radius:12px; padding:12px 16px 12px 40px; color:var(--theme-text); font-size:13px;"
+            onfocus={(e) => { if (!emailError) (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--theme-primary)'; }}
+            onblur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = emailError ? 'var(--theme-danger)' : 'var(--theme-border)'; }}
           />
         </div>
         {#if emailError}
-          <p style="color:#EF4444; font-size:11px; margin:4px 0 0;">{emailError}</p>
+          <p style="color:var(--theme-danger); font-size:11px; margin:4px 0 0;">{emailError}</p>
         {/if}
       </div>
 
       <!-- Password -->
       <div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <label for="password" style="font-size:11px; color:#94A3B8;">Password</label>
-          <a href="/forgot-password" style="font-size:11px; color:#7C3AED; text-decoration:none;" class="hover:text-[#8B5CF6] transition-colors">Forgot password?</a>
+          <label for="password" style="font-size:11px; color:var(--theme-text-muted);">Password</label>
+          <a href="/forgot-password" style="font-size:11px; color:var(--theme-primary); text-decoration:none;" class="hover:text-primary-soft transition-colors">Forgot password?</a>
         </div>
         <div style="position:relative;">
-          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94A3B8; display:flex; pointer-events:none;">
+          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--theme-text-muted); display:flex; pointer-events:none;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </span>
           <input
@@ -347,14 +347,14 @@
             onkeydown={handleKeydown}
             oninput={() => { passwordError = ''; loginError = null; }}
             placeholder="••••••••"
-            class="w-full outline-none placeholder-[#4B5563] transition-colors"
-            style="background:#1A1A2E; border:1px solid {passwordError ? '#EF4444' : '#2D2D4A'}; border-radius:12px; padding:12px 40px 12px 40px; color:#F8FAFC; font-size:13px;"
-            onfocus={(e) => { if (!passwordError) (e.currentTarget as HTMLInputElement).style.borderColor = '#7C3AED'; }}
-            onblur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = passwordError ? '#EF4444' : '#2D2D4A'; }}
+            class="w-full outline-none placeholder-fg-subtle transition-colors"
+            style="background:var(--theme-surface); border:1px solid {passwordError ? 'var(--theme-danger)' : 'var(--theme-border)'}; border-radius:12px; padding:12px 40px 12px 40px; color:var(--theme-text); font-size:13px;"
+            onfocus={(e) => { if (!passwordError) (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--theme-primary)'; }}
+            onblur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = passwordError ? 'var(--theme-danger)' : 'var(--theme-border)'; }}
           />
           <button
             type="button"
-            style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:#94A3B8; background:none; border:none; cursor:pointer; display:flex; padding:0;"
+            style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--theme-text-muted); background:none; border:none; cursor:pointer; display:flex; padding:0;"
             onclick={() => (showPassword = !showPassword)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
@@ -366,7 +366,7 @@
           </button>
         </div>
         {#if passwordError}
-          <p style="color:#EF4444; font-size:11px; margin:4px 0 0;">{passwordError}</p>
+          <p style="color:var(--theme-danger); font-size:11px; margin:4px 0 0;">{passwordError}</p>
         {/if}
       </div>
 
@@ -376,15 +376,15 @@
           type="checkbox"
           id="rememberMe"
           bind:checked={rememberMe}
-          class="accent-[#7C3AED]"
+          class="accent-primary"
           style="width:16px; height:16px; cursor:pointer; flex-shrink:0;"
         />
-        <label for="rememberMe" style="font-size:13px; color:#94A3B8; cursor:pointer; user-select:none;">Keep me signed in</label>
+        <label for="rememberMe" style="font-size:13px; color:var(--theme-text-muted); cursor:pointer; user-select:none;">Keep me signed in</label>
       </div>
 
       {#if loginError}
         <div class="bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.3)] rounded-lg px-4 py-3 mb-4 flex items-center gap-2">
-          <span class="text-[#EF4444] text-sm">{loginError}</span>
+          <span class="text-danger text-sm">{loginError}</span>
         </div>
       {/if}
 
@@ -392,11 +392,11 @@
       <button
         type="button"
         class="w-full flex items-center justify-center gap-2 font-semibold transition-colors disabled:opacity-60"
-        style="background:#7C3AED; border-radius:12px; padding:14px 20px; font-size:13px; color:white; border:none; cursor:pointer;"
+        style="background:var(--theme-primary); border-radius:12px; padding:14px 20px; font-size:13px; color:white; border:none; cursor:pointer;"
         onclick={handleLogin}
         disabled={loading}
-        onmouseenter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.background = '#8B5CF6'; }}
-        onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = '#7C3AED'}
+        onmouseenter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.background = 'var(--theme-primary-hover)'; }}
+        onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--theme-primary)'}
       >
         {loading ? 'Signing in...' : 'Sign in'}
         {#if !loading}
@@ -412,21 +412,21 @@
     {#if showOtp}
       <!-- Divider -->
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-        <div style="flex:1; height:1px; background:#2D2D4A;"></div>
-        <span style="font-size:11px; color:#94A3B8; white-space:nowrap;">2FA verification</span>
-        <div style="flex:1; height:1px; background:#2D2D4A;"></div>
+        <div style="flex:1; height:1px; background:var(--theme-border);"></div>
+        <span style="font-size:11px; color:var(--theme-text-muted); white-space:nowrap;">2FA verification</span>
+        <div style="flex:1; height:1px; background:var(--theme-border);"></div>
       </div>
 
       <!-- OTP box -->
-      <div style="background:#1A1A2E; border:1px solid #2D2D4A; border-radius:12px; padding:20px; margin-bottom:16px;">
+      <div style="background:var(--theme-surface); border:1px solid var(--theme-border); border-radius:12px; padding:20px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          <span style="font-size:14px; font-weight:600; color:#F8FAFC;">Check your email</span>
+          <span style="font-size:14px; font-weight:600; color:var(--theme-text);">Check your email</span>
         </div>
-        <p style="font-size:12px; color:#94A3B8; margin:0 0 20px;">
-          We sent a 6-digit code to <span style="color:#F8FAFC;">{email || 'your email'}</span>
+        <p style="font-size:12px; color:var(--theme-text-muted); margin:0 0 20px;">
+          We sent a 6-digit code to <span style="color:var(--theme-text);">{email || 'your email'}</span>
         </p>
 
         <!-- OTP error -->
@@ -435,7 +435,7 @@
             display:flex; align-items:center; gap:8px;
             background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
             border-radius:8px; padding:10px 14px;
-            font-size:12px; color:#F87171; margin-bottom:16px;
+            font-size:12px; color:var(--theme-danger); margin-bottom:16px;
           ">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -458,24 +458,24 @@
               class="text-center outline-none font-bold transition-colors"
               style="
                 width:44px; height:52px; border-radius:8px;
-                background:#0F0F1A;
-                border:1px solid {otpValues[i] ? '#7C3AED' : '#2D2D4A'};
-                color:#F8FAFC; font-size:22px;
+                background:var(--theme-inset);
+                border:1px solid {otpValues[i] ? 'var(--theme-primary)' : 'var(--theme-border)'};
+                color:var(--theme-text); font-size:22px;
               "
-              onfocus={(e) => (e.currentTarget as HTMLInputElement).style.borderColor = '#7C3AED'}
-              onblur={(e) => (e.currentTarget as HTMLInputElement).style.borderColor = otpValues[i] ? '#7C3AED' : '#2D2D4A'}
+              onfocus={(e) => (e.currentTarget as HTMLInputElement).style.borderColor = 'var(--theme-primary)'}
+              onblur={(e) => (e.currentTarget as HTMLInputElement).style.borderColor = otpValues[i] ? 'var(--theme-primary)' : 'var(--theme-border)'}
               aria-label="OTP digit {i + 1}"
             />
           {/each}
         </div>
 
         <!-- Resend -->
-        <p style="font-size:12px; color:#94A3B8; text-align:center; margin:0 0 16px;">
+        <p style="font-size:12px; color:var(--theme-text-muted); text-align:center; margin:0 0 16px;">
           Didn't receive it?
           <button
             type="button"
-            style="color:#7C3AED; background:none; border:none; cursor:pointer; font-size:12px; padding:0;"
-            class="hover:text-[#8B5CF6] transition-colors"
+            style="color:var(--theme-primary); background:none; border:none; cursor:pointer; font-size:12px; padding:0;"
+            class="hover:text-primary-soft transition-colors"
             onclick={handleResendCode}
           >Resend code</button>
         </p>
@@ -484,11 +484,11 @@
         <button
           type="button"
           class="w-full font-semibold transition-colors disabled:opacity-60"
-          style="background:#7C3AED; border-radius:12px; padding:12px; font-size:13px; color:white; border:none; cursor:pointer;"
+          style="background:var(--theme-primary); border-radius:12px; padding:12px; font-size:13px; color:white; border:none; cursor:pointer;"
           onclick={handleOtpSubmit}
           disabled={otpLoading || otpValues.join('').length < 6}
-          onmouseenter={(e) => { if (!otpLoading) (e.currentTarget as HTMLElement).style.background = '#8B5CF6'; }}
-          onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = '#7C3AED'}
+          onmouseenter={(e) => { if (!otpLoading) (e.currentTarget as HTMLElement).style.background = 'var(--theme-primary-hover)'; }}
+          onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--theme-primary)'}
         >
           {otpLoading ? 'Verifying...' : 'Verify code'}
         </button>
@@ -497,8 +497,8 @@
       <!-- Back to sign in -->
       <button
         type="button"
-        class="w-full text-center hover:text-white transition-colors"
-        style="font-size:13px; color:#94A3B8; background:none; border:none; cursor:pointer;"
+        class="w-full text-center hover:text-fg transition-colors"
+        style="font-size:13px; color:var(--theme-text-muted); background:none; border:none; cursor:pointer;"
         onclick={() => { showOtp = false; otpError = ''; otpValues = ['','','','','','']; }}
       >
         Back to sign in
@@ -507,8 +507,8 @@
 
     <!-- Security note -->
     <div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:24px;">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <span style="font-size:11px; color:#94A3B8;">Secured with 2FA - Email OTP</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--theme-text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span style="font-size:11px; color:var(--theme-text-muted);">Secured with 2FA - Email OTP</span>
     </div>
 
   </div>

@@ -44,9 +44,9 @@
   }
 
   function outcomeBadgeClass(outcome: string): string {
-    if (outcome === 'dispensed') return 'bg-[#06b6d4]/20 text-[#22d3ee] border border-[#06b6d4]/40';
-    if (outcome === 'skipped') return 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
-    return 'bg-red-500/20 text-red-400 border border-red-500/40';
+    if (outcome === 'dispensed') return 'bg-[#06b6d4]/20 text-info border border-[#06b6d4]/40';
+    if (outcome === 'skipped') return 'bg-amber-500/20 text-warning border border-amber-500/40';
+    return 'bg-red-500/20 text-danger border border-red-500/40';
   }
 
   async function loadDashboardData() {
@@ -131,28 +131,28 @@
   <!-- Page header -->
   <div>
     <div class="flex items-center gap-2.5">
-      <h1 class="text-[18px] font-bold text-[#F8FAFC]">{m.dashboard_title()}</h1>
+      <h1 class="text-[18px] font-bold text-fg">{m.dashboard_title()}</h1>
       <span
         class="text-[11px] font-medium px-2 py-0.5 rounded-full"
-        style="background:{sseConnected ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}; color:{sseConnected ? '#10B981' : '#EF4444'}"
+        style="background:{sseConnected ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}; color:{sseConnected ? 'var(--theme-success)' : 'var(--theme-danger)'}"
       >{sseConnected ? m.dashboard_live() : m.dashboard_offline()}</span>
     </div>
-    <p class="text-[12px] text-[#94A3B8] mt-0.5">{m.dashboard_subtitle()}</p>
+    <p class="text-[12px] text-fg-muted mt-0.5">{m.dashboard_subtitle()}</p>
   </div>
 
   <!-- - Section 1: Stat cards - -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
     <!-- Card 1: Today's meals (progress ring) -->
-    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col items-center gap-2">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide self-start">{m.stats_todays_meals()}</p>
+    <div class="bg-surface border border-line rounded-[12px] p-4 flex flex-col items-center gap-2">
+      <p class="text-[11px] text-fg-muted uppercase tracking-wide self-start">{m.stats_todays_meals()}</p>
       <div class="relative">
         <svg width="64" height="64" viewBox="0 0 36 36" class="-rotate-90" aria-hidden="true">
-          <circle cx="18" cy="18" r="15.5" fill="none" stroke="#2D2D4A" stroke-width="3"/>
+          <circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" style="color: var(--theme-border)" stroke-width="3"/>
           <circle
             cx="18" cy="18" r="15.5"
             fill="none"
-            stroke="#7C3AED"
+            stroke="currentColor" style="color: var(--theme-primary)"
             stroke-width="3"
             stroke-dasharray="{ringDash} 97.4"
             stroke-linecap="round"
@@ -160,31 +160,31 @@
           />
         </svg>
         <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-[13px] font-bold text-[#F8FAFC]">{todayDispensed}/{todayMealTotal || 0}</span>
+          <span class="text-[13px] font-bold text-fg">{todayDispensed}/{todayMealTotal || 0}</span>
         </div>
       </div>
-      <p class="text-[11px] text-[#94A3B8]">{progressPct}% {m.dashboard_done()}</p>
+      <p class="text-[11px] text-fg-muted">{progressPct}% {m.dashboard_done()}</p>
     </div>
 
     <!-- Card 2: Dispensed -->
-    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_dispensed()}</p>
-      <p class="text-[32px] font-bold leading-none" style="color: #10B981">{todayDispensed}</p>
-      <p class="text-[11px] text-[#94A3B8] mt-2">{m.dashboard_on_schedule()}</p>
+    <div class="bg-surface border border-line rounded-[12px] p-4 flex flex-col justify-between">
+      <p class="text-[11px] text-fg-muted uppercase tracking-wide mb-2">{m.stats_dispensed()}</p>
+      <p class="text-[32px] font-bold leading-none" style="color: var(--theme-success)">{todayDispensed}</p>
+      <p class="text-[11px] text-fg-muted mt-2">{m.dashboard_on_schedule()}</p>
     </div>
 
     <!-- Card 3: Skipped -->
-    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_skipped()}</p>
-      <p class="text-[32px] font-bold leading-none" style="color: #F59E0B">{todaySkipped}</p>
-      <p class="text-[11px] text-[#94A3B8] mt-2">{todaySkipped > 0 ? m.dashboard_meals_missed() : m.dashboard_none_today()}</p>
+    <div class="bg-surface border border-line rounded-[12px] p-4 flex flex-col justify-between">
+      <p class="text-[11px] text-fg-muted uppercase tracking-wide mb-2">{m.stats_skipped()}</p>
+      <p class="text-[32px] font-bold leading-none" style="color: var(--theme-warning)">{todaySkipped}</p>
+      <p class="text-[11px] text-fg-muted mt-2">{todaySkipped > 0 ? m.dashboard_meals_missed() : m.dashboard_none_today()}</p>
     </div>
 
     <!-- Card 4: Rejected -->
-    <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-4 flex flex-col justify-between">
-      <p class="text-[11px] text-[#94A3B8] uppercase tracking-wide mb-2">{m.stats_rejected()}</p>
-      <p class="text-[32px] font-bold leading-none text-[#94A3B8]">{todayRejected}</p>
-      <p class="text-[11px] text-[#94A3B8] mt-2">{todayRejected === 0 ? m.dashboard_all_clear() : m.dashboard_needs_attention()}</p>
+    <div class="bg-surface border border-line rounded-[12px] p-4 flex flex-col justify-between">
+      <p class="text-[11px] text-fg-muted uppercase tracking-wide mb-2">{m.stats_rejected()}</p>
+      <p class="text-[32px] font-bold leading-none text-fg-muted">{todayRejected}</p>
+      <p class="text-[11px] text-fg-muted mt-2">{todayRejected === 0 ? m.dashboard_all_clear() : m.dashboard_needs_attention()}</p>
     </div>
   </div>
 
@@ -199,7 +199,7 @@
     <!-- Left: Cat status card -->
     {#if data.cats.length > 0}
       {@const cat = data.cats[0]}
-      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col gap-4">
+      <div class="bg-surface border border-line rounded-[12px] p-5 flex flex-col gap-4">
 
         <!-- Cat header -->
         <div class="flex items-center gap-3">
@@ -207,18 +207,18 @@
             <img
               src={cat.profilePhotoUrl}
               alt={cat.name}
-              class="w-12 h-12 rounded-full object-cover border-2 border-[#7C3AED] shrink-0"
+              class="w-12 h-12 rounded-full object-cover border-2 border-primary shrink-0"
             />
           {:else}
             <div
-              class="w-12 h-12 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#F59E0B] flex items-center justify-center text-2xl shrink-0"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl shrink-0"
               aria-hidden="true"
             >🐱</div>
           {/if}
           <div class="min-w-0">
-            <h2 class="text-[18px] font-bold text-[#F8FAFC] truncate">{cat.name}</h2>
+            <h2 class="text-[18px] font-bold text-fg truncate">{cat.name}</h2>
             <span
-              class="inline-block text-[11px] font-medium text-[#10B981] rounded-full px-2 py-0.5 mt-0.5"
+              class="inline-block text-[11px] font-medium text-success rounded-full px-2 py-0.5 mt-0.5"
               style="background: rgba(16,185,129,0.15)"
             >{m.settings_feeder_online()}</span>
           </div>
@@ -226,23 +226,23 @@
 
         <!-- 2×2 stat grid -->
         <div class="grid grid-cols-2 gap-2">
-          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_last_fed()}</p>
-            <p class="text-[13px] font-medium text-[#F8FAFC] truncate">
+          <div class="rounded-[8px]" style="background: var(--theme-inset); padding: 10px 12px;">
+            <p class="text-[10px] text-fg-muted uppercase tracking-wide mb-1">{m.dashboard_last_fed()}</p>
+            <p class="text-[13px] font-medium text-fg truncate">
               {lastFedEvent ? formatTime(lastFedEvent.timestamp) : '—'}
             </p>
           </div>
-          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_next_feeding()}</p>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">—</p>
+          <div class="rounded-[8px]" style="background: var(--theme-inset); padding: 10px 12px;">
+            <p class="text-[10px] text-fg-muted uppercase tracking-wide mb-1">{m.dashboard_next_feeding()}</p>
+            <p class="text-[13px] font-medium text-fg">—</p>
           </div>
-          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_weight_goal()}</p>
-            <p class="text-[13px] font-medium text-[#F8FAFC] capitalize">{cat.weightGoal.replace('_', ' ')}</p>
+          <div class="rounded-[8px]" style="background: var(--theme-inset); padding: 10px 12px;">
+            <p class="text-[10px] text-fg-muted uppercase tracking-wide mb-1">{m.dashboard_weight_goal()}</p>
+            <p class="text-[13px] font-medium text-fg capitalize">{cat.weightGoal.replace('_', ' ')}</p>
           </div>
-          <div class="rounded-[8px]" style="background: #0F0F1A; padding: 10px 12px;">
-            <p class="text-[10px] text-[#94A3B8] uppercase tracking-wide mb-1">{m.dashboard_consumption()}</p>
-            <p class="text-[13px] font-medium text-[#F8FAFC]">{cat.consumptionBaseline}% {m.dashboard_baseline()}</p>
+          <div class="rounded-[8px]" style="background: var(--theme-inset); padding: 10px 12px;">
+            <p class="text-[10px] text-fg-muted uppercase tracking-wide mb-1">{m.dashboard_consumption()}</p>
+            <p class="text-[13px] font-medium text-fg">{cat.consumptionBaseline}% {m.dashboard_baseline()}</p>
           </div>
         </div>
 
@@ -251,16 +251,16 @@
           type="button"
           disabled={dispensing}
           onclick={() => manualDispense(cat.catId)}
-          class="w-full text-white font-semibold rounded-[8px] py-[10px] text-[13px] bg-[#7C3AED] hover:bg-[#8B5CF6] disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-auto"
+          class="w-full text-white font-semibold rounded-[8px] py-[10px] text-[13px] bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-auto"
         >
           {dispensing ? m.dashboard_dispensing() : m.dashboard_manual_dispense()}
         </button>
       </div>
     {:else}
-      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
+      <div class="bg-surface border border-line rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-fg-muted">
         <span class="text-3xl" aria-hidden="true">🐱</span>
         <p class="text-[13px]">{m.dashboard_no_cats()}</p>
-        <a href="/cats/new" class="text-[13px] font-medium text-[#7C3AED] hover:text-[#8B5CF6] transition-colors">
+        <a href="/cats/new" class="text-[13px] font-medium text-primary hover:text-primary-soft transition-colors">
           {m.dashboard_add_cat()} →
         </a>
       </div>
@@ -278,7 +278,7 @@
         firmwareVersion={device.firmwareVersion}
       />
     {:else}
-      <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
+      <div class="bg-surface border border-line rounded-[12px] p-5 flex flex-col items-center justify-center gap-3 text-fg-muted">
         <span class="text-3xl" aria-hidden="true">📡</span>
         <p class="text-[13px]">{m.dashboard_no_device()}</p>
       </div>
@@ -286,18 +286,18 @@
   </div>
 
   <!-- - Section 4: 7-day chart - -->
-  <div class="bg-[#1A1A2E] border border-[#2D2D4A] rounded-[12px] p-5">
+  <div class="bg-surface border border-line rounded-[12px] p-5">
     <!-- Header + custom legend -->
     <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-      <h2 class="text-[14px] font-semibold text-[#F8FAFC]">{m.dashboard_7day_history()}</h2>
+      <h2 class="text-[14px] font-semibold text-fg">{m.dashboard_7day_history()}</h2>
       <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+        <span class="flex items-center gap-1.5 text-[11px] text-fg-muted">
           <span class="w-2.5 h-2.5 rounded-sm bg-[#10B981] shrink-0"></span>{m.stats_dispensed()}
         </span>
-        <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+        <span class="flex items-center gap-1.5 text-[11px] text-fg-muted">
           <span class="w-2.5 h-2.5 rounded-sm bg-[#F59E0B] shrink-0"></span>{m.stats_skipped()}
         </span>
-        <span class="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+        <span class="flex items-center gap-1.5 text-[11px] text-fg-muted">
           <span class="w-2.5 h-2.5 rounded-sm bg-[#EF4444] shrink-0"></span>{m.stats_rejected()}
         </span>
       </div>

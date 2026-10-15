@@ -37,12 +37,12 @@
   });
 
   const barColor = $derived.by(() => {
-    if (!targetWeightKg) return '#7c3aed';
+    if (!targetWeightKg) return 'var(--theme-primary)';
     const diff = Math.abs(currentWeightKg - targetWeightKg);
     const pctOff = diff / targetWeightKg;
-    if (pctOff < 0.05) return '#22c55e'; // within 5% — green
-    if (pctOff < 0.15) return '#f59e0b'; // within 15% — amber
-    return '#ef4444'; // far off — red
+    if (pctOff < 0.05) return 'var(--theme-success)'; // within 5% — green
+    if (pctOff < 0.15) return 'var(--theme-warning)'; // within 15% — amber
+    return 'var(--theme-danger)'; // far off — red
   });
 
   const statusLabel = $derived.by(() => {
@@ -68,20 +68,20 @@
   <!-- Labels row -->
   <div class="flex items-center justify-between text-sm">
     <div class="flex items-center gap-2">
-      <span class="text-white font-medium">{currentWeightKg.toFixed(2)} kg</span>
+      <span class="text-fg font-medium">{currentWeightKg.toFixed(2)} kg</span>
     </div>
     {#if targetWeightKg}
-      <span class="text-[#9ca3af] text-xs">Target: {targetWeightKg.toFixed(2)} kg</span>
+      <span class="text-fg-muted text-xs">Target: {targetWeightKg.toFixed(2)} kg</span>
     {/if}
   </div>
   <div class="flex items-center gap-2">
-    <span class="text-xs px-2 py-0.5 rounded-full bg-[#1e1e3a] text-[#9ca3af] border border-[#ffffff]/10">
+    <span class="text-xs px-2 py-0.5 rounded-full bg-inset text-fg-muted border border-line">
         {goalLabel}
       </span>
   </div>
 
   <!-- Progress track -->
-  <div class="h-3 bg-[#0f0f1a] rounded-full overflow-hidden border border-[#ffffff]/5">
+  <div class="h-3 bg-inset rounded-full overflow-hidden border border-line-subtle">
     <div
       class="h-full rounded-full transition-all duration-500 ease-out"
       style="width: {progress}%; background-color: {barColor};"
