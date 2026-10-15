@@ -60,6 +60,7 @@
           breed={cat.breed}
           profilePhotoUrl={cat.profilePhotoUrl}
           onClick={() => goto(`/cats/${cat.catId}`)}
+          data={cat}
         />
       {/each}
     </div>

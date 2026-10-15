@@ -8,24 +8,24 @@
   const cat = data.cat as Cat | null;
   const catId = data.catId as string;
 
-  let name                  = $state(cat?.name ?? '');
-  let breed                 = $state(cat?.breed ?? '');
-  let dateOfBirth           = $state(cat?.dateOfBirth ?? '');
-  let currentWeightKg       = $state(cat?.currentWeightKg?.toString() ?? '');
-  let targetWeightKg        = $state(cat?.targetWeightKg?.toString() ?? '');
-  let weightGoal            = $state<WeightGoal>(cat?.weightGoal ?? 'maintenance');
-  let consumptionBaseline   = $state(cat?.consumptionBaseline ?? 95);
+  let name = $state(cat?.name ?? '');
+  let breed = $state(cat?.breed ?? '');
+  let dateOfBirth = $state(cat?.dateOfBirth ?? '');
+  let currentWeightKg = $state(cat?.currentWeightKg?.toString() ?? '');
+  let targetWeightKg = $state(cat?.targetWeightKg?.toString() ?? '');
+  let weightGoal = $state<WeightGoal>(cat?.weightGoal ?? 'maintenance');
+  let consumptionBaseline = $state(cat?.consumptionBaseline ?? 95);
   let weightReminderInterval = $state<3 | 7 | 14>(cat?.weightReminderInterval ?? 7);
 
   let loading = $state(false);
   let error   = $state('');
 
   // Profile photo state
-  let profilePhotoUrl    = $state<string | null>((data.cat as any)?.profilePhotoUrl ?? null);
-  let pendingProfileKey  = $state<string | undefined>(cat?.profilePhotoKey ?? cat?.photoS3Keys?.[0]);
-  let photoPickerOpen    = $state(false);
-  let photoUrls          = $state<Array<{ key: string; url: string }>>((data.cat as any)?.photoUrls ?? []);
-  let uniquePhotoUrls    = $derived((() => {
+  let profilePhotoUrl = $state<string | null>((data.cat as any)?.profilePhotoUrl ?? null);
+  let pendingProfileKey = $state<string | undefined>(cat?.profilePhotoKey ?? cat?.photoS3Keys?.[0]);
+  let photoPickerOpen = $state(false);
+  let photoUrls = $state<Array<{ key: string; url: string }>>((data.cat as any)?.photoUrls ?? []);
+  let uniquePhotoUrls = $derived((() => {
     const seenKeys = new Set<string>();
     const result: Array<{ key: string; url: string }> = [];
     for (const photo of photoUrls) {
@@ -36,9 +36,9 @@
     }
     return result;
   })());
-  let photoUploading     = $state(false);
-  let photoSaving        = $state(false);
-  let photoError         = $state('');
+  let photoUploading = $state(false);
+  let photoSaving = $state(false);
+  let photoError = $state('');
 
   async function saveProfilePhoto() {
     if (!pendingProfileKey) return;
@@ -220,6 +220,7 @@
                       class="w-[60px] h-[60px] rounded-lg overflow-hidden border-2 transition-all shrink-0"
                       style="border-color:{pendingProfileKey === photo.key ? '#7c3aed' : 'rgba(255,255,255,0.1)'}"
                     >
+                      <!-- svelte-ignore a11y_img_redundant_alt -->
                       <img
                         src={photo.url}
                         alt="Cat photo"

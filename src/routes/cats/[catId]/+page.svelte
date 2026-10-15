@@ -13,7 +13,7 @@
   onMount(() => { loading = false; });
 
   const cat = $derived<Cat | null>(data.cat);
-  let photoUrl = $state<string | null>(data.photoUrl ?? null);
+  let photoUrl = $state<string | null>((data.cat as any)?.profilePhotoUrl ?? null);
   const weight = $derived<{ entries?: WeightEntry[] } | null>(data.weight);
   const events = $derived<FeedingEvent[]>(data.events);
 
@@ -52,10 +52,10 @@
     const dob = new Date(dateOfBirth);
     const now = new Date();
     const months = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth());
-    if (months < 12) return `${months}mo`;
+    if (months < 12) return `${months}m`;
     const years = Math.floor(months / 12);
     const rem = months % 12;
-    return rem > 0 ? `${years}y ${rem}mo` : `${years}y`;
+    return rem > 0 ? `${years}y ${rem}m` : `${years}y`;
   }
 
   function outcomeBadgeClass(outcome: string): string {
@@ -73,7 +73,7 @@
       const res = await fetch(`/api/v1/cats/${cat.catId}/weight`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weightKg: kg, notes: weightNotes || undefined })
+        body: JSON.stringify({ weightKg: kg, loggedAt: new Date().toISOString(), notes: weightNotes || undefined })
       });
       const body = await res.json();
       if (body.success) {
@@ -119,15 +119,14 @@
               style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #7C3AED"
               onerror={() => { photoUrl = null; }}
             />
-          {:else}
-            <div class="text-5xl">🐱</div>
           {/if}
           <div>
             <h1 class="text-2xl font-bold text-white">{cat.name}</h1>
             <p class="text-slate-400 text-sm mt-0.5">
               {#if cat.breed}{cat.breed}{/if}
               {#if cat.breed && cat.dateOfBirth} · {/if}
-              {#if cat.dateOfBirth}{calcAge(cat.dateOfBirth)} {m.cat_age_suffix()}{/if}
+              {#if cat.dateOfBirth}{calcAge(cat.dateOfBirth)}{/if}
+              <!--{#if cat.dateOfBirth}{calcAge((cat.dateOfBirth))} {m.cat_age_suffix()} {/if}-->
             </p>
             {#if cat.microchipNumber}
               <p class="text-slate-600 text-xs mt-1 font-mono">{m.cat_chip()} {cat.microchipNumber}</p>

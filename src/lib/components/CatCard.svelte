@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { WeightGoal } from '$lib/types';
+  import type { Cat } from '$lib/types';
 
   interface Props {
     catId: string;
@@ -10,9 +11,12 @@
     breed?: string;
     profilePhotoUrl?: string | null;
     onClick?: () => void;
+    data?: Cat | null;
   }
 
-  let { catId: _catId, name, currentWeightKg, weightGoal, consumptionBaseline, breed, profilePhotoUrl, onClick }: Props = $props();
+  let { catId: _catId, name, currentWeightKg, weightGoal, consumptionBaseline, breed, profilePhotoUrl, onClick, data }: Props = $props();
+
+  const weightKg = $derived(data?.currentWeightKg ?? currentWeightKg);
 
   const goalLabel = $derived(
     weightGoal === 'weight_loss' ? 'Weight Loss' :
@@ -40,12 +44,12 @@
       />
     {:else}
       <div
-        class="w-12 h-12 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#F59E0B] flex items-center justify-center text-2xl shrink-0"
+        class="w-12 h-12 rounded-full bg-linear-to-br from-[#7C3AED] to-[#F59E0B] flex items-center justify-center text-2xl shrink-0"
         aria-hidden="true"
       >🐱</div>
     {/if}
     <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f59e0b]/20 text-[#fbbf24] border border-[#f59e0b]/40">
-      {currentWeightKg.toFixed(2)} kg
+      {weightKg.toFixed(2)} kg
     </span>
   </div>
 

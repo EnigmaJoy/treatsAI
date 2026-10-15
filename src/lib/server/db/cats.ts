@@ -56,14 +56,16 @@ export async function updateCat(catId: string, updates: Partial<Cat>): Promise<C
     const current = await getCat(catId);
     if (!current) return undefined;
     const updated = { ...current, ...updates };
+    // Keys go after the spread: `current` comes from getCat and carries the METADATA row's PK/SK,
+    // which would otherwise overwrite the HOUSEHOLD keys and leave the list copy stale.
     await Promise.all([
         docClient.send(
-            new PutCommand({ TableName: TABLE_NAME, Item: { PK: `CAT#${catId}`, SK: 'METADATA', ...updated } })
+            new PutCommand({ TableName: TABLE_NAME, Item: { ...updated, PK: `CAT#${catId}`, SK: 'METADATA' } })
         ),
         docClient.send(
             new PutCommand({
                 TableName: TABLE_NAME,
-                Item: { PK: `HOUSEHOLD#${updated.householdId}`, SK: `CAT#${catId}`, ...updated }
+                Item: { ...updated, PK: `HOUSEHOLD#${updated.householdId}`, SK: `CAT#${catId}` }
             })
         )
     ]);

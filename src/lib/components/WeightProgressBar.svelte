@@ -40,9 +40,9 @@
     if (!targetWeightKg) return '#7c3aed';
     const diff = Math.abs(currentWeightKg - targetWeightKg);
     const pctOff = diff / targetWeightKg;
-    if (pctOff < 0.05) return '#22c55e';     // within 5% — green
-    if (pctOff < 0.15) return '#f59e0b';     // within 15% — amber
-    return '#ef4444';                          // far off — red
+    if (pctOff < 0.05) return '#22c55e'; // within 5% — green
+    if (pctOff < 0.15) return '#f59e0b'; // within 15% — amber
+    return '#ef4444'; // far off — red
   });
 
   const statusLabel = $derived.by(() => {
@@ -69,13 +69,15 @@
   <div class="flex items-center justify-between text-sm">
     <div class="flex items-center gap-2">
       <span class="text-white font-medium">{currentWeightKg.toFixed(2)} kg</span>
-      <span class="text-xs px-2 py-0.5 rounded-full bg-[#1e1e3a] text-[#9ca3af] border border-[#ffffff]/10">
-        {goalLabel}
-      </span>
     </div>
     {#if targetWeightKg}
       <span class="text-[#9ca3af] text-xs">Target: {targetWeightKg.toFixed(2)} kg</span>
     {/if}
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="text-xs px-2 py-0.5 rounded-full bg-[#1e1e3a] text-[#9ca3af] border border-[#ffffff]/10">
+        {goalLabel}
+      </span>
   </div>
 
   <!-- Progress track -->
